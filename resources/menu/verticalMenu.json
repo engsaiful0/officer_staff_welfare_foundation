@@ -1,0 +1,187 @@
+{
+  "menu": [
+    {
+      "name": "Dashboards",
+      "url": "/layouts/vertical",
+      "icon": "menu-icon tf-icons ti ti-smart-home",
+      "slug": "dashboard"
+    },
+    
+    {
+      "name": "Member",
+      "icon": "menu-icon tf-icons ti ti-users",
+      "slug": "members",
+      "submenu": [
+        {
+          "url": "/app/members/add-member",
+          "name": "Add Member",
+          "slug": "members.add-member",
+          "permission": "member-add"
+        },
+        {
+          "url": "/app/members/view-member",
+          "name": "View Member",
+          "slug": "members.view-member",
+          "permission": "member-view"
+        }
+      ]
+    },
+    {
+      "name": "Employee",
+      "icon": "menu-icon tf-icons ti ti-users",
+      "slug": "app-employee",
+      "submenu": [
+        {
+          "url": "app/employees/add-employee",
+          "name": "Add Employee",
+          "slug": "app-add-employee",
+          "permission": "employee-add"
+        },
+        {
+          "url": "app/employees/view-employee",
+          "name": "View Employees",
+          "slug": "app-view-employee",
+          "permission": "employee-view"
+        }
+      ]
+    },
+    {
+      "name": "Expense",
+      "icon": "menu-icon tf-icons ti ti-file-dollar",
+      "slug": "app-expense",
+      "submenu": [
+        {
+          "url": "app/expenses",
+          "name": "Expense Management",
+          "slug": "app-expenses"
+        }
+      ]
+    },
+    {
+      "name": "Report",
+      "icon": "menu-icon tf-icons ti ti-report",
+      "slug": "app-report",
+      "submenu": [
+        {
+          "url": "/app/student-list-report",
+          "name": "Student List",
+          "slug": "student-list-report"
+        },
+        {
+          "url": "app/fee-collection-report",
+          "name": "Fee Collection Report",
+          "slug": "fee-collection-report"
+        },
+        {
+          "url": "app/expense-report",
+          "name": "Expense Report",
+          "slug": "expense-report"
+        },
+        {
+          "url": "app/employee-list-report",
+          "name": "Employee List Report",
+          "slug": "employee-list-report"
+        },
+        {
+          "url": "app/teacher-list-report",
+          "name": "Teacher List Report",
+          "slug": "teacher-list-report"
+        },
+        {
+          "url": "app/head-wise-fee-report",
+          "name": "Head Wise Fee Report",
+          "slug": "head-wise-fee-report"
+        },
+        {
+          "url": "app/fee-summary",
+          "name": "Student Fee Summary",
+          "slug": "fee-summary",
+          "permission": "fee-summary-view"
+        },
+        {
+          "url": "app/my-collection-report",
+          "name": "My Collection Report",
+          "slug": "my-collection-report"
+        },
+        {
+          "url": "app/fee-management/monthly-report",
+          "name": "Monthly Fee Due Report",
+          "slug": "monthly-fee-due-report"
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "icon": "menu-icon tf-icons ti ti-settings",
+      "slug": "basic-settings",
+      "permission": "settings-view",
+      "submenu": [
+        {
+          "url": "app/settings/app-settings",
+          "name": "App Setting",
+          "slug": "app-setting"
+        },
+        {
+          "url": "app/settings/designation",
+          "name": "Designation",
+          "slug": "designation"
+        },
+        {
+          "url": "app/settings/expense-head",
+          "name": "Expense Head",
+          "slug": "expense-head"
+        },
+        {
+          "url": "app/settings/income-head",
+          "name": "Income Head",
+          "slug": "income-head"
+        },
+        {
+          "url": "app/settings/nationality",
+          "name": "Nationality",
+          "slug": "nationality"
+        },
+        {
+          "url": "app/settings/payment-method",
+          "name": "Payment Method",
+          "slug": "payment-method"
+        },
+        {
+          "url": "app/settings/religion",
+          "name": "Religion",
+          "slug": "religion"
+        },
+        {
+          "url": "rules",
+          "name": "Rules & Permissions",
+          "slug": "app-access-rules"
+        },
+        {
+          "url": "app/settings/users",
+          "name": "Users",
+          "slug": "users"
+        },
+        {
+          "url": "app/settings/technology",
+          "name": "Technology",
+          "slug": "technology"
+        },
+        {
+          "url": "app/settings/cache-clear",
+          "name": "Cache Clear",
+          "slug": "cache-clear"
+        },
+        {
+          "url": "app/settings/branch",
+          "name": "Branch",
+          "slug": "branch"
+        },
+        {
+          "url": "app/settings/relation",
+          "name": "Relation",
+          "slug": "relation"
+        }
+      ]
+    }
+  ]
+}
