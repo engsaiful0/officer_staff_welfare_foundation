@@ -10,6 +10,8 @@ class Designation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'designation_name','designation_type',
+        'designation_name',
+        'designation_type',
+        'user_id',
     ];
 }

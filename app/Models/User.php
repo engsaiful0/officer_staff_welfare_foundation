@@ -52,4 +52,19 @@ class User extends Authenticatable
   {
     return $this->belongsTo(Rule::class);
   }
+
+  public function ledgerEntries()
+  {
+    return $this->hasMany(LedgerEntry::class, 'created_by');
+  }
+
+  public function rateHistories()
+  {
+    return $this->hasMany(RateHistory::class, 'created_by');
+  }
+
+  public function imports()
+  {
+    return $this->hasMany(Import::class, 'imported_by');
+  }
 }

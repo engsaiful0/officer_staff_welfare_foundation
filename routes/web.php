@@ -96,7 +96,7 @@ use App\Http\Controllers\wizard_example\Checkout as WizardCheckout;
 use App\Http\Controllers\wizard_example\PropertyListing;
 use App\Http\Controllers\wizard_example\CreateDeal;
 // use App\Http\Controllers\modal\ModalExample;
-use App\Http\Controllers\cards\CardBasic;
+// use App\Http\Controllers\cards\CardBasic;
 use App\Http\Controllers\cards\CardAdvance;
 use App\Http\Controllers\cards\CardStatistics;
 use App\Http\Controllers\cards\CardAnalytics;
@@ -516,7 +516,11 @@ Route::get('/test-member-datatable', function() {
 
 // Main Page Route
 Route::get('/', [LoginBasic::class, 'index'])->name('auth-login-basic');
+Route::get('/login', [LoginBasic::class, 'index'])->name('login');
 Route::post('/auth/login-basic', [LoginBasic::class, 'login'])->name('auth-login-basic.post');
+
+// Logout Route
+Route::post('/logout', [LoginBasic::class, 'logout'])->name('logout');
 
 Route::get('/dashboard/analytics', [Analytics::class, 'index'])->name('dashboard-analytics');
 Route::get('/dashboard/crm', [Crm::class, 'index'])->name('dashboard-crm');
@@ -628,7 +632,7 @@ Route::get('/wizard/ex-create-deal', [CreateDeal::class, 'index'])->name('wizard
 // Route::get('/modal-examples', [ModalExample::class, 'index'])->name('modal-examples');
 
 // cards
-Route::get('/cards/basic', [CardBasic::class, 'index'])->name('cards-basic');
+// Route::get('/cards/basic', [CardBasic::class, 'index'])->name('cards-basic');
 Route::get('/cards/advance', [CardAdvance::class, 'index'])->name('cards-advance');
 Route::get('/cards/statistics', [CardStatistics::class, 'index'])->name('cards-statistics');
 Route::get('/cards/analytics', [CardAnalytics::class, 'index'])->name('cards-analytics');
@@ -756,3 +760,79 @@ Route::get('/members/get-members', [MemberController::class, 'getMembers'])->nam
 Route::post('/members/check-email-unique', [MemberController::class, 'checkEmailUnique'])->name('members.check-email-unique');
 Route::post('/members/check-mobile-unique', [MemberController::class, 'checkMobileUnique'])->name('members.check-mobile-unique');
 Route::post('/members/check-nid-unique', [MemberController::class, 'checkNidUnique'])->name('members.check-nid-unique');
+
+// Export routes
+Route::get('/members/export/excel', [MemberController::class, 'exportExcel'])->name('members.export-excel');
+Route::get('/members/export/pdf', [MemberController::class, 'exportPdf'])->name('members.export-pdf');
+
+// Investment Module Routes
+use App\Http\Controllers\InvestmentController;
+use App\Http\Controllers\LedgerEntryController;
+use App\Http\Controllers\InvestmentImportController;
+use App\Http\Controllers\InvestmentReportController;
+
+// Investment Routes
+Route::resource('investments', InvestmentController::class);
+Route::get('/app/investments/view-investments', [InvestmentController::class, 'index'])->name('investments.view-investments');
+Route::get('/app/investments/add-investment', [InvestmentController::class, 'create'])->name('investments.add-investment');
+Route::get('/app/investments/{investment}', [InvestmentController::class, 'show'])->name('investments.show');
+Route::get('/app/investments/{investment}/edit', [InvestmentController::class, 'edit'])->name('investments.edit');
+Route::get('/app/investments/member/{memberId}', [InvestmentController::class, 'getByMember'])->name('investments.by-member');
+
+// Ledger Entry Routes
+Route::resource('ledger-entries', LedgerEntryController::class);
+Route::get('/app/ledger-entries/view-entries', [LedgerEntryController::class, 'index'])->name('ledger-entries.view-entries');
+Route::get('/app/ledger-entries/add-entry', [LedgerEntryController::class, 'create'])->name('ledger-entries.add-entry');
+Route::post('/app/ledger-entries/create-accrual', [LedgerEntryController::class, 'createAccrual'])->name('ledger-entries.create-accrual');
+
+// Investment Import Routes
+Route::get('/app/investments/import', [InvestmentImportController::class, 'index'])->name('investments.import');
+Route::post('/app/investments/import', [InvestmentImportController::class, 'import'])->name('investments.import.store');
+Route::get('/app/investments/import/history', [InvestmentImportController::class, 'history'])->name('investments.import.history');
+
+// Investment Report Routes
+Route::get('/app/investments/reports', [InvestmentReportController::class, 'index'])->name('investments.reports');
+Route::get('/app/investments/reports/portfolio', [InvestmentReportController::class, 'portfolioReport'])->name('investments.reports.portfolio');
+Route::get('/app/investments/reports/interest', [InvestmentReportController::class, 'interestReport'])->name('investments.reports.interest');
+Route::get('/app/investments/reports/maturity', [InvestmentReportController::class, 'maturityReport'])->name('investments.reports.maturity');
+Route::get('/app/investments/reports/export-pdf', [InvestmentReportController::class, 'exportPdf'])->name('investments.reports.export-pdf');
+Route::get('/app/investments/reports/export-excel', [InvestmentReportController::class, 'exportExcel'])->name('investments.reports.export-excel');
+
+// Deposit Module Routes
+use App\Http\Controllers\DepositController;
+use App\Http\Controllers\DepositLedgerController;
+use App\Http\Controllers\DepositImportController;
+use App\Http\Controllers\DepositReportController;
+
+// Deposit Routes
+Route::resource('deposits', DepositController::class);
+Route::get('/app/deposits/view-deposits', [DepositController::class, 'index'])->name('deposits.view-deposits');
+Route::get('/app/deposits/add-deposit', [DepositController::class, 'create'])->name('deposits.add-deposit');
+Route::get('/app/deposits/{deposit}', [DepositController::class, 'show'])->name('deposits.show');
+Route::get('/app/deposits/{deposit}/edit', [DepositController::class, 'edit'])->name('deposits.edit');
+Route::patch('/app/deposits/{deposit}/close', [DepositController::class, 'close'])->name('deposits.close');
+Route::get('/app/deposits/member/{memberId}', [DepositController::class, 'getByMember'])->name('deposits.by-member');
+
+// Deposit Ledger Routes
+Route::get('/app/deposits/{deposit}/ledger', [DepositLedgerController::class, 'index'])->name('deposits.ledger.index');
+Route::post('/app/deposits/{deposit}/ledger/deposit', [DepositLedgerController::class, 'deposit'])->name('deposits.ledger.deposit');
+Route::post('/app/deposits/{deposit}/ledger/withdrawal', [DepositLedgerController::class, 'withdrawal'])->name('deposits.ledger.withdrawal');
+Route::post('/app/deposits/{deposit}/ledger/accrue', [DepositLedgerController::class, 'accrue'])->name('deposits.ledger.accrue');
+Route::post('/app/deposits/{deposit}/ledger/adjustment', [DepositLedgerController::class, 'adjustment'])->name('deposits.ledger.adjustment');
+Route::put('/app/deposits/{deposit}/ledger/{ledgerEntry}', [DepositLedgerController::class, 'update'])->name('deposits.ledger.update');
+Route::delete('/app/deposits/{deposit}/ledger/{ledgerEntry}', [DepositLedgerController::class, 'destroy'])->name('deposits.ledger.destroy');
+
+// Deposit Import Routes
+Route::get('/app/deposits/import', [DepositImportController::class, 'index'])->name('deposits.import');
+Route::post('/app/deposits/import', [DepositImportController::class, 'import'])->name('deposits.import.store');
+Route::get('/app/deposits/import/template', [DepositImportController::class, 'downloadTemplate'])->name('deposits.import.template');
+Route::get('/app/deposits/import/history', [DepositImportController::class, 'history'])->name('deposits.import.history');
+Route::get('/app/deposits/import/{import}', [DepositImportController::class, 'show'])->name('deposits.import.show');
+
+// Deposit Report Routes
+Route::get('/app/deposits/reports', [DepositReportController::class, 'index'])->name('deposits.reports');
+Route::get('/app/deposits/reports/portfolio', [DepositReportController::class, 'portfolioReport'])->name('deposits.reports.portfolio');
+Route::get('/app/deposits/reports/interest', [DepositReportController::class, 'interestReport'])->name('deposits.reports.interest');
+Route::get('/app/deposits/reports/maturity', [DepositReportController::class, 'maturityReport'])->name('deposits.reports.maturity');
+Route::get('/app/deposits/reports/export-pdf', [DepositReportController::class, 'exportPdf'])->name('deposits.reports.export-pdf');
+Route::get('/app/deposits/reports/export-excel', [DepositReportController::class, 'exportExcel'])->name('deposits.reports.export-excel');

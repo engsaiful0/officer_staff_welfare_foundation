@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MembersExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MemberController extends Controller
 {
@@ -23,82 +26,46 @@ class MemberController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->ajax()) {
-            $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user']);
-            
-            // Handle DataTables server-side processing
-            if ($request->has('draw')) {
-                $totalRecords = Member::count();
-                $filteredRecords = $query->count();
-                
-                Log::info('DataTable request', [
-                    'draw' => $request->draw,
-                    'totalRecords' => $totalRecords,
-                    'filteredRecords' => $filteredRecords,
-                    'request_data' => $request->all()
-                ]);
-                
-                // Apply search
-                if ($request->has('search') && !empty($request->search['value'])) {
-                    $searchValue = $request->search['value'];
-                    $query->where(function($q) use ($searchValue) {
-                        $q->where('name', 'like', "%{$searchValue}%")
-                          ->orWhere('email', 'like', "%{$searchValue}%")
-                          ->orWhere('mobile', 'like', "%{$searchValue}%")
-                          ->orWhere('unique_id', 'like', "%{$searchValue}%")
-                          ->orWhere('member_unique_id', 'like', "%{$searchValue}%");
-                    });
-                    $filteredRecords = $query->count();
-                }
-                
-                // Apply ordering
-                if ($request->has('order')) {
-                    $orderColumn = $request->order[0]['column'];
-                    $orderDir = $request->order[0]['dir'];
-                    $columns = ['id', 'name', 'picture', 'unique_id', 'designation_id', 'branch_id', 'email', 'mobile', 'date_of_join'];
-                    
-                    if (isset($columns[$orderColumn])) {
-                        $query->orderBy($columns[$orderColumn], $orderDir);
-                    }
-                }
-                
-                // Apply pagination
-                $start = $request->start ?? 0;
-                $length = $request->length ?? 10;
-                $members = $query->skip($start)->take($length)->get();
-                
-                $response = [
-                    'draw' => intval($request->draw),
-                    'recordsTotal' => $totalRecords,
-                    'recordsFiltered' => $filteredRecords,
-                    'data' => $members
-                ];
-                
-                Log::info('DataTable response', [
-                    'draw' => $response['draw'],
-                    'recordsTotal' => $response['recordsTotal'],
-                    'recordsFiltered' => $response['recordsFiltered'],
-                    'data_count' => count($response['data']),
-                    'first_member' => $response['data']->first()
-                ]);
-                
-                return response()->json($response);
-            }
-            
-            // Fallback for non-DataTables requests
-            $members = $query->paginate(10);
-            
-            return response()->json([
-                'data' => $members->items(),
-                'current_page' => $members->currentPage(),
-                'last_page' => $members->lastPage(),
-                'per_page' => $members->perPage(),
-                'total' => $members->total(),
-                'links' => $members->links()->toHtml()
-            ]);
+        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
+        
+        // Apply filters
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('mobile', 'like', "%{$search}%")
+                  ->orWhere('unique_id', 'like', "%{$search}%")
+                  ->orWhere('member_unique_id', 'like', "%{$search}%");
+            });
         }
         
-        return view('content.members.index');
+        if ($request->filled('mobile')) {
+            $query->where('mobile', 'like', "%{$request->mobile}%");
+        }
+        
+        if ($request->filled('designation_id')) {
+            $query->where('designation_id', $request->designation_id);
+        }
+        
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+        
+        // Apply sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+        
+        // Paginate results
+        $perPage = $request->get('per_page', 15);
+        $members = $query->paginate($perPage)->withQueryString();
+        
+        // Get filter options
+        $designations = Designation::where('designation_type', 'Member')->get();
+        $branches = Branch::all();
+        
+        return view('content.members.index', compact('members', 'designations', 'branches'));
     }
 
     /**
@@ -387,5 +354,88 @@ class MemberController extends Controller
         $exists = $query->exists();
         
         return response()->json(['unique' => !$exists]);
+    }
+
+    /**
+     * Export members to Excel
+     */
+    public function exportExcel(Request $request)
+    {
+        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
+        
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('mobile', 'like', "%{$search}%")
+                  ->orWhere('unique_id', 'like', "%{$search}%")
+                  ->orWhere('member_unique_id', 'like', "%{$search}%");
+            });
+        }
+        
+        if ($request->filled('mobile')) {
+            $query->where('mobile', 'like', "%{$request->mobile}%");
+        }
+        
+        if ($request->filled('designation_id')) {
+            $query->where('designation_id', $request->designation_id);
+        }
+        
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+        
+        // Apply same sorting as index
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+        
+        $members = $query->get();
+        
+        return Excel::download(new MembersExport($members), 'members_' . date('Y-m-d_H-i-s') . '.xlsx');
+    }
+
+    /**
+     * Export members to PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
+        
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('mobile', 'like', "%{$search}%")
+                  ->orWhere('unique_id', 'like', "%{$search}%")
+                  ->orWhere('member_unique_id', 'like', "%{$search}%");
+            });
+        }
+        
+        if ($request->filled('mobile')) {
+            $query->where('mobile', 'like', "%{$request->mobile}%");
+        }
+        
+        if ($request->filled('designation_id')) {
+            $query->where('designation_id', $request->designation_id);
+        }
+        
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+        
+        // Apply same sorting as index
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+        
+        $members = $query->get();
+        
+        $pdf = Pdf::loadView('content.members.export-pdf', compact('members'));
+        return $pdf->download('members_' . date('Y-m-d_H-i-s') . '.pdf');
     }
 }

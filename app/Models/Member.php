@@ -16,7 +16,6 @@ class Member extends Model
         'mobile',
         'email',
         'nid_number',
-        'member_unique_id',
         'picture',
         'designation_id',
         'date_of_join',
@@ -69,6 +68,21 @@ class Member extends Model
     public function nomineeRelation()
     {
         return $this->belongsTo(Relation::class, 'nominee_relation_id');
+    }
+
+    public function investments()
+    {
+        return $this->hasMany(Investment::class);
+    }
+
+    public function deposits()
+    {
+        return $this->hasMany(Deposit::class);
+    }
+
+    public function memberUniqueId()
+    {
+        return $this->hasOne(MemberUniqueId::class);
     }
 
     // Auto-generate unique ID

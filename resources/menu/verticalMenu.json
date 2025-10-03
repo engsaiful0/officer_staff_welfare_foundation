@@ -58,9 +58,71 @@
       ]
     },
     {
+      "name": "Investment",
+      "icon": "menu-icon tf-icons ti ti-file-dollar",
+      "slug": "investment-management",
+      "submenu": [
+        {
+          "url": "/app/investments/add-investment",
+          "name": "Add Investment",
+          "slug": "investments.add-investment",
+          "permission": "investment-add"
+        },
+        {
+          "url": "/app/investments/view-investments",
+          "name": "View Investments",
+          "slug": "investments.view-investments",
+          "permission": "investment-view"
+        },
+        {
+          "url": "/app/investments/import",
+          "name": "Import Data",
+          "slug": "investments.import",
+          "permission": "investment-import"
+        },
+        {
+          "url": "/app/investments/reports",
+          "name": "Reports",
+          "slug": "investments.reports",
+          "permission": "investment-reports"
+        }
+      ]
+    },
+    {
+      "name": "Deposit",
+      "icon": "menu-icon tf-icons ti ti-file-dollar",
+      "slug": "deposit-management",
+      "submenu": [
+        {
+          "url": "/app/deposits/add-deposit",
+          "name": "Add Deposit",
+          "slug": "deposits.add-deposit",
+          "permission": "deposit-add"
+        },
+        {
+          "url": "/app/deposits/view-deposits",
+          "name": "View Deposits",
+          "slug": "deposits.view-deposits",
+          "permission": "deposit-view"
+        },
+        {
+          "url": "/app/deposits/import",
+          "name": "Import Data",
+          "slug": "deposits.import",
+          "permission": "deposit-import"
+        },
+        {
+          "url": "/app/deposits/reports",
+          "name": "Reports",
+          "slug": "deposits.reports",
+          "permission": "deposit-reports"
+        }
+      ]
+    },
+    {
       "name": "Report",
       "icon": "menu-icon tf-icons ti ti-report",
-      "slug": "app-report",
+      "slug": "report-management",
       "submenu": [
         {
           "url": "/app/student-list-report",
@@ -160,11 +222,6 @@
           "url": "app/settings/users",
           "name": "Users",
           "slug": "users"
-        },
-        {
-          "url": "app/settings/technology",
-          "name": "Technology",
-          "slug": "technology"
         },
         {
           "url": "app/settings/cache-clear",

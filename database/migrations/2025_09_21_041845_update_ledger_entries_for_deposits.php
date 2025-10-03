@@ -11,12 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ssc_passing_sessions', function (Blueprint $table) {
-            $table->id();
-            $table->string('session_name')->unique();
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
+        //
     }
 
     /**
@@ -24,6 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ssc_passing_sessions');
+        //
     }
 };

@@ -13,18 +13,11 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'student-add',
-            'student-edit',
-            'student-view',
-            'student-delete',
             'employee-add',
             'employee-edit',
             'employee-view',
             'employee-delete',
             'fee-collect-add',
-            'fee-collect-view',
-            'fee-collect-edit',
-            'fee-collect-delete',
             'rule-add',
             'rule-edit',
             'rule-delete',
@@ -38,11 +31,40 @@ class PermissionSeeder extends Seeder
             'member-delete',
             'fee-summary-view',
             'my-collection-report-view',
-            'settings-view'
+            'settings-view',
+            'deposit-add',
+            'deposit-view',
+            'deposit-edit',
+            'deposit-delete',
+            'deposit-import',
+            'deposit-reports',
+            'deposit-ledger-add',
+            'deposit-ledger-view',
+            'deposit-ledger-edit',
+            'deposit-ledger-delete',
+            'deposit-ledger-import',
+            'deposit-ledger-reports',
+            'investment-add',
+            'investment-view',
+            'investment-edit',
+            'investment-delete',
+            'investment-import',
+            'investment-reports',
+            'investment-ledger-add',
+            'investment-ledger-view',
+            'investment-ledger-edit',
+            'investment-ledger-delete',
+            'investment-ledger-import',
+            'investment-ledger-reports'
+
+
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission,'user_id' => 1]);
+            Permission::firstOrCreate(
+                ['name' => $permission],
+                ['user_id' => 1]
+            );
         }
     }
 }

@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('academic_years', function (Blueprint $table) {
-            $table->id();
-            $table->string('academic_year_name');
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
-            $table->timestamps();
+        Schema::table('imports', function (Blueprint $table) {
+            $table->string('type')->default('investment')->after('filename');
+            $table->index('type');
         });
     }
 
@@ -24,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('academic_years');
+        Schema::table('imports', function (Blueprint $table) {
+            $table->dropIndex(['type']);
+            $table->dropColumn('type');
+        });
     }
 };
