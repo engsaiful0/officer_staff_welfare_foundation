@@ -134,7 +134,7 @@
                             <td>{{ $member->id }}</td>
                             <td>
                                 @if($member->picture)
-                                    <img src="{{ asset('storage/' . $member->picture) }}" 
+                                    <img src="{{ asset('storage/app/public/' . $member->picture) }}" 
                                          alt="{{ $member->name }}" 
                                          class="rounded-circle" 
                                          width="40" height="40">
@@ -160,24 +160,23 @@
                             <td>{{ $member->date_of_join ? $member->date_of_join->format('M d, Y') : 'N/A' }}</td>
                             <td>
                                 <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle" data-bs-toggle="dropdown">
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item" href="{{ route('members.show', $member) }}">
                                             <i class="bx bx-show me-1"></i>View
                                         </a>
-                                        @can('member-edit')
+                                        
                                         <a class="dropdown-item" href="{{ route('members.edit', $member) }}">
                                             <i class="bx bx-edit me-1"></i>Edit
                                         </a>
-                                        @endcan
-                                        @can('member-delete')
+                                      
                                         <a class="dropdown-item text-danger" href="#" 
                                            onclick="deleteMember({{ $member->id }}, '{{ $member->name }}')">
                                             <i class="bx bx-trash me-1"></i>Delete
                                         </a>
-                                        @endcan
+                                        
                                     </div>
                                 </div>
                             </td>

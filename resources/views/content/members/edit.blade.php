@@ -3,14 +3,17 @@
 @section('title', 'Edit Member')
 
 @section('page-script')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
     window.checkEmailUrl = '{{ route("members.check-email-unique") }}';
     window.checkMobileUrl = '{{ route("members.check-mobile-unique") }}';
     window.checkNidUrl = '{{ route("members.check-nid-unique") }}';
     window.getMembersUrl = '{{ route("members.get-members") }}';
     window.memberId = {{ $member->id }};
+    window.membersListUrl = '{{ route("members.view-member") }}';
 </script>
-<script src="{{asset('assets/js/member-form.js')}}?v={{ time() }}"></script>
+<script src="{{asset('assets/js/member-utils.js')}}?v={{ time() }}"></script>
+<script src="{{asset('assets/js/member-edit.js')}}?v={{ time() }}"></script>
 @endsection
 
 @section('content')
@@ -65,7 +68,7 @@
                     <input type="file" class="form-control" id="picture" name="picture" accept="image/*">
                     @if($member->picture)
                     <div class="mt-2">
-                        <img src="{{ asset('storage/' . $member->picture) }}" alt="Current Picture" class="img-thumbnail" style="max-width: 100px;">
+                        <img src="{{ asset('storage/app/public/' . $member->picture) }}" alt="Current Picture" class="img-thumbnail" style="max-width: 100px;">
                         <small class="text-muted d-block">Current picture</small>
                     </div>
                     @endif
@@ -82,7 +85,7 @@
                     <select class="form-select" id="designation_id" name="designation_id" required>
                         <option value="">Select Designation</option>
                         @foreach($designations as $designation)
-                        <option value="{{ $designation->id }}" {{ $member->designation_id == $designation->id ? 'selected' : '' }}>{{ $designation->name }}</option>
+                        <option value="{{ $designation->id }}" {{ $member->designation_id == $designation->id ? 'selected' : '' }}>{{ $designation->designation_name }}</option>
                         @endforeach
                     </select>
                     <div class="invalid-feedback"></div>
@@ -96,10 +99,10 @@
                 
                 <div class="col-md-4 mb-3">
                     <label for="branch_id" class="form-label">Branch <span class="text-danger">*</span></label>
-                    <select class="form-select" id="branch_id" name="branch_id" required>
+                    <select class="form-select select2" id="branch_id" name="branch_id" required>
                         <option value="">Select Branch</option>
                         @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}" {{ $member->branch_id == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                        <option value="{{ $branch->id }}" {{ $member->branch_id == $branch->id ? 'selected' : '' }}>{{ $branch->branch_name }}</option>
                         @endforeach
                     </select>
                     <div class="invalid-feedback"></div>
@@ -107,10 +110,10 @@
                 
                 <div class="col-md-4 mb-3">
                     <label for="religion_id" class="form-label">Religion <span class="text-danger">*</span></label>
-                    <select class="form-select" id="religion_id" name="religion_id" required>
+                    <select class="form-select select2" id="religion_id" name="religion_id" required>
                         <option value="">Select Religion</option>
                         @foreach($religions as $religion)
-                        <option value="{{ $religion->id }}" {{ $member->religion_id == $religion->id ? 'selected' : '' }}>{{ $religion->name }}</option>
+                        <option value="{{ $religion->id }}" {{ $member->religion_id == $religion->id ? 'selected' : '' }}>{{ $religion->religion_name }}</option>
                         @endforeach
                     </select>
                     <div class="invalid-feedback"></div>
@@ -118,7 +121,7 @@
                 
                 <div class="col-md-4 mb-3">
                     <label for="introducer_id" class="form-label">Introducer</label>
-                    <select class="form-select" id="introducer_id" name="introducer_id">
+                    <select class="form-select select2" id="introducer_id" name="introducer_id">
                         <option value="">Select Introducer (Optional)</option>
                         @foreach($members as $memberOption)
                         <option value="{{ $memberOption->id }}" {{ $member->introducer_id == $memberOption->id ? 'selected' : '' }}>{{ $memberOption->name }} ({{ $memberOption->unique_id }})</option>
@@ -164,7 +167,7 @@
                 
                 <div class="col-md-4 mb-3">
                     <label for="nominee_relation_id" class="form-label">Nominee Relation</label>
-                    <select class="form-select" id="nominee_relation_id" name="nominee_relation_id">
+                    <select class="form-select select2" id="nominee_relation_id" name="nominee_relation_id">
                         <option value="">Select Relation (Optional)</option>
                         @foreach($relations as $relation)
                         <option value="{{ $relation->id }}" {{ $member->nominee_relation_id == $relation->id ? 'selected' : '' }}>{{ $relation->relation_name }}</option>
