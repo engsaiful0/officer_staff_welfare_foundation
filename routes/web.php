@@ -503,16 +503,6 @@ Route::get('/test-member-crud', function() {
     ]);
 });
 
-// Test Member DataTable Route
-Route::get('/test-member-datatable', function() {
-    $request = new Illuminate\Http\Request();
-    $request->merge(['draw' => 1, 'start' => 0, 'length' => 10]);
-    $request->headers->set('Accept', 'application/json');
-    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-    
-    $controller = new App\Http\Controllers\MemberController();
-    return $controller->index($request);
-});
 
 // Main Page Route
 Route::get('/', [LoginBasic::class, 'index'])->name('auth-login-basic');

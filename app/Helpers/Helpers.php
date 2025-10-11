@@ -94,7 +94,7 @@ class Helpers
     $styleVal = $data['myStyle'] == "dark" ? "dark" : "light";
     $styleUpdatedVal = $data['myStyle'] == "dark" ? "dark" : $data['myStyle'];
     // Determine if the layout is admin or front based on cookies
-    $layoutName = $data['myLayout'];
+    $layoutName = $data['myLayout'] ?? 'vertical';
     $isAdmin = Str::contains($layoutName, 'front') ? false : true;
 
     $modeCookieName = $isAdmin ? 'admin-mode' : 'front-mode';

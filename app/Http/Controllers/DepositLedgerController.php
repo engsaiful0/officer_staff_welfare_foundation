@@ -96,3 +96,4 @@ class DepositLedgerController extends Controller
             return redirect()->back()->with('error', 'Failed to record deposit: ' . $e->getMessage());
         }
     }
+}

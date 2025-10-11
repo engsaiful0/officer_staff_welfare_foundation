@@ -28,7 +28,7 @@ return [
     | Application URL
     |--------------------------------------------------------------------------
     */
-    'url' => env('APP_URL', 'http://localhost/polytechnic'),
+    'url' => env('APP_URL', 'http://localhost/oswf'),
 
     'asset_url' => env('ASSET_URL'),
 

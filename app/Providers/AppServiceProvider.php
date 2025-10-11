@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\Paginator;
+use App\Helpers\Helpers;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,7 +16,10 @@ class AppServiceProvider extends ServiceProvider
    */
   public function register(): void
   {
-    //
+    // Register Helper class as a singleton
+    $this->app->singleton('Helper', function ($app) {
+      return new Helpers();
+    });
   }
 
   /**
