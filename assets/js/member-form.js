@@ -9,11 +9,31 @@ $(document).ready(function () {
         form.find('.form-control').removeClass('is-invalid');
         form.find('.invalid-feedback').text('');
 
+        // Client-side validation for required fields
+        var isValid = true;
+        form.find('input[required], select[required], textarea[required]').each(function() {
+            var field = $(this);
+            var value = field.val();
+            
+            if (!value || value.trim() === '') {
+                field.addClass('is-invalid');
+                field.siblings('.invalid-feedback').text('This field is required.');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            toastr.error('Please fill in all required fields.');
+            return;
+        }
+
         var formData = new FormData(this);
         var url = form.attr('action');
         var method = form.find('input[name="_method"]').val() || 'POST';
 
         console.log('Form submission:', { url: url, method: method });
+        console.log('Form data:', Object.fromEntries(formData.entries()));
+        console.log('CSRF Token:', $('meta[name="csrf-token"]').attr('content'));
 
         // Show loading state with spinner
         var submitBtn = form.find('button[type="submit"]');
@@ -35,8 +55,10 @@ $(document).ready(function () {
             success: function (response) {
                 toastr.success(response.message);
 
-                // Clear the form after success
-                form[0].reset();
+                // Only reset form if it's a create form (not edit)
+                if (!window.memberId) {
+                    form[0].reset();
+                }
             },
             error: function (xhr) {
                 if (xhr.status === 422) {
@@ -47,8 +69,17 @@ $(document).ready(function () {
                         input.addClass('is-invalid');
                         input.siblings('.invalid-feedback').text(messages[0]);
                     });
+                    
+                    // Show validation error message
+                    toastr.error('Please fix the validation errors and try again.');
+                } else if (xhr.status === 419) {
+                    toastr.error('Session expired. Please refresh the page and try again.');
                 } else {
-                    Swal.fire('Error', 'An error occurred while saving the member', 'error');
+                    var errorMessage = 'An error occurred while saving the member';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    Swal.fire('Error', errorMessage, 'error');
                 }
             },
             complete: function () {
@@ -107,6 +138,12 @@ $(document).ready(function () {
                     input.removeClass('is-valid').addClass('is-invalid');
                     input.siblings('.invalid-feedback').text('This email is already taken.');
                 }
+            },
+            error: function(xhr) {
+                console.error('Email uniqueness check failed:', xhr);
+                var input = $('#email');
+                input.removeClass('is-valid is-invalid');
+                input.siblings('.invalid-feedback').text('');
             }
         });
     }
@@ -134,6 +171,12 @@ $(document).ready(function () {
                     input.removeClass('is-valid').addClass('is-invalid');
                     input.siblings('.invalid-feedback').text('This mobile number is already registered.');
                 }
+            },
+            error: function(xhr) {
+                console.error('Mobile uniqueness check failed:', xhr);
+                var input = $('#mobile');
+                input.removeClass('is-valid is-invalid');
+                input.siblings('.invalid-feedback').text('');
             }
         });
     }
@@ -161,6 +204,12 @@ $(document).ready(function () {
                     input.removeClass('is-valid').addClass('is-invalid');
                     input.siblings('.invalid-feedback').text('This NID number is already registered.');
                 }
+            },
+            error: function(xhr) {
+                console.error('NID uniqueness check failed:', xhr);
+                var input = $('#nid_number');
+                input.removeClass('is-valid is-invalid');
+                input.siblings('.invalid-feedback').text('');
             }
         });
     }

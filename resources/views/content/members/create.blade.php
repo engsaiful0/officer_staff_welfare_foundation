@@ -3,15 +3,17 @@
 @section('title', 'Add Member')
 
 @section('page-script')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
     window.checkEmailUrl = '{{ route("members.check-email-unique") }}';
     window.checkMobileUrl = '{{ route("members.check-mobile-unique") }}';
     window.checkNidUrl = '{{ route("members.check-nid-unique") }}';
     window.getMembersUrl = '{{ route("members.get-members") }}';
     window.memberStoreUrl = '{{ route("members.store") }}';
-    window.memberIndexUrl = '{{ route("members.view-member") }}';
+    window.membersListUrl = '{{ route("members.view-member") }}';
 </script>
-<script src="{{asset('assets/js/member-form.js')}}?v={{ time() }}"></script>
+<script src="{{asset('assets/js/member-utils.js')}}?v={{ time() }}"></script>
+<script src="{{asset('assets/js/member-add.js')}}?v={{ time() }}"></script>
 @endsection
 
 @section('content')

@@ -27,44 +27,44 @@ class MemberController extends Controller
     public function index(Request $request)
     {
         $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
-        
+
         // Apply filters
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('mobile', 'like', "%{$search}%")
-                  ->orWhere('unique_id', 'like', "%{$search}%")
-                  ->orWhere('member_unique_id', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%")
+                    ->orWhere('unique_id', 'like', "%{$search}%")
+                    ->orWhere('member_unique_id', 'like', "%{$search}%");
             });
         }
-        
+
         if ($request->filled('mobile')) {
             $query->where('mobile', 'like', "%{$request->mobile}%");
         }
-        
+
         if ($request->filled('designation_id')) {
             $query->where('designation_id', $request->designation_id);
         }
-        
+
         if ($request->filled('branch_id')) {
             $query->where('branch_id', $request->branch_id);
         }
-        
+
         // Apply sorting
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
-        
+
         // Paginate results
         $perPage = $request->get('per_page', 15);
         $members = $query->paginate($perPage)->withQueryString();
-        
+
         // Get filter options
         $designations = Designation::where('designation_type', 'Member')->get();
         $branches = Branch::all();
-        
+
         return view('content.members.index', compact('members', 'designations', 'branches'));
     }
 
@@ -79,12 +79,12 @@ class MemberController extends Controller
         $relations = Relation::all();
         $members = Member::select('id', 'name', 'unique_id')->get();
 
-         // Get the last serial
-         $latest = MemberUniqueId::latest('serial')->first();
-         $nextSerial = $latest ? $latest->serial + 1 : 1;
-         // Format as M-0001, M-0002, ...
+        // Get the last serial
+        $latest = MemberUniqueId::latest('serial')->first();
+        $nextSerial = $latest ? $latest->serial + 1 : 1;
+        // Format as M-0001, M-0002, ...
         $member_unique_id = 'M-' . str_pad($nextSerial, 4, '0', STR_PAD_LEFT);
-        
+
         return view('content.members.create', compact('designations', 'branches', 'religions', 'relations', 'members', 'member_unique_id', 'nextSerial'));
     }
 
@@ -185,7 +185,6 @@ class MemberController extends Controller
         $member->load(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user']);
         return response()->json(['member' => $member]);
     }
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -195,9 +194,18 @@ class MemberController extends Controller
         $branches = Branch::all();
         $religions = Religion::all();
         $relations = Relation::all();
-        $members = Member::where('id', '!=', $member->id)->select('id', 'name', 'unique_id')->get();
-        
-        return view('content.members.edit', compact('member', 'designations', 'branches', 'religions', 'relations', 'members'));
+        $members = Member::where('id', '!=', $member->id)
+            ->select('id', 'name', 'unique_id')
+            ->get();
+
+        return view('content.members.edit', compact(
+            'member',
+            'designations',
+            'branches',
+            'religions',
+            'relations',
+            'members'
+        ));
     }
 
     /**
@@ -205,76 +213,120 @@ class MemberController extends Controller
      */
     public function update(Request $request, Member $member)
     {
-        // Custom validation messages
-        $messages = [
-            'email.unique' => 'This email is already taken.',
-            'mobile.unique' => 'This mobile number is already registered.',
-            'nid_number.unique' => 'This NID number is already registered.',
-        ];
+        try {
+            // Custom validation messages
+            $messages = [
+                'email.unique' => 'This email is already taken.',
+                'mobile.unique' => 'This mobile number is already registered.',
+                'nid_number.unique' => 'This NID number is already registered.',
+            ];
 
-        // Validation rules
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'father_name' => 'required|string|max:255',
-            'mobile' => [
-                'required',
-                'string',
-                'max:15',
-                Rule::unique('members', 'mobile')->ignore($member->id),
-            ],
-            'email' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('members', 'email')->ignore($member->id),
-            ],
-            'nid_number' => [
-                'required',
-                'string',
-                'max:20',
-                Rule::unique('members', 'nid_number')->ignore($member->id),
-            ],
-            'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'designation_id' => 'required|exists:designations,id',
-            'date_of_join' => 'required|date',
-            'branch_id' => 'required|exists:branches,id',
-            'present_address' => 'required|string',
-            'permanent_address' => 'required|string',
-            'introducer_id' => 'nullable|exists:members,id',
-            'religion_id' => 'required|exists:religions,id',
-            'nominee_name' => 'nullable|string|max:255',
-            'nominee_relation_id' => 'nullable|exists:relations,id',
-            'nominee_phone' => 'nullable|string|max:15',
-        ], $messages);
+            // Validation rules
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'father_name' => 'required|string|max:255',
+                'mobile' => [
+                    'required',
+                    'string',
+                    'max:15',
+                    Rule::unique('members', 'mobile')->ignore($member->id),
+                ],
+                'email' => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+                    Rule::unique('members', 'email')->ignore($member->id),
+                ],
+                'nid_number' => [
+                    'required',
+                    'string',
+                    'max:20',
+                    Rule::unique('members', 'nid_number')->ignore($member->id),
+                ],
+                'designation_id' => 'required|exists:designations,id',
+                'date_of_join' => 'required|date',
+                'branch_id' => 'required|exists:branches,id',
+                'present_address' => 'required|string',
+                'permanent_address' => 'required|string',
+                'introducer_id' => 'nullable|exists:members,id',
+                'religion_id' => 'required|exists:religions,id',
+                'nominee_name' => 'nullable|string|max:255',
+                'nominee_relation_id' => 'nullable|exists:relations,id',
+                'nominee_phone' => 'nullable|string|max:15',
+                'member_unique_id' => 'nullable|string|max:50',
+                'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ], $messages);
 
-        $data = $validatedData;
-
-        // Handle file upload
-        if ($request->hasFile('picture')) {
-            // Delete old picture
-            if ($member->picture && Storage::disk('public')->exists($member->picture)) {
-                Storage::disk('public')->delete($member->picture);
+            // Handle image upload
+            if ($request->hasFile('picture')) {
+                // Delete old picture if exists
+                if ($member->picture && Storage::disk('public')->exists($member->picture)) {
+                    Storage::disk('public')->delete($member->picture);
+                }
+                $validatedData['picture'] = $request->file('picture')->store('profile_pictures', 'public');
             }
-            $data['picture'] = $request->file('picture')->store('profile_pictures', 'public');
-        }
 
-        // Update member
-        $member->update($data);
+            // Update member record
+            $member->update($validatedData);
 
-        // Update user account
-        if ($member->user) {
-            $member->user->update([
-                'name' => $member->name,
-                'email' => $member->email,
+            // Handle MemberUniqueId relationship
+            if ($request->filled('member_unique_id')) {
+                $memberUniqueId = $member->memberUniqueId;
+                if ($memberUniqueId) {
+                    $memberUniqueId->update(['member_unique_id' => $request->member_unique_id]);
+                } else {
+                    MemberUniqueId::create([
+                        'member_id' => $member->id,
+                        'member_unique_id' => $request->member_unique_id,
+                        'serial' => $request->get('serial', 1),
+                    ]);
+                }
+            }
+
+            // Update linked user account
+            if ($member->user) {
+                $member->user->update([
+                    'name' => $member->name,
+                    'email' => $member->email,
+                ]);
+            }
+
+            // Log the update action
+            Log::info('Member updated successfully', [
+                'member_id' => $member->id,
+                'updated_by' => auth()->id(),
+                'updated_fields' => array_keys($validatedData)
             ]);
-        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Member updated successfully.',
-            'member' => $member->load(['designation', 'branch', 'religion', 'introducer'])
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Member updated successfully.',
+                'member' => $member->load(['designation', 'branch', 'religion', 'introducer', 'memberUniqueId']),
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('Member update failed', [
+                'member_id' => $member->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating the member. Please try again.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -314,13 +366,13 @@ class MemberController extends Controller
     public function checkEmailUnique(Request $request)
     {
         $query = Member::where('email', $request->email);
-        
+
         if ($request->has('id')) {
             $query->where('id', '!=', $request->id);
         }
-        
+
         $exists = $query->exists();
-        
+
         return response()->json(['unique' => !$exists]);
     }
 
@@ -330,13 +382,13 @@ class MemberController extends Controller
     public function checkMobileUnique(Request $request)
     {
         $query = Member::where('mobile', $request->mobile);
-        
+
         if ($request->has('id')) {
             $query->where('id', '!=', $request->id);
         }
-        
+
         $exists = $query->exists();
-        
+
         return response()->json(['unique' => !$exists]);
     }
 
@@ -346,13 +398,13 @@ class MemberController extends Controller
     public function checkNidUnique(Request $request)
     {
         $query = Member::where('nid_number', $request->nid_number);
-        
+
         if ($request->has('id')) {
             $query->where('id', '!=', $request->id);
         }
-        
+
         $exists = $query->exists();
-        
+
         return response()->json(['unique' => !$exists]);
     }
 
@@ -362,38 +414,38 @@ class MemberController extends Controller
     public function exportExcel(Request $request)
     {
         $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
-        
+
         // Apply same filters as index
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('mobile', 'like', "%{$search}%")
-                  ->orWhere('unique_id', 'like', "%{$search}%")
-                  ->orWhere('member_unique_id', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%")
+                    ->orWhere('unique_id', 'like', "%{$search}%")
+                    ->orWhere('member_unique_id', 'like', "%{$search}%");
             });
         }
-        
+
         if ($request->filled('mobile')) {
             $query->where('mobile', 'like', "%{$request->mobile}%");
         }
-        
+
         if ($request->filled('designation_id')) {
             $query->where('designation_id', $request->designation_id);
         }
-        
+
         if ($request->filled('branch_id')) {
             $query->where('branch_id', $request->branch_id);
         }
-        
+
         // Apply same sorting as index
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
-        
+
         $members = $query->get();
-        
+
         return Excel::download(new MembersExport($members), 'members_' . date('Y-m-d_H-i-s') . '.xlsx');
     }
 
@@ -403,38 +455,38 @@ class MemberController extends Controller
     public function exportPdf(Request $request)
     {
         $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
-        
+
         // Apply same filters as index
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('mobile', 'like', "%{$search}%")
-                  ->orWhere('unique_id', 'like', "%{$search}%")
-                  ->orWhere('member_unique_id', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%")
+                    ->orWhere('unique_id', 'like', "%{$search}%")
+                    ->orWhere('member_unique_id', 'like', "%{$search}%");
             });
         }
-        
+
         if ($request->filled('mobile')) {
             $query->where('mobile', 'like', "%{$request->mobile}%");
         }
-        
+
         if ($request->filled('designation_id')) {
             $query->where('designation_id', $request->designation_id);
         }
-        
+
         if ($request->filled('branch_id')) {
             $query->where('branch_id', $request->branch_id);
         }
-        
+
         // Apply same sorting as index
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
-        
+
         $members = $query->get();
-        
+
         $pdf = Pdf::loadView('content.members.export-pdf', compact('members'));
         return $pdf->download('members_' . date('Y-m-d_H-i-s') . '.pdf');
     }
