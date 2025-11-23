@@ -267,18 +267,18 @@ Route::get('/auth/two-steps-cover', [TwoStepsCover::class, 'index'])->name('auth
 
 // cards
 // Route::get('/cards/basic', [CardBasic::class, 'index'])->name('cards-basic');
-Route::get('/cards/advance', [CardAdvance::class, 'index'])->name('cards-advance');
-Route::get('/cards/statistics', [CardStatistics::class, 'index'])->name('cards-statistics');
-Route::get('/cards/analytics', [CardAnalytics::class, 'index'])->name('cards-analytics');
-Route::get('/cards/gamifications', [CardGamifications::class, 'index'])->name('cards-gamifications');
-Route::get('/cards/actions', [CardActions::class, 'index'])->name('cards-actions');
+// Route::get('/cards/advance', [CardAdvance::class, 'index'])->name('cards-advance');
+// Route::get('/cards/statistics', [CardStatistics::class, 'index'])->name('cards-statistics');
+// Route::get('/cards/analytics', [CardAnalytics::class, 'index'])->name('cards-analytics');
+// Route::get('/cards/gamifications', [CardGamifications::class, 'index'])->name('cards-gamifications');
+// Route::get('/cards/actions', [CardActions::class, 'index'])->name('cards-actions');
 
 
 
 // form layouts
-Route::get('/form/layouts-vertical', [VerticalForm::class, 'index'])->name('form-layouts-vertical');
-Route::get('/form/layouts-horizontal', [HorizontalForm::class, 'index'])->name('form-layouts-horizontal');
-Route::get('/form/layouts-sticky', [StickyActions::class, 'index'])->name('form-layouts-sticky');
+// Route::get('/form/layouts-vertical', [VerticalForm::class, 'index'])->name('form-layouts-vertical');
+// Route::get('/form/layouts-horizontal', [HorizontalForm::class, 'index'])->name('form-layouts-horizontal');
+// Route::get('/form/layouts-sticky', [StickyActions::class, 'index'])->name('form-layouts-sticky');
 
 
 // laravel example
