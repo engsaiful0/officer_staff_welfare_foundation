@@ -224,6 +224,11 @@
           "slug": "users"
         },
         {
+          "url": "app/settings/investment-type",
+          "name": "Investment Type",
+          "slug": "investment-type"
+        },
+        {
           "url": "app/settings/cache-clear",
           "name": "Cache Clear",
           "slug": "cache-clear"

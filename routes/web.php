@@ -69,6 +69,7 @@ use App\Http\Controllers\settings\User;
 
 use App\Http\Controllers\settings\Branch;
 use App\Http\Controllers\settings\Relation;
+use App\Http\Controllers\settings\InvestmentType;
 use App\Http\Controllers\CacheController;
 
 
@@ -197,6 +198,12 @@ Route::get('/app/settings/get-relation', [Relation::class, 'getrelation'])->name
 Route::post('/app/settings/relation', [Relation::class, 'store'])->name('app-settings-relation.store');
 Route::put('/app/settings/relation/{id}', [Relation::class, 'update'])->name('app-settings-relation.update');
 Route::delete('/app/settings/relation/{id}', [Relation::class, 'destroy'])->name('app-settings-relation.destroy');
+
+Route::get('/app/settings/investment-type', [InvestmentType::class, 'index'])->name('app-settings-investment-type');
+Route::get('/app/settings/get-investment-type', [InvestmentType::class, 'getInvestmentTypes'])->name('app-settings-get-investment-type');
+Route::post('/app/settings/investment-type', [InvestmentType::class, 'store'])->name('app-settings-investment-type.store');
+Route::put('/app/settings/investment-type/{id}', [InvestmentType::class, 'update'])->name('app-settings-investment-type.update');
+Route::delete('/app/settings/investment-type/{id}', [InvestmentType::class, 'destroy'])->name('app-settings-investment-type.destroy');
 
 // Cache Management Routes
 Route::get('/app/settings/cache-clear', [CacheController::class, 'index'])->name('app-settings-cache-clear');
