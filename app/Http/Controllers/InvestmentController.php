@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Investment;
 use App\Models\Member;
 use App\Models\InvestmentType;
+use App\Models\InvestmentInstallment;
+use App\Models\InvestmentAccount;
+use App\Models\InvestmentAccountNumber;
 use App\Models\LedgerEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -63,8 +66,10 @@ class InvestmentController extends Controller
     public function create()
     {
         $members = Member::select('id', 'name', 'unique_id')->get();
+        $latest = InvestmentAccountNumber::latest('serial')->first();
+        $nextAccountNumber = 'INV' . Carbon::now()->year . '-' . str_pad($latest ? $latest->serial + 1 : 1, 6, '0', STR_PAD_LEFT);
         $investmentTypes=InvestmentType::all();
-        return view('content.investments.create', compact('members', 'investmentTypes'));
+        return view('content.investments.create', compact('members', 'investmentTypes', 'nextAccountNumber'));
     }
 
     /**
@@ -77,10 +82,15 @@ class InvestmentController extends Controller
             'principal_amount' => 'required|numeric|min:0',
             'investment_type_id' => 'required|exists:investment_types,id',
             'start_date' => 'required|date',
-            'term_months' => 'required|integer|min:1',
-            'rate' => 'required|numeric|min:0|max:1',
-            'rate_period' => 'required|in:annual,monthly',
-            'frequency' => 'required|in:monthly,quarterly,daily',
+            'interest_rate' => 'required|numeric|min:0|max:1',
+            'investment_years' => 'required|integer|min:1',
+            'payment_type' => 'required|in:monthly,quarterly,yearly,daily',
+            'no_of_installments' => 'required|integer|min:1',
+            'principal_amount_per_installment' => 'required|numeric|min:0',
+            'rent' => 'required|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
+            'total_rent' => 'required|numeric|min:0',
+            'gestation_maturity_date' => 'nullable|date',
             'notes' => 'nullable|string'
         ]);
 
@@ -97,20 +107,25 @@ class InvestmentController extends Controller
         try {
             DB::beginTransaction();
 
-            // Calculate expiry date
+            // Calculate expiry date based on investment years
             $startDate = Carbon::parse($request->start_date);
-            $expiryDate = $startDate->copy()->addMonths($request->term_months);
+            $expiryDate = $startDate->copy()->addYears($request->investment_years);
+            $termMonths = $request->investment_years * 12;
+
+            // Determine rate_period and frequency based on payment_type
+            $ratePeriod = 'annual'; // Default to annual
+            $frequency = $request->payment_type; // monthly, quarterly, yearly, daily
 
             $investment = Investment::create([
                 'member_id' => $request->member_id,
                 'principal_amount' => $request->principal_amount,
-                'product_name' => $request->product_name,
+                'product_name' => $request->product_name ?? null,
                 'start_date' => $request->start_date,
-                'term_months' => $request->term_months,
+                'term_months' => $termMonths,
                 'expiry_date' => $expiryDate,
-                'rate' => $request->rate,
-                'rate_period' => $request->rate_period,
-                'frequency' => $request->frequency,
+                'rate' => $request->interest_rate,
+                'rate_period' => $ratePeriod,
+                'frequency' => $frequency,
                 'status' => 'active',
                 'notes' => $request->notes
             ]);
@@ -126,6 +141,12 @@ class InvestmentController extends Controller
                 'description' => 'Initial investment principal',
                 'created_by' => auth()->id()
             ]);
+
+            // Generate installment schedule
+            $this->generateInstallmentSchedule($investment, $request);
+
+            // Create investment account
+            $this->createInvestmentAccount($investment, $request);
 
             DB::commit();
 
@@ -338,5 +359,102 @@ class InvestmentController extends Controller
             'success' => true,
             'data' => $investments
         ]);
+    }
+
+    /**
+     * Generate installment schedule for an investment
+     */
+    private function generateInstallmentSchedule(Investment $investment, Request $request)
+    {
+        $noOfInstallments = (int) $request->no_of_installments;
+        $principalPerInstallment = (float) $request->principal_amount_per_installment;
+        $rentPerInstallment = (float) $request->rent;
+        $totalAmountPerInstallment = (float) $request->total_amount;
+        $principalAmount = (float) $request->principal_amount;
+        
+        $startDate = Carbon::parse($request->start_date);
+        $paymentType = $request->payment_type;
+        
+        $beginningBalance = $principalAmount;
+        $cumulativeRent = 0;
+        $installments = [];
+
+        for ($i = 1; $i <= $noOfInstallments; $i++) {
+            // Calculate schedule date based on payment type
+            $scheduleDate = $startDate->copy();
+            
+            switch ($paymentType) {
+                case 'monthly':
+                    $scheduleDate->addMonths($i - 1);
+                    break;
+                case 'quarterly':
+                    $scheduleDate->addMonths(($i - 1) * 3);
+                    break;
+                case 'yearly':
+                    $scheduleDate->addYears($i - 1);
+                    break;
+                case 'daily':
+                    $scheduleDate->addDays($i - 1);
+                    break;
+                default:
+                    $scheduleDate->addMonths($i - 1);
+            }
+
+            // Calculate ending balance
+            $endingBalance = $beginningBalance - $principalPerInstallment;
+            
+            // Update cumulative rent
+            $cumulativeRent += $rentPerInstallment;
+
+            $installments[] = [
+                'investment_id' => $investment->id,
+                'installment_number' => $i,
+                'schedule_date' => $scheduleDate->toDateString(),
+                'beginning_balance' => round($beginningBalance, 2),
+                'principal_amount' => round($principalPerInstallment, 2),
+                'rent' => round($rentPerInstallment, 2),
+                'total_amount' => round($totalAmountPerInstallment, 2),
+                'ending_balance' => round($endingBalance, 2),
+                'cumulative_rent' => round($cumulativeRent, 2),
+                'status' => 'pending',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            // Update beginning balance for next installment
+            $beginningBalance = $endingBalance;
+        }
+
+        // Insert all installments in batch
+        InvestmentInstallment::insert($installments);
+    }
+
+    /**
+     * Create investment account for an investment
+     */
+    private function createInvestmentAccount(Investment $investment, Request $request)
+    {
+        $noOfInstallments = (int) $request->no_of_installments;
+        
+        $account = InvestmentAccount::create([
+            'investment_id' => $investment->id,
+            'account_opening_date' => $request->start_date,
+            'opening_balance' => $request->principal_amount,
+            'current_balance' => $request->principal_amount,
+            'total_principal_paid' => 0,
+            'total_interest_received' => 0,
+            'total_rent_received' => 0,
+            'total_payments_made' => 0,
+            'total_installments_paid' => 0,
+            'installments_paid_count' => 0,
+            'installments_pending_count' => $noOfInstallments,
+            'installments_overdue_count' => 0,
+            'account_status' => 'active',
+            'account_notes' => $request->notes,
+            'created_by' => auth()->id(),
+        ]);
+
+        // Generate account number
+        $account->generateAccountNumber();
     }
 }

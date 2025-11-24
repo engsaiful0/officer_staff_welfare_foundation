@@ -49,6 +49,16 @@ class Investment extends Model
         return $this->hasMany(RateHistory::class);
     }
 
+    public function installments()
+    {
+        return $this->hasMany(InvestmentInstallment::class)->orderBy('installment_number');
+    }
+
+    public function account()
+    {
+        return $this->hasOne(InvestmentAccount::class);
+    }
+
     // Accessors & Mutators
     public function getRatePercentageAttribute()
     {

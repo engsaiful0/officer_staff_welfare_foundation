@@ -34,6 +34,13 @@
                                 @enderror
                             </div>
                             <div class="col-md-3">
+                                <label for="account_number" class="form-label">Account Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('account_number') is-invalid @enderror" id="account_number" required name="account_number" value="{{ $nextAccountNumber }}" readonly>
+                                @error('account_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-3">
                                 <label for="investment_type_id" class="form-label">Investment Type <span class="text-danger">*</span></label>
                                 <select class="form-select @error('investment_type_id') is-invalid @enderror select2" id="investment_type_id" name="investment_type_id" required>
                                     <option value="">Select Investment Type</option>
@@ -73,6 +80,14 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                            <div class="col-md-3">
+                                <label for="gestation_maturity_date" class="form-label">Gestation Maturity Date</label>
+                                <input type="date" class="form-control @error('gestation_maturity_date') is-invalid @enderror"
+                                    id="gestation_maturity_date" name="gestation_maturity_date" value="{{ old('gestation_maturity_date', date('Y-m-d')) }}" required>
+                                @error('gestation_maturity_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
 
 
@@ -81,8 +96,7 @@
                                 <label for="rate" class="form-label">Interest Rate <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input placeholder="Enter Interest Rate" type="number" class="form-control @error('rate') is-invalid @enderror"
-                                        id="rate" name="interest_rate" value="{{ old('interest_rate') }}"
-                                        step="0.0001" min="0" max="1" required>
+                                        id="rate" name="interest_rate" value="{{ old('interest_rate') }}" required>
                                     <span class="input-group-text">%</span>
                                 </div>
                                 <small class="form-text text-muted">Enter as decimal (e.g., 0.15 for 15%)</small>
@@ -93,7 +107,7 @@
 
                             <div class="col-md-3">
                                 <label for="frequency" class="form-label"> Investment Years <span class="text-danger">*</span></label>
-                                <input type="number" placeholder="Enter Investment Years" min="2" class="form-control @error('investment_years') is-invalid @enderror" id="investment_years" name="investment_years" value="{{ old('investment_years') }}" required>
+                                <input type="number" placeholder="Enter Investment Years" min="2" max="20" class="form-control @error('investment_years') is-invalid @enderror" id="investment_years" name="investment_years" value="{{ old('investment_years') }}" required>
                                 @error('investment_years')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -143,17 +157,26 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            <div class="col-md-3">
+                                <label for="total_amount" class="form-label"> Total Rent </label>
+                                <input type="number" class="form-control @error('total_rent') is-invalid @enderror" id="total_rent" name="total_rent" value="{{ old('total_rent') }}" readonly>
+                                @error('total_rent')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-3">
+                                <label for="notes" class="form-label">Notes</label>
+                                <textarea class="form-control @error('notes') is-invalid @enderror"
+                                    id="notes" name="notes" rows="3"
+                                    placeholder="Additional notes about this investment">{{ old('notes') }}</textarea>
+                                @error('notes')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                         <!-- Notes -->
-                        <div class="col-12">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control @error('notes') is-invalid @enderror"
-                                id="notes" name="notes" rows="3"
-                                placeholder="Additional notes about this investment">{{ old('notes') }}</textarea>
-                            @error('notes')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+
                         <!-- Form Actions -->
                         <div class="row mt-4">
                             <div class="col-12">
@@ -187,6 +210,7 @@
                 $('#principal_amount_per_installment').val('');
                 $('#rent').val('');
                 $('#total_amount').val('');
+                $('#total_rent').val('');
                 return;
             }
 
@@ -240,11 +264,15 @@
             // Calculate total amount per installment
             const totalAmountPerInstallment = principalAmountPerInstallment + rentPerInstallment;
 
+            // Calculate total rent (rent per installment * number of installments)
+            const totalRent = rentPerInstallment * noOfInstallments;
+
             // Update the fields
             $('#no_of_installments').val(noOfInstallments);
             $('#principal_amount_per_installment').val(principalAmountPerInstallment);
             $('#rent').val(rentPerInstallment);
             $('#total_amount').val(totalAmountPerInstallment);
+            $('#total_rent').val(totalRent);
         }
 
         // Event listeners - oninput for investment_years, onchange for payment_type
