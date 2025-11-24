@@ -14,7 +14,15 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('investments.store') }}" method="POST">
+                    <!-- Loading Spinner -->
+                    <div id="loading-spinner" class="text-center d-none" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: rgba(255,255,255,0.9); padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 mb-0">Saving investment data...</p>
+                    </div>
+                    
+                    <form id="investment-form" action="{{ route('investments.store') }}" method="POST">
                         @csrf
 
                         <div class="row g-3">
@@ -182,13 +190,16 @@
                             <div class="col-12">
                                 <div class="d-flex justify-content-end gap-2">
                                     <a href="{{ route('investments.view-investments') }}" class="btn btn-outline-secondary">Cancel</a>
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit" id="submit-btn" class="btn btn-primary">
                                         <i class="bx bx-save me-1"></i> Create Investment
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </form>
+                    
+                    <!-- Success/Error Messages -->
+                    <div id="form-messages" class="mt-3"></div>
                 </div>
             </div>
         </div>
@@ -295,6 +306,81 @@
 
         // Initial calculation if values are already present
         calculateInstallments();
+        
+        // AJAX Form Submission
+        $('#investment-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const formData = form.serialize();
+            const submitBtn = $('#submit-btn');
+            const spinner = $('#loading-spinner');
+            const messages = $('#form-messages');
+            
+            // Disable submit button and show spinner
+            submitBtn.prop('disabled', true);
+            spinner.removeClass('d-none');
+            messages.html('');
+            
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                success: function(response) {
+                    spinner.addClass('d-none');
+                    
+                    if (response.success) {
+                        messages.html('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                            '<strong>Success!</strong> ' + (response.message || 'Investment created successfully.') +
+                            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                            '</div>');
+                        
+                        // Redirect after 2 seconds
+                        setTimeout(function() {
+                            if (response.redirect) {
+                                window.location.href = response.redirect;
+                            } else {
+                                window.location.href = '{{ route("investments.view-investments") }}';
+                            }
+                        }, 2000);
+                    } else {
+                        submitBtn.prop('disabled', false);
+                        messages.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                            '<strong>Error!</strong> ' + (response.message || 'Failed to create investment.') +
+                            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                            '</div>');
+                    }
+                },
+                error: function(xhr) {
+                    spinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+                    
+                    let errorMessage = 'An error occurred while creating the investment.';
+                    
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON.errors) {
+                            let errorList = '<ul class="mb-0">';
+                            $.each(xhr.responseJSON.errors, function(key, value) {
+                                errorList += '<li>' + value[0] + '</li>';
+                            });
+                            errorList += '</ul>';
+                            errorMessage = errorList;
+                        }
+                    }
+                    
+                    messages.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                        '<strong>Error!</strong> ' + errorMessage +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                        '</div>');
+                }
+            });
+        });
     });
 </script>
 @endsection

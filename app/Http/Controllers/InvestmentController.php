@@ -46,7 +46,7 @@ class InvestmentController extends Controller
             $query->where('start_date', '<=', $request->date_to);
         }
 
-        $investments = $query->orderBy('created_at', 'desc')->paginate(15);
+        $investments = $query->with(['account', 'installments'])->orderBy('created_at', 'desc')->paginate(15);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -82,7 +82,7 @@ class InvestmentController extends Controller
             'principal_amount' => 'required|numeric|min:0',
             'investment_type_id' => 'required|exists:investment_types,id',
             'start_date' => 'required|date',
-            'interest_rate' => 'required|numeric|min:0|max:1',
+            'interest_rate' => 'required|numeric',
             'investment_years' => 'required|integer|min:1',
             'payment_type' => 'required|in:monthly,quarterly,yearly,daily',
             'no_of_installments' => 'required|integer|min:1',
@@ -109,7 +109,7 @@ class InvestmentController extends Controller
 
             // Calculate expiry date based on investment years
             $startDate = Carbon::parse($request->start_date);
-            $expiryDate = $startDate->copy()->addYears($request->investment_years);
+            $expiryDate = $startDate->copy()->addYears((int) $request->investment_years);
             $termMonths = $request->investment_years * 12;
 
             // Determine rate_period and frequency based on payment_type
@@ -132,7 +132,8 @@ class InvestmentController extends Controller
 
             // Create initial ledger entry for principal
             LedgerEntry::create([
-                'investment_id' => $investment->id,
+                'entity_type' => 'investment',
+                'entity_id' => $investment->id,
                 'entry_date' => $request->start_date,
                 'type' => 'principal',
                 'amount' => $request->principal_amount,
@@ -150,11 +151,12 @@ class InvestmentController extends Controller
 
             DB::commit();
 
-            if ($request->expectsJson()) {
+            if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Investment created successfully',
-                    'data' => $investment->load('member')
+                    'data' => $investment->load(['member', 'account', 'installments']),
+                    'redirect' => route('investments.show', $investment)
                 ], 201);
             }
 
@@ -182,7 +184,12 @@ class InvestmentController extends Controller
      */
     public function show(Investment $investment)
     {
-        $investment->load(['member', 'ledgerEntries.createdBy']);
+        $investment->load([
+            'member', 
+            'account.accountNumberRecord.user',
+            'installments',
+            'ledgerEntries.createdBy'
+        ]);
         $ledgerEntries = $investment->ledgerEntries()->orderBy('entry_date', 'desc')->paginate(10);
 
         if (request()->expectsJson()) {
@@ -244,7 +251,7 @@ class InvestmentController extends Controller
 
             // Calculate expiry date
             $startDate = Carbon::parse($request->start_date);
-            $expiryDate = $startDate->copy()->addMonths($request->term_months);
+            $expiryDate = $startDate->copy()->addMonths((int) $request->term_months);
 
             $investment->update([
                 'member_id' => $request->member_id,
@@ -385,19 +392,19 @@ class InvestmentController extends Controller
             
             switch ($paymentType) {
                 case 'monthly':
-                    $scheduleDate->addMonths($i - 1);
+                    $scheduleDate->addMonths((int)($i - 1));
                     break;
                 case 'quarterly':
-                    $scheduleDate->addMonths(($i - 1) * 3);
+                    $scheduleDate->addMonths((int)(($i - 1) * 3));
                     break;
                 case 'yearly':
-                    $scheduleDate->addYears($i - 1);
+                    $scheduleDate->addYears((int)($i - 1));
                     break;
                 case 'daily':
-                    $scheduleDate->addDays($i - 1);
+                    $scheduleDate->addDays((int)($i - 1));
                     break;
                 default:
-                    $scheduleDate->addMonths($i - 1);
+                    $scheduleDate->addMonths((int)($i - 1));
             }
 
             // Calculate ending balance
@@ -417,6 +424,7 @@ class InvestmentController extends Controller
                 'ending_balance' => round($endingBalance, 2),
                 'cumulative_rent' => round($cumulativeRent, 2),
                 'status' => 'pending',
+                'created_by' => auth()->id(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

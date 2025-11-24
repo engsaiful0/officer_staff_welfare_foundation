@@ -98,14 +98,14 @@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>Account #</th>
                                         <th>Member</th>
                                         <th>Product</th>
                                         <th>Principal</th>
                                         <th>Current Balance</th>
+                                        <th>Installments</th>
                                         <th>Rate</th>
                                         <th>Start Date</th>
-                                        <th>Expiry Date</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -113,19 +113,40 @@
                                 <tbody>
                                     @foreach($investments as $investment)
                                         <tr>
-                                            <td>{{ $investment->id }}</td>
+                                            <td>
+                                                @if($investment->account)
+                                                    <span class="fw-semibold">{{ $investment->account->account_number ?: 'N/A' }}</span>
+                                                @else
+                                                    <span class="text-muted">N/A</span>
+                                                @endif
+                                            </td>
                                             <td>
                                                 <div class="d-flex flex-column">
                                                     <span class="fw-semibold">{{ $investment->member->name }}</span>
-                                                    <small class="text-muted">{{ $investment->member->member_unique_id }}</small>
+                                                    <small class="text-muted">{{ $investment->member->unique_id }}</small>
                                                 </div>
                                             </td>
                                             <td>{{ $investment->product_name ?: 'N/A' }}</td>
-                                            <td>{{ number_format($investment->principal_amount, 2) }}</td>
-                                            <td>{{ number_format($investment->current_balance, 2) }}</td>
+                                            <td>৳{{ number_format($investment->principal_amount, 2) }}</td>
+                                            <td>
+                                                @if($investment->account)
+                                                    ৳{{ number_format($investment->account->current_balance, 2) }}
+                                                @else
+                                                    ৳{{ number_format($investment->principal_amount, 2) }}
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($investment->account)
+                                                    <small>
+                                                        Paid: {{ $investment->account->installments_paid_count }} / 
+                                                        Total: {{ $investment->account->installments_paid_count + $investment->account->installments_pending_count }}
+                                                    </small>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
                                             <td>{{ number_format($investment->rate_percentage, 2) }}%</td>
                                             <td>{{ $investment->start_date->format('Y-m-d') }}</td>
-                                            <td>{{ $investment->expiry_date->format('Y-m-d') }}</td>
                                             <td>
                                                 <span class="badge bg-{{ $investment->status === 'active' ? 'success' : ($investment->status === 'matured' ? 'warning' : 'secondary') }}">
                                                     {{ ucfirst($investment->status) }}
