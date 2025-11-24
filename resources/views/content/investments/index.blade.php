@@ -153,29 +153,20 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <div class="dropdown">
-                                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                                <div class="d-flex gap-2">
+                                                    <a href="{{ route('investments.show', $investment) }}" class="btn btn-sm btn-outline-info" title="View">
+                                                        <i class="bx bx-show"></i>
+                                                    </a>
+                                                    <a href="{{ route('investments.edit', $investment) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                        <i class="bx bx-edit-alt"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger delete-investment" 
+                                                        data-id="{{ $investment->id }}" 
+                                                        data-account="{{ $investment->account->account_number ?? 'N/A' }}"
+                                                        data-url="{{ route('investments.destroy', $investment) }}"
+                                                        title="Delete">
+                                                        <i class="bx bx-trash"></i>
                                                     </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="{{ route('investments.show', $investment) }}">
-                                                            <i class="bx bx-show me-1"></i> View
-                                                        </a>
-                                                        <a class="dropdown-item" href="{{ route('investments.edit', $investment) }}">
-                                                            <i class="bx bx-edit-alt me-1"></i> Edit
-                                                        </a>
-                                                        <a class="dropdown-item" href="{{ route('ledger-entries.add-entry', ['investment_id' => $investment->id]) }}">
-                                                            <i class="bx bx-plus me-1"></i> Add Entry
-                                                        </a>
-                                                        <div class="dropdown-divider"></div>
-                                                        <form action="{{ route('investments.destroy', $investment) }}" method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure you want to delete this investment?')">
-                                                                <i class="bx bx-trash me-1"></i> Delete
-                                                            </button>
-                                                        </form>
-                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -201,4 +192,59 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Delete investment with confirmation
+        $(document).on('click', '.delete-investment', function(e) {
+            e.preventDefault();
+            
+            const button = $(this);
+            const investmentId = button.data('id');
+            const accountNumber = button.data('account');
+            const deleteUrl = button.data('url');
+            
+            if (confirm('Are you sure you want to delete investment account ' + accountNumber + '?\n\nThis action cannot be undone!')) {
+                // Show loading state
+                button.prop('disabled', true);
+                button.html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+                
+                $.ajax({
+                    url: deleteUrl,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        _method: 'DELETE'
+                    },
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success message
+                            alert('Investment deleted successfully.');
+                            // Reload the page
+                            window.location.reload();
+                        } else {
+                            alert('Error: ' + (response.message || 'Failed to delete investment.'));
+                            button.prop('disabled', false);
+                            button.html('<i class="bx bx-trash"></i>');
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'Failed to delete investment.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        alert('Error: ' + errorMessage);
+                        button.prop('disabled', false);
+                        button.html('<i class="bx bx-trash"></i>');
+                    }
+                });
+            }
+        });
+    });
+</script>
 @endsection

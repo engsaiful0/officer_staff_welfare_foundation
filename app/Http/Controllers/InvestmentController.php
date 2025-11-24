@@ -210,8 +210,47 @@ class InvestmentController extends Controller
      */
     public function edit(Investment $investment)
     {
+        $investment->load(['account', 'installments']);
         $members = Member::select('id', 'name', 'unique_id')->get();
-        return view('content.investments.edit', compact('investment', 'members'));
+        $investmentTypes = InvestmentType::all();
+        
+        // Calculate values for form
+        $noOfInstallments = $investment->installments->count();
+        $principalPerInstallment = $noOfInstallments > 0 ? $investment->installments->first()->principal_amount : 0;
+        $rentPerInstallment = $noOfInstallments > 0 ? $investment->installments->first()->rent : 0;
+        $totalAmountPerInstallment = $noOfInstallments > 0 ? $investment->installments->first()->total_amount : 0;
+        $totalRent = $noOfInstallments > 0 ? $investment->installments->sum('rent') : 0;
+        
+        // Determine payment type and investment years from installments
+        $paymentType = 'monthly'; // default
+        $investmentYears = $investment->term_months / 12;
+        
+        if ($noOfInstallments > 1) {
+            $firstDate = $investment->installments->first()->schedule_date;
+            $secondDate = $investment->installments->skip(1)->first()->schedule_date;
+            $diff = Carbon::parse($firstDate)->diffInMonths(Carbon::parse($secondDate));
+            
+            if ($diff == 1) {
+                $paymentType = 'monthly';
+            } elseif ($diff == 3) {
+                $paymentType = 'quarterly';
+            } elseif ($diff == 12) {
+                $paymentType = 'yearly';
+            }
+        }
+        
+        return view('content.investments.edit', compact(
+            'investment', 
+            'members', 
+            'investmentTypes',
+            'noOfInstallments',
+            'principalPerInstallment',
+            'rentPerInstallment',
+            'totalAmountPerInstallment',
+            'totalRent',
+            'paymentType',
+            'investmentYears'
+        ));
     }
 
     /**
@@ -222,13 +261,14 @@ class InvestmentController extends Controller
         $validator = Validator::make($request->all(), [
             'member_id' => 'required|exists:members,id',
             'principal_amount' => 'required|numeric|min:0',
-            'product_name' => 'nullable|string|max:255',
+            'investment_type_id' => 'nullable|exists:investment_types,id',
             'start_date' => 'required|date',
-            'term_months' => 'required|integer|min:1',
-            'rate' => 'required|numeric|min:0|max:1',
-            'rate_period' => 'required|in:annual,monthly',
-            'frequency' => 'required|in:monthly,quarterly,daily',
+            'interest_rate' => 'required|numeric',
+            'investment_years' => 'required|integer|min:1',
+            'payment_type' => 'required|in:monthly,quarterly,yearly,daily',
             'status' => 'required|in:active,matured,closed',
+            'account_opening_date' => 'nullable|date',
+            'gestation_maturity_date' => 'nullable|date',
             'notes' => 'nullable|string'
         ]);
 
@@ -246,33 +286,52 @@ class InvestmentController extends Controller
             DB::beginTransaction();
 
             // Check if rate has changed
-            $rateChanged = $investment->rate != $request->rate;
             $oldRate = $investment->rate;
+            $newRate = $request->interest_rate;
+            // Convert percentage to decimal if needed
+            if ($newRate > 1) {
+                $newRate = $newRate / 100;
+            }
+            $rateChanged = $oldRate != $newRate;
 
-            // Calculate expiry date
+            // Calculate expiry date based on investment years
             $startDate = Carbon::parse($request->start_date);
-            $expiryDate = $startDate->copy()->addMonths((int) $request->term_months);
+            $expiryDate = $startDate->copy()->addYears((int) $request->investment_years);
+            $termMonths = $request->investment_years * 12;
+
+            // Determine rate_period and frequency
+            $ratePeriod = 'annual';
+            $frequency = $request->payment_type;
 
             $investment->update([
                 'member_id' => $request->member_id,
                 'principal_amount' => $request->principal_amount,
-                'product_name' => $request->product_name,
                 'start_date' => $request->start_date,
-                'term_months' => $request->term_months,
+                'term_months' => $termMonths,
                 'expiry_date' => $expiryDate,
-                'rate' => $request->rate,
-                'rate_period' => $request->rate_period,
-                'frequency' => $request->frequency,
+                'rate' => $newRate,
+                'rate_period' => $ratePeriod,
+                'frequency' => $frequency,
                 'status' => $request->status,
                 'notes' => $request->notes
             ]);
+
+            // Update investment account if exists
+            if ($investment->account) {
+                $investment->account->update([
+                    'account_opening_date' => $request->account_opening_date ?? $request->start_date,
+                    'account_closing_date' => $request->gestation_maturity_date,
+                    'account_notes' => $request->notes,
+                    'updated_by' => auth()->id()
+                ]);
+            }
 
             // Create rate history entry if rate changed
             if ($rateChanged) {
                 \App\Models\RateHistory::create([
                     'investment_id' => $investment->id,
                     'old_rate' => $oldRate,
-                    'new_rate' => $request->rate,
+                    'new_rate' => $newRate,
                     'effective_date' => now()->toDateString(),
                     'reason' => 'Rate updated via investment edit',
                     'created_by' => auth()->id()
@@ -281,11 +340,12 @@ class InvestmentController extends Controller
 
             DB::commit();
 
-            if ($request->expectsJson()) {
+            if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Investment updated successfully',
-                    'data' => $investment->load('member')
+                    'data' => $investment->load(['member', 'account', 'installments']),
+                    'redirect' => route('investments.show', $investment)
                 ]);
             }
 
@@ -314,9 +374,26 @@ class InvestmentController extends Controller
     public function destroy(Investment $investment)
     {
         try {
-            // Check if investment has ledger entries
-            if ($investment->ledgerEntries()->count() > 1) { // More than just the initial principal entry
-                if (request()->expectsJson()) {
+            DB::beginTransaction();
+            
+            // Check if investment has paid installments
+            $paidInstallments = $investment->installments()->where('status', 'paid')->count();
+            if ($paidInstallments > 0) {
+                if (request()->expectsJson() || request()->ajax()) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot delete investment with paid installments. Please close the investment instead.'
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Cannot delete investment with paid installments.');
+            }
+
+            // Check if investment has ledger entries (more than just the initial principal entry)
+            $ledgerEntriesCount = $investment->ledgerEntries()->count();
+            if ($ledgerEntriesCount > 1) {
+                if (request()->expectsJson() || request()->ajax()) {
+                    DB::rollBack();
                     return response()->json([
                         'success' => false,
                         'message' => 'Cannot delete investment with existing transactions'
@@ -325,20 +402,34 @@ class InvestmentController extends Controller
                 return redirect()->back()->with('error', 'Cannot delete investment with existing transactions.');
             }
 
+            // Delete related records
+            $investment->installments()->delete();
+            if ($investment->account) {
+                $investment->account->accountNumberRecord()->delete();
+                $investment->account->delete();
+            }
+            $investment->ledgerEntries()->delete();
+            $investment->rateHistories()->delete();
+            
+            // Delete the investment
             $investment->delete();
 
-            if (request()->expectsJson()) {
+            DB::commit();
+
+            if (request()->expectsJson() || request()->ajax()) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Investment deleted successfully'
                 ]);
             }
 
-            return redirect()->route('investments.index')
+            return redirect()->route('investments.view-investments')
                 ->with('success', 'Investment deleted successfully.');
 
         } catch (\Exception $e) {
-            if (request()->expectsJson()) {
+            DB::rollBack();
+            
+            if (request()->expectsJson() || request()->ajax()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to delete investment: ' . $e->getMessage()
