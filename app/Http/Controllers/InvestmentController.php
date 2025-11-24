@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Investment;
 use App\Models\Member;
+use App\Models\InvestmentType;
 use App\Models\LedgerEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +63,8 @@ class InvestmentController extends Controller
     public function create()
     {
         $members = Member::select('id', 'name', 'unique_id')->get();
-        return view('content.investments.create', compact('members'));
+        $investmentTypes=InvestmentType::all();
+        return view('content.investments.create', compact('members', 'investmentTypes'));
     }
 
     /**
@@ -73,7 +75,7 @@ class InvestmentController extends Controller
         $validator = Validator::make($request->all(), [
             'member_id' => 'required|exists:members,id',
             'principal_amount' => 'required|numeric|min:0',
-            'product_name' => 'nullable|string|max:255',
+            'investment_type_id' => 'required|exists:investment_types,id',
             'start_date' => 'required|date',
             'term_months' => 'required|integer|min:1',
             'rate' => 'required|numeric|min:0|max:1',

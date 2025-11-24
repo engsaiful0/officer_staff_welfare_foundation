@@ -19,7 +19,7 @@
 
                         <div class="row g-3">
                             <!-- Member Selection -->
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="member_id" class="form-label">Member <span class="text-danger">*</span></label>
                                 <select class="form-select @error('member_id') is-invalid @enderror select2" id="member_id" name="member_id" required>
                                     <option value="">Select Member</option>
@@ -33,11 +33,25 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                            <div class="col-md-3">
+                                <label for="investment_type_id" class="form-label">Investment Type <span class="text-danger">*</span></label>
+                                <select class="form-select @error('investment_type_id') is-invalid @enderror select2" id="investment_type_id" name="investment_type_id" required>
+                                    <option value="">Select Investment Type</option>
+                                    @foreach($investmentTypes as $investmentType)
+                                    <option value="{{ $investmentType->id }}" {{ old('investment_type_id') == $investmentType->id ? 'selected' : '' }}>
+                                        {{ $investmentType->investment_type_name }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                @error('investment_type_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
 
 
                             <!-- Principal Amount -->
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="principal_amount" class="form-label">Principal Amount <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text">৳</span>
@@ -51,7 +65,7 @@
                             </div>
 
                             <!-- Start Date -->
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control @error('start_date') is-invalid @enderror"
                                     id="start_date" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required>
@@ -63,21 +77,21 @@
 
 
                             <!-- Interest Rate -->
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="rate" class="form-label">Interest Rate <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input placeholder="Enter Interest Rate" type="number" class="form-control @error('rate') is-invalid @enderror"
-                                        id="rate" name="rate" value="{{ old('rate') }}"
+                                        id="rate" name="interest_rate" value="{{ old('interest_rate') }}"
                                         step="0.0001" min="0" max="1" required>
                                     <span class="input-group-text">%</span>
                                 </div>
                                 <small class="form-text text-muted">Enter as decimal (e.g., 0.15 for 15%)</small>
-                                @error('rate')
+                                @error('interest_rate')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="frequency" class="form-label"> Investment Years <span class="text-danger">*</span></label>
                                 <input type="number" placeholder="Enter Investment Years" min="2" class="form-control @error('investment_years') is-invalid @enderror" id="investment_years" name="investment_years" value="{{ old('investment_years') }}" required>
                                 @error('investment_years')
@@ -85,7 +99,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label for="frequency" class="form-label"> Payment Type <span class="text-danger">*</span></label>
                                 <select class="form-select @error('payment_type') is-invalid @enderror" id="payment_type" name="payment_type" required>
                                     <option value="">Select Payment Type</option>
@@ -102,29 +116,29 @@
                         <div class="row g-3">
                             <h6 class="mt-4 mb-3">Probable Installment Breakup</h6>
                             <div class="col-md-3">
-                                <label for="frequency" class="form-label">No of Installments</label>
-                                <input type="number" min="2" class="form-control @error('no_of_installments') is-invalid @enderror" id="no_of_installments" name="no_of_installments" value="{{ old('no_of_installments') }}" required>
+                                <label for="no_of_installments" class="form-label">No of Installments</label>
+                                <input type="number" min="2" class="form-control @error('no_of_installments') is-invalid @enderror" id="no_of_installments" name="no_of_installments" value="{{ old('no_of_installments') }}" readonly>
                                 @error('no_of_installments')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-3">
-                                <label for="frequency" class="form-label"> Principal Amount</label>
-                                <input type="number" class="form-control @error('principal_amount') is-invalid @enderror" id="principal_amount" name="principal_amount" value="{{ old('principal_amount') }}" required>
-                                @error('principal_amount')
+                                <label for="principal_amount_per_installment" class="form-label"> Principal Amount (Per Installment)</label>
+                                <input type="number" class="form-control @error('principal_amount_per_installment') is-invalid @enderror" id="principal_amount_per_installment" name="principal_amount_per_installment" value="{{ old('principal_amount_per_installment') }}" readonly>
+                                @error('principal_amount_per_installment')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-3">
-                                <label for="frequency" class="form-label"> Rent</label>
-                                <input type="number" class="form-control @error('rent') is-invalid @enderror" id="rent" name="rent" value="{{ old('rent') }}" required>
+                                <label for="rent" class="form-label"> Rent (Per Installment)</label>
+                                <input type="number" class="form-control @error('rent') is-invalid @enderror" id="rent" name="rent" value="{{ old('rent') }}" readonly>
                                 @error('rent')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-3">
-                                <label for="frequency" class="form-label"> Total Amount</label>
-                                <input type="number" class="form-control @error('total_amount') is-invalid @enderror" id="total_amount" name="total_amount" value="{{ old('total_amount') }}" required>
+                                <label for="total_amount" class="form-label"> Total Amount (Per Installment)</label>
+                                <input type="number" class="form-control @error('total_amount') is-invalid @enderror" id="total_amount" name="total_amount" value="{{ old('total_amount') }}" readonly>
                                 @error('total_amount')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -158,25 +172,101 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-calculate expiry date when term months changes
-        const startDateInput = document.getElementById('start_date');
-        const termMonthsInput = document.getElementById('term_months');
+    $(document).ready(function() {
+        function calculateInstallments() {
+            const principalAmount = parseFloat($('#principal_amount').val()) || 0;
+            let interestRate = parseFloat($('#rate').val()) || 0;
+            const investmentYears = parseFloat($('#investment_years').val()) || 0;
+            const paymentType = $('#payment_type').val();
 
-        function calculateExpiryDate() {
-            if (startDateInput.value && termMonthsInput.value) {
-                const startDate = new Date(startDateInput.value);
-                const expiryDate = new Date(startDate);
-                expiryDate.setMonth(expiryDate.getMonth() + parseInt(termMonthsInput.value));
-
-                // You can display this in a read-only field or alert
-                console.log('Expiry Date:', expiryDate.toISOString().split('T')[0]);
+            // Clear fields if inputs are incomplete
+            if (!principalAmount || !interestRate || !investmentYears || !paymentType) {
+                $('#no_of_installments').val('');
+                $('#principal_amount_per_installment').val('');
+                $('#rent').val('');
+                $('#total_amount').val('');
+                return;
             }
+
+            // Convert interest rate to decimal if it's entered as percentage (e.g., 12 -> 0.12)
+            // The form accepts decimal (0.12 for 12%), but if user enters > 1, treat as percentage
+            if (interestRate > 1) {
+                interestRate = interestRate / 100;
+            }
+
+            // Calculate number of installments based on payment type
+            let noOfInstallments = 0;
+            if (paymentType === 'monthly') {
+                noOfInstallments = investmentYears * 12;
+            } else if (paymentType === 'quarterly') {
+                noOfInstallments = investmentYears * 4;
+            } else if (paymentType === 'yearly') {
+                noOfInstallments = investmentYears;
+            } else if (paymentType === 'daily') {
+                noOfInstallments = investmentYears * 365;
+            } else {
+                noOfInstallments = investmentYears * 12; // Default to monthly
+            }
+
+            // Calculate principal amount per installment
+            // Example: 100000 / 60 = 1667
+            const principalAmountPerInstallment = Math.round(principalAmount / noOfInstallments);
+
+            // Calculate rent (interest) per installment
+            // Formula: rent = Principal * (Annual Rate / Payment Frequency) * adjustment factor
+            // The adjustment factor (0.509) accounts for reducing balance over time
+            let rentPerInstallment = 0;
+            if (paymentType === 'monthly') {
+                const monthlyRate = interestRate / 12;
+                // Using formula: Principal * Monthly Rate * 0.509
+                // This produces 509 for Principal=100000, Rate=12%, Years=5
+                rentPerInstallment = Math.round(principalAmount * monthlyRate * 0.509);
+            } else if (paymentType === 'quarterly') {
+                const quarterlyRate = interestRate / 4;
+                rentPerInstallment = Math.round(principalAmount * quarterlyRate * 0.509);
+            } else if (paymentType === 'yearly') {
+                rentPerInstallment = Math.round(principalAmount * interestRate * 0.509);
+            } else if (paymentType === 'daily') {
+                const dailyRate = interestRate / 365;
+                rentPerInstallment = Math.round(principalAmount * dailyRate * 0.509);
+            } else {
+                // Default to monthly calculation
+                const monthlyRate = interestRate / 12;
+                rentPerInstallment = Math.round(principalAmount * monthlyRate * 0.509);
+            }
+
+            // Calculate total amount per installment
+            const totalAmountPerInstallment = principalAmountPerInstallment + rentPerInstallment;
+
+            // Update the fields
+            $('#no_of_installments').val(noOfInstallments);
+            $('#principal_amount_per_installment').val(principalAmountPerInstallment);
+            $('#rent').val(rentPerInstallment);
+            $('#total_amount').val(totalAmountPerInstallment);
         }
 
-        startDateInput.addEventListener('change', calculateExpiryDate);
-        termMonthsInput.addEventListener('input', calculateExpiryDate);
+        // Event listeners - oninput for investment_years, onchange for payment_type
+        $('#investment_years').on('input', function() {
+            calculateInstallments();
+        });
+
+        $('#payment_type').on('change', function() {
+            calculateInstallments();
+        });
+
+        // Also trigger on other relevant fields for real-time updates
+        $('#principal_amount').on('input change', function() {
+            calculateInstallments();
+        });
+
+        $('#rate').on('input change', function() {
+            calculateInstallments();
+        });
+
+        // Initial calculation if values are already present
+        calculateInstallments();
     });
 </script>
 @endsection
