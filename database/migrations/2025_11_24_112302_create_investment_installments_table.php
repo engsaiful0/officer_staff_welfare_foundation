@@ -22,8 +22,10 @@ return new class extends Migration
             $table->decimal('total_amount', 15, 2);
             $table->decimal('ending_balance', 15, 2);
             $table->decimal('cumulative_rent', 15, 2);
+            $table->decimal('fine_amount', 15, 2)->default(0);
             $table->enum('status', ['pending', 'paid', 'overdue'])->default('pending');
             $table->date('paid_date')->nullable();
+            
             $table->text('notes')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('paid_by')->nullable();

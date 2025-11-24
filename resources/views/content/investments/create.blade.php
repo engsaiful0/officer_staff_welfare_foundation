@@ -14,14 +14,6 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <!-- Loading Spinner -->
-                    <div id="loading-spinner" class="text-center d-none" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: rgba(255,255,255,0.9); padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-3 mb-0">Saving investment data...</p>
-                    </div>
-                    
                     <form id="investment-form" action="{{ route('investments.store') }}" method="POST">
                         @csrf
 
@@ -81,6 +73,14 @@
 
                             <!-- Start Date -->
                             <div class="col-md-3">
+                                <label for="start_date" class="form-label">Account Opening Date <span class="text-danger">*</span></label>
+                                <input value="{{ old('account_opening_date', date('Y-m-d')) }}" type="date" class="form-control @error('account_opening_date') is-invalid @enderror"
+                                    id="account_opening_date" name="account_opening_date" value="{{ old('account_opening_date', date('Y-m-d')) }}" required>
+                                @error('account_opening_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-3">
                                 <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control @error('start_date') is-invalid @enderror"
                                     id="start_date" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required>
@@ -88,6 +88,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                            
                             <div class="col-md-3">
                                 <label for="gestation_maturity_date" class="form-label">Gestation Maturity Date</label>
                                 <input type="date" class="form-control @error('gestation_maturity_date') is-invalid @enderror"
@@ -191,7 +192,13 @@
                                 <div class="d-flex justify-content-end gap-2">
                                     <a href="{{ route('investments.view-investments') }}" class="btn btn-outline-secondary">Cancel</a>
                                     <button type="submit" id="submit-btn" class="btn btn-primary">
-                                        <i class="bx bx-save me-1"></i> Create Investment
+                                        <span id="submit-text">
+                                            <i class="bx bx-save me-1"></i> Create Investment
+                                        </span>
+                                        <span id="submit-spinner" class="d-none">
+                                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                            Saving...
+                                        </span>
                                     </button>
                                 </div>
                             </div>
@@ -314,12 +321,14 @@
             const form = $(this);
             const formData = form.serialize();
             const submitBtn = $('#submit-btn');
-            const spinner = $('#loading-spinner');
+            const submitText = $('#submit-text');
+            const submitSpinner = $('#submit-spinner');
             const messages = $('#form-messages');
             
-            // Disable submit button and show spinner
+            // Disable submit button and show spinner inside button
             submitBtn.prop('disabled', true);
-            spinner.removeClass('d-none');
+            submitText.addClass('d-none');
+            submitSpinner.removeClass('d-none');
             messages.html('');
             
             $.ajax({
@@ -331,7 +340,8 @@
                     'Accept': 'application/json'
                 },
                 success: function(response) {
-                    spinner.addClass('d-none');
+                    submitText.removeClass('d-none');
+                    submitSpinner.addClass('d-none');
                     
                     if (response.success) {
                         messages.html('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
@@ -356,7 +366,8 @@
                     }
                 },
                 error: function(xhr) {
-                    spinner.addClass('d-none');
+                    submitText.removeClass('d-none');
+                    submitSpinner.addClass('d-none');
                     submitBtn.prop('disabled', false);
                     
                     let errorMessage = 'An error occurred while creating the investment.';

@@ -388,23 +388,39 @@ class InvestmentController extends Controller
 
         for ($i = 1; $i <= $noOfInstallments; $i++) {
             // Calculate schedule date based on payment type
+            // First installment is on start_date, subsequent ones are calculated from start_date
             $scheduleDate = $startDate->copy();
             
             switch ($paymentType) {
                 case 'monthly':
-                    $scheduleDate->addMonths((int)($i - 1));
+                    // First installment: start_date, second: start_date + 1 month, etc.
+                    if ($i > 1) {
+                        $scheduleDate->addMonths((int)($i - 1));
+                    }
                     break;
                 case 'quarterly':
-                    $scheduleDate->addMonths((int)(($i - 1) * 3));
+                    // First installment: start_date, second: start_date + 3 months, etc.
+                    if ($i > 1) {
+                        $scheduleDate->addMonths((int)(($i - 1) * 3));
+                    }
                     break;
                 case 'yearly':
-                    $scheduleDate->addYears((int)($i - 1));
+                    // First installment: start_date, second: start_date + 1 year, etc.
+                    if ($i > 1) {
+                        $scheduleDate->addYears((int)($i - 1));
+                    }
                     break;
                 case 'daily':
-                    $scheduleDate->addDays((int)($i - 1));
+                    // First installment: start_date, second: start_date + 1 day, etc.
+                    if ($i > 1) {
+                        $scheduleDate->addDays((int)($i - 1));
+                    }
                     break;
                 default:
-                    $scheduleDate->addMonths((int)($i - 1));
+                    // Default to monthly
+                    if ($i > 1) {
+                        $scheduleDate->addMonths((int)($i - 1));
+                    }
             }
 
             // Calculate ending balance
@@ -446,7 +462,7 @@ class InvestmentController extends Controller
         
         $account = InvestmentAccount::create([
             'investment_id' => $investment->id,
-            'account_opening_date' => $request->start_date,
+            'account_opening_date' => $request->account_opening_date,
             'opening_balance' => $request->principal_amount,
             'current_balance' => $request->principal_amount,
             'total_principal_paid' => 0,
