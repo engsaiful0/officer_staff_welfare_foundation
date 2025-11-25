@@ -346,6 +346,14 @@ Route::get('/app/investments/{investment}', [InvestmentController::class, 'show'
 Route::get('/app/investments/{investment}/edit', [InvestmentController::class, 'edit'])->name('investments.edit');
 Route::get('/app/investments/member/{memberId}', [InvestmentController::class, 'getByMember'])->name('investments.by-member');
 
+// Investment Payment Routes
+use App\Http\Controllers\InvestmentPaymentController;
+
+Route::get('/app/investments/{investment}/payments', [InvestmentPaymentController::class, 'index'])->name('investments.payments.index');
+Route::get('/app/investments/{investment}/payments/{installmentId}', [InvestmentPaymentController::class, 'show'])->name('investments.payments.show');
+Route::post('/app/investments/{investment}/payments/{installmentId}', [InvestmentPaymentController::class, 'store'])->name('investments.payments.store');
+Route::post('/app/investments/{investment}/payments/{installmentId}/calculate-fine', [InvestmentPaymentController::class, 'calculateFine'])->name('investments.payments.calculate-fine');
+
 // Ledger Entry Routes
 Route::resource('ledger-entries', LedgerEntryController::class);
 Route::get('/app/ledger-entries/view-entries', [LedgerEntryController::class, 'index'])->name('ledger-entries.view-entries');

@@ -95,7 +95,7 @@
                 <div class="card-body">
                     @if($investments->count() > 0)
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table class="table table-striped table-bordered table-hover">
                                 <thead>
                                     <tr>
                                         <th>Account #</th>
@@ -155,17 +155,17 @@
                                             <td>
                                                 <div class="d-flex gap-2">
                                                     <a href="{{ route('investments.show', $investment) }}" class="btn btn-sm btn-outline-info" title="View">
-                                                        <i class="bx bx-show"></i>
+                                                        <i class="bx bx-show"></i>View
                                                     </a>
                                                     <a href="{{ route('investments.edit', $investment) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                                        <i class="bx bx-edit-alt"></i>
+                                                        <i class="bx bx-edit-alt"></i>Edit
                                                     </a>
                                                     <button type="button" class="btn btn-sm btn-outline-danger delete-investment" 
                                                         data-id="{{ $investment->id }}" 
                                                         data-account="{{ $investment->account->account_number ?? 'N/A' }}"
                                                         data-url="{{ route('investments.destroy', $investment) }}"
                                                         title="Delete">
-                                                        <i class="bx bx-trash"></i>
+                                                        <i class="bx bx-trash"></i>Delete
                                                     </button>
                                                 </div>
                                             </td>

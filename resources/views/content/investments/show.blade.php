@@ -30,6 +30,9 @@
                     <i class="bx bx-arrow-back me-1"></i> Back to Investments
                 </a>
                 <div class="d-flex gap-2">
+                    <a href="{{ route('investments.payments.index', $investment) }}" class="btn btn-outline-success">
+                        <i class="bx bx-money me-1"></i> Payments
+                    </a>
                     <a href="{{ route('investments.edit', $investment) }}" class="btn btn-outline-primary">
                         <i class="bx bx-edit me-1"></i> Edit
                     </a>
@@ -51,7 +54,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <table class="table table-borderless">
+                            <table class="table table-borderless table-sm table-bordered table-hover">
                                 <tr>
                                     <td width="40%"><strong>Account Number:</strong></td>
                                     <td>
@@ -90,7 +93,7 @@
                             </table>
                         </div>
                         <div class="col-md-6">
-                            <table class="table table-borderless">
+                            <table class="table table-borderless table-sm table-bordered table-hover">
                                 <tr>
                                     <td width="40%"><strong>Account Opening Date:</strong></td>
                                     <td>
@@ -172,7 +175,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
+                        <table class="table table-bordered table-striped table-hover">
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
