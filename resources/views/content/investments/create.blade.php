@@ -14,7 +14,7 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('investments.store') }}" method="POST">
+                    <form id="investmentForm" action="{{ route('investments.store') }}" method="POST">
                         @csrf
                         
                         <div class="row g-3">
@@ -29,8 +29,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback"></div>
                                 @error('member_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -40,8 +41,9 @@
                                 <input type="text" class="form-control @error('product_name') is-invalid @enderror" 
                                        id="product_name" name="product_name" value="{{ old('product_name') }}" 
                                        placeholder="e.g., Fixed Deposit, Savings Account">
+                                <div class="invalid-feedback"></div>
                                 @error('product_name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -54,8 +56,9 @@
                                            id="principal_amount" name="principal_amount" value="{{ old('principal_amount') }}" 
                                            step="0.01" min="0" required>
                                 </div>
+                                <div class="invalid-feedback"></div>
                                 @error('principal_amount')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -64,8 +67,9 @@
                                 <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control @error('start_date') is-invalid @enderror" 
                                        id="start_date" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required>
+                                <div class="invalid-feedback"></div>
                                 @error('start_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -75,8 +79,9 @@
                                 <input type="number" class="form-control @error('term_months') is-invalid @enderror" 
                                        id="term_months" name="term_months" value="{{ old('term_months') }}" 
                                        min="1" required>
+                                <div class="invalid-feedback"></div>
                                 @error('term_months')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -90,8 +95,9 @@
                                     <span class="input-group-text">%</span>
                                 </div>
                                 <small class="form-text text-muted">Enter as decimal (e.g., 0.15 for 15%)</small>
+                                <div class="invalid-feedback"></div>
                                 @error('rate')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -103,8 +109,9 @@
                                     <option value="annual" {{ old('rate_period') == 'annual' ? 'selected' : '' }}>Annual</option>
                                     <option value="monthly" {{ old('rate_period') == 'monthly' ? 'selected' : '' }}>Monthly</option>
                                 </select>
+                                <div class="invalid-feedback"></div>
                                 @error('rate_period')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -117,8 +124,9 @@
                                     <option value="monthly" {{ old('frequency') == 'monthly' ? 'selected' : '' }}>Monthly</option>
                                     <option value="quarterly" {{ old('frequency') == 'quarterly' ? 'selected' : '' }}>Quarterly</option>
                                 </select>
+                                <div class="invalid-feedback"></div>
                                 @error('frequency')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -128,8 +136,9 @@
                                 <textarea class="form-control @error('notes') is-invalid @enderror" 
                                           id="notes" name="notes" rows="3" 
                                           placeholder="Additional notes about this investment">{{ old('notes') }}</textarea>
+                                <div class="invalid-feedback"></div>
                                 @error('notes')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -139,8 +148,10 @@
                             <div class="col-12">
                                 <div class="d-flex justify-content-end gap-2">
                                     <a href="{{ route('investments.view-investments') }}" class="btn btn-outline-secondary">Cancel</a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bx bx-save me-1"></i> Create Investment
+                                    <button type="submit" id="submitBtn" class="btn btn-primary">
+                                        <span class="spinner-border spinner-border-sm d-none me-2" id="submitSpinner" role="status" aria-hidden="true"></span>
+                                        <i class="bx bx-save me-1" id="submitIcon"></i> 
+                                        <span id="submitText">Create Investment</span>
                                     </button>
                                 </div>
                             </div>
