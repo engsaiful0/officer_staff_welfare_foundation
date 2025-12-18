@@ -7,13 +7,149 @@ use App\Models\InvestmentAccount;
 use App\Models\InvestmentInstallment;
 use App\Models\LedgerEntry;
 use App\Models\PaymentMethod;
+use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InvestmentCollectionController extends Controller
 {
+    /**
+     * View all investment collections with filters
+     */
+    public function viewCollection(Request $request)
+    {
+        if ($request->ajax()) {
+            $query = InvestmentInstallment::with(['investment.member', 'paymentMethod', 'investment.account'])
+                ->where('status', 'paid');
+
+            // Apply filters
+            if ($request->filled('member_id')) {
+                $query->whereHas('investment', function($q) use ($request) {
+                    $q->where('member_id', $request->member_id);
+                });
+            }
+
+            if ($request->filled('account_number')) {
+                $query->whereHas('investment.account', function($q) use ($request) {
+                    $q->where('account_number', 'like', '%' . $request->account_number . '%');
+                });
+            }
+
+            if ($request->filled('payment_method_id')) {
+                $query->where('payment_method_id', $request->payment_method_id);
+            }
+
+            if ($request->filled('date_from')) {
+                $query->whereDate('paid_date', '>=', $request->date_from);
+            }
+
+            if ($request->filled('date_to')) {
+                $query->whereDate('paid_date', '<=', $request->date_to);
+            }
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('receipt_number', 'like', "%$search%")
+                      ->orWhere('transaction_reference', 'like', "%$search%")
+                      ->orWhereHas('investment.member', function($mq) use ($search) {
+                          $mq->where('name', 'like', "%$search%")
+                            ->orWhere('unique_id', 'like', "%$search%");
+                      });
+                });
+            }
+
+            $collections = $query->orderBy('paid_date', 'desc')->paginate(15);
+
+            return response()->json([
+                'success' => true,
+                'data' => $collections->items(),
+                'pagination' => (string) $collections->links()
+            ]);
+        }
+
+        $members = Member::select('id', 'name', 'unique_id')->get();
+        $paymentMethods = PaymentMethod::all();
+
+        return view('content.investments.collection.view-collection', compact('members', 'paymentMethods'));
+    }
+
+    /**
+     * Export collections to PDF, Excel or Print
+     */
+    public function export(Request $request)
+    {
+        $type = $request->type; // pdf, excel, print
+        
+        $query = InvestmentInstallment::with(['investment.member', 'paymentMethod', 'investment.account'])
+            ->where('status', 'paid');
+
+        // Apply same filters as viewCollection
+        if ($request->filled('member_id')) {
+            $query->whereHas('investment', function($q) use ($request) {
+                $q->where('member_id', $request->member_id);
+            });
+        }
+        if ($request->filled('account_number')) {
+            $query->whereHas('investment.account', function($q) use ($request) {
+                $q->where('account_number', 'like', '%' . $request->account_number . '%');
+            });
+        }
+        if ($request->filled('payment_method_id')) {
+            $query->where('payment_method_id', $request->payment_method_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('paid_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('paid_date', '<=', $request->date_to);
+        }
+
+        $collections = $query->orderBy('paid_date', 'desc')->get();
+
+        if ($type === 'pdf') {
+            $pdf = Pdf::loadView('content.investments.collection.export-pdf', compact('collections'));
+            return $pdf->download('investment-collections-' . date('Y-m-d') . '.pdf');
+        }
+
+        if ($type === 'excel') {
+            // Simplistic excel export for now, usually requires an export class
+            return Excel::download(new class($collections) implements \Maatwebsite\Excel\Concerns\FromCollection, \Maatwebsite\Excel\Concerns\WithHeadings {
+                private $collections;
+                public function __construct($collections) { $this->collections = $collections; }
+                public function collection() {
+                    return $this->collections->map(function($item) {
+                        return [
+                            $item->paid_date->format('Y-m-d'),
+                            $item->receipt_number,
+                            $item->investment->account->account_number ?? 'N/A',
+                            $item->investment->member->name,
+                            $item->installment_number,
+                            $item->total_amount,
+                            $item->discount_amount,
+                            $item->total_amount - ($item->discount_amount ?? 0),
+                            $item->paymentMethod->payment_method_name ?? 'N/A',
+                            $item->transaction_reference
+                        ];
+                    });
+                }
+                public function headings(): array {
+                    return ['Date', 'Receipt #', 'Account #', 'Member', 'Inst #', 'Gross Amount', 'Discount', 'Net Paid', 'Method', 'Ref'];
+                }
+            }, 'investment-collections-' . date('Y-m-d') . '.xlsx');
+        }
+
+        if ($type === 'print') {
+            return view('content.investments.collection.export-print', compact('collections'));
+        }
+
+        return redirect()->back();
+    }
+
     /**
      * Show investment collection form
      */

@@ -557,9 +557,9 @@ document.addEventListener('DOMContentLoaded', function() {
         submitIcon.classList.add('d-none');
         submitText.textContent = 'Processing...';
         submitBtn.disabled = true;
-        form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
-            field.disabled = true;
-        });
+       // form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
+           // field.disabled = true;
+        //});
 
         const formData = new FormData(form);
 

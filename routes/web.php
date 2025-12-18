@@ -351,6 +351,8 @@ Route::get('/app/investments/collection', [InvestmentCollectionController::class
 Route::get('/app/investments/collection/get-installments', [InvestmentCollectionController::class, 'getInstallments'])->name('investments.collection.get-installments');
 Route::post('/app/investments/collection', [InvestmentCollectionController::class, 'store'])->name('investments.collection.store');
 Route::post('/app/investments/collection/calculate-fine', [InvestmentCollectionController::class, 'calculateFine'])->name('investments.collection.calculate-fine');
+Route::get('/app/investments/view-collection', [InvestmentCollectionController::class, 'viewCollection'])->name('investments.view-collection');
+Route::get('/app/investments/collection/export', [InvestmentCollectionController::class, 'export'])->name('investments.collection.export');
 
 Route::get('/app/investments/view-investments', [InvestmentController::class, 'index'])->name('investments.view-investments');
 Route::get('/app/investments/add-investment', [InvestmentController::class, 'create'])->name('investments.add-investment');
