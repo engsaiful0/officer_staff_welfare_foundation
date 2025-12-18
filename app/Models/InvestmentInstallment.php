@@ -27,7 +27,12 @@ class InvestmentInstallment extends Model
         'notes',
         'created_by',
         'paid_by',
-        'updated_by'
+        'updated_by',
+        'payment_method_id',
+        'transaction_reference',
+        'receipt_number',
+        'bank_name',
+        'check_number'
     ];
 
     protected $casts = [
@@ -49,6 +54,11 @@ class InvestmentInstallment extends Model
     public function investment()
     {
         return $this->belongsTo(Investment::class);
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
     }
 
     // Scopes
@@ -147,10 +157,10 @@ class InvestmentInstallment extends Model
     public function updateFine($paidDate = null)
     {
         $fine = $this->calculateFine($paidDate);
-        $this->fine_amount = (float)$fine;
+        $this->fine_amount = round((float)$fine, 2);
         
         // Update total amount to include fine
-        $this->total_amount = (float)$this->principal_amount + (float)$this->rent + (float)$fine;
+        $this->total_amount = round((float)$this->principal_amount + (float)$this->rent + (float)$fine, 2);
         
         return $this;
     }

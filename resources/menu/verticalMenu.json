@@ -75,6 +75,12 @@
           "permission": "investment-view"
         },
         {
+          "url": "/app/investments/collection",
+          "name": "Payment Investment",
+          "slug": "investments.collection.index",
+          "permission": "payment-investment"
+        },
+        {
           "url": "/app/investments/import",
           "name": "Import Data",
           "slug": "investments.import",

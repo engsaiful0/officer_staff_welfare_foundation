@@ -30,8 +30,11 @@
                     <i class="bx bx-arrow-back me-1"></i> Back to Investments
                 </a>
                 <div class="d-flex gap-2">
+                    <a href="{{ route('investments.payments.pay-investment', $investment) }}" class="btn btn-success">
+                        <i class="bx bx-money me-1"></i> Pay Investment
+                    </a>
                     <a href="{{ route('investments.payments.index', $investment) }}" class="btn btn-outline-success">
-                        <i class="bx bx-money me-1"></i> Payments
+                        <i class="bx bx-list-ul me-1"></i> View Payments
                     </a>
                     <a href="{{ route('investments.edit', $investment) }}" class="btn btn-outline-primary">
                         <i class="bx bx-edit me-1"></i> Edit

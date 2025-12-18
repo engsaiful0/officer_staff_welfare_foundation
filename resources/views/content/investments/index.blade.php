@@ -153,9 +153,12 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <div class="d-flex gap-2">
+                                                <div class="d-flex gap-2 flex-wrap">
                                                     <a href="{{ route('investments.show', $investment) }}" class="btn btn-sm btn-outline-info" title="View">
                                                         <i class="bx bx-show"></i>View
+                                                    </a>
+                                                    <a href="{{ route('investments.payments.pay-investment', $investment) }}" class="btn btn-sm btn-success" title="Pay Investment">
+                                                        <i class="bx bx-money"></i>Pay Investment
                                                     </a>
                                                     <a href="{{ route('investments.edit', $investment) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                                         <i class="bx bx-edit-alt"></i>Edit

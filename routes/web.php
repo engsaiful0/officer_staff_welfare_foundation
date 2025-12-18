@@ -340,15 +340,24 @@ use App\Http\Controllers\InvestmentReportController;
 
 // Investment Routes
 Route::resource('investments', InvestmentController::class);
+
+// Investment Payment Routes (must be before parameterized routes)
+use App\Http\Controllers\InvestmentPaymentController;
+use App\Http\Controllers\InvestmentCollectionController;
+Route::get('/app/investments/payment-investment', [InvestmentPaymentController::class, 'paymentInvestment'])->name('investments.payments.payment-investment');
+
+// Investment Collection Routes
+Route::get('/app/investments/collection', [InvestmentCollectionController::class, 'index'])->name('investments.collection.index');
+Route::get('/app/investments/collection/get-installments', [InvestmentCollectionController::class, 'getInstallments'])->name('investments.collection.get-installments');
+Route::post('/app/investments/collection', [InvestmentCollectionController::class, 'store'])->name('investments.collection.store');
+Route::post('/app/investments/collection/calculate-fine', [InvestmentCollectionController::class, 'calculateFine'])->name('investments.collection.calculate-fine');
+
 Route::get('/app/investments/view-investments', [InvestmentController::class, 'index'])->name('investments.view-investments');
 Route::get('/app/investments/add-investment', [InvestmentController::class, 'create'])->name('investments.add-investment');
+Route::get('/app/investments/member/{memberId}', [InvestmentController::class, 'getByMember'])->name('investments.by-member');
 Route::get('/app/investments/{investment}', [InvestmentController::class, 'show'])->name('investments.show');
 Route::get('/app/investments/{investment}/edit', [InvestmentController::class, 'edit'])->name('investments.edit');
-Route::get('/app/investments/member/{memberId}', [InvestmentController::class, 'getByMember'])->name('investments.by-member');
-
-// Investment Payment Routes
-use App\Http\Controllers\InvestmentPaymentController;
-
+Route::get('/app/investments/{investment}/pay', [InvestmentPaymentController::class, 'payInvestment'])->name('investments.payments.pay-investment');
 Route::get('/app/investments/{investment}/payments', [InvestmentPaymentController::class, 'index'])->name('investments.payments.index');
 Route::get('/app/investments/{investment}/payments/{installmentId}', [InvestmentPaymentController::class, 'show'])->name('investments.payments.show');
 Route::post('/app/investments/{investment}/payments/{installmentId}', [InvestmentPaymentController::class, 'store'])->name('investments.payments.store');

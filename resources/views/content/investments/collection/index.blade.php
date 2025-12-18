@@ -1,116 +1,135 @@
 @extends('layouts.contentNavbarLayout')
 
-@section('title', 'Investment Payment - Banking System')
+@section('title', 'Investment Collection')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
         <div class="col-lg-12 mb-4 order-0">
-            <!-- Payment Header Card -->
+            <!-- Collection Header Card -->
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
                     <h5 class="card-title mb-0 text-white">
-                        <i class="bx bx-credit-card me-2"></i>Investment Payment Processing
+                        <i class="bx bx-collection me-2"></i>Investment Collection Form
                     </h5>
-                    <a href="{{ route('investments.payments.index', $investment) }}" class="btn btn-light btn-sm">
-                        <i class="bx bx-arrow-back me-1"></i> Back to Payments
-                    </a>
                 </div>
             </div>
 
             <div class="row">
-                <!-- Left Column: Account & Installment Details -->
-                <div class="col-lg-4 mb-4">
-                    <!-- Account Information Card -->
+                <!-- Left Column: Account Selection & Installment Details -->
+                <div class="col-lg-5 mb-4">
+                    <!-- Account Selection Card -->
                     <div class="card h-100">
                         <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="bx bx-user me-2"></i>Account Information</h6>
+                            <h6 class="mb-0"><i class="bx bx-search me-2"></i>Select Investment Account</h6>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <small class="text-muted d-block">Investment Account</small>
-                                <strong class="fs-6">
-                                    @if($investment->account && $investment->account->account_number)
-                                        {{ $investment->account->account_number }}
-                                    @else
-                                        #{{ $investment->getKey() }}
-                                    @endif
-                                </strong>
+                                <label for="account_id" class="form-label">
+                                    Investment Account <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-lg" id="account_id" name="account_id" required>
+                                    <option value="">-- Select Investment Account --</option>
+                                    @foreach($accounts as $account)
+                                        <option value="{{ $account->id }}" 
+                                                data-account-number="{{ $account->account_number ?? 'N/A' }}"
+                                                data-member-name="{{ $account->investment->member->name }}"
+                                                data-member-id="{{ $account->investment->member->unique_id ?? 'N/A' }}">
+                                            {{ $account->account_number ?? 'Account #' . $account->id }} - 
+                                            {{ $account->investment->member->name }} 
+                                            ({{ $account->investment->member->unique_id ?? 'N/A' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Select an investment account to view pending installments</small>
                             </div>
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Member Name</small>
-                                <strong>{{ $investment->member->name }}</strong>
-                            </div>
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Member ID</small>
-                                <strong>{{ $investment->member->unique_id ?? 'N/A' }}</strong>
-                            </div>
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Interest Rate</small>
-                                <strong>{{ number_format($investment->rate_percentage, 2) }}%</strong>
-                            </div>
-                            @if($investment->account)
-                            <div class="mb-0">
-                                <small class="text-muted d-block">Current Balance</small>
-                                <strong class="text-primary fs-5">${{ number_format($investment->account->current_balance, 2) }}</strong>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
 
-                    <!-- Installment Details Card -->
-                    <div class="card mt-3">
-                        <div class="card-header bg-warning text-dark">
-                            <h6 class="mb-0"><i class="bx bx-calendar me-2"></i>Installment Details</h6>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-sm table-borderless mb-0">
-                                <tr>
-                                    <td class="text-muted">Installment #</td>
-                                    <td class="text-end"><strong>#{{ $installment->installment_number }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Due Date</td>
-                                    <td class="text-end">
-                                        <strong>{{ $installment->schedule_date->format('M d, Y') }}</strong>
-                                        @if($daysLate > 0)
-                                            <br><small class="text-danger">({{ $daysLate }} days overdue)</small>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Principal</td>
-                                    <td class="text-end"><strong>${{ number_format($installment->principal_amount, 2) }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Interest (Rent)</td>
-                                    <td class="text-end"><strong>${{ number_format($installment->rent, 2) }}</strong></td>
-                                </tr>
-                                @if($fine > 0)
-                                <tr>
-                                    <td class="text-muted">Late Fee</td>
-                                    <td class="text-end"><strong class="text-danger">$<span id="fine_display">{{ number_format($fine, 2) }}</span></strong></td>
-                                </tr>
-                                @endif
-                                <tr class="border-top">
-                                    <td class="text-muted"><strong>Total Due</strong></td>
-                                    <td class="text-end"><strong class="text-primary fs-5">$<span id="total_due_display">{{ number_format($installment->principal_amount + $installment->rent + $fine, 2) }}</span></strong></td>
-                                </tr>
-                            </table>
+                            <!-- Account Information Display -->
+                            <div id="account_info" style="display: none;">
+                                <div class="card bg-light mt-3">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-3">Account Information</h6>
+                                        <table class="table table-sm table-borderless mb-0">
+                                            <tr>
+                                                <td class="text-muted" style="width: 40%;">Account #:</td>
+                                                <td><strong id="display_account_number">-</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Member:</td>
+                                                <td><strong id="display_member_name">-</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Member ID:</td>
+                                                <td id="display_member_id">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Current Balance:</td>
+                                                <td><strong class="text-primary" id="display_balance">-</strong></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Installment Selection -->
+                            <div id="installment_selection" style="display: none;" class="mt-3">
+                                <label for="installment_id" class="form-label">
+                                    Select Installment (Month) <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-lg" id="installment_id" name="installment_id" required>
+                                    <option value="">-- Select Installment --</option>
+                                </select>
+                                <small class="text-muted">Select the month/installment to collect</small>
+
+                                <!-- Installment Details -->
+                                <div id="installment_details" class="card bg-warning text-dark mt-3" style="display: none;">
+                                    <div class="card-body">
+                                        <h6 class="mb-3">Installment Details</h6>
+                                        <table class="table table-sm table-borderless mb-0 text-dark">
+                                            <tr>
+                                                <td style="width: 50%;">Installment #:</td>
+                                                <td><strong id="display_installment_number">-</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Due Date:</td>
+                                                <td id="display_due_date">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Principal:</td>
+                                                <td><strong>$<span id="display_principal">0.00</span></strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Interest (Rent):</td>
+                                                <td><strong>$<span id="display_rent">0.00</span></strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Fine (Estimated):</td>
+                                                <td><strong class="text-danger">$<span id="display_fine">0.00</span></strong></td>
+                                            </tr>
+                                            <tr class="border-top">
+                                                <td><strong>Total Due:</strong></td>
+                                                <td><strong class="text-primary fs-5">$<span id="display_total">0.00</span></strong></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right Column: Payment Form -->
-                <div class="col-lg-8 mb-4">
+                <div class="col-lg-7 mb-4">
                     <div class="card">
                         <div class="card-header bg-success text-white">
                             <h6 class="mb-0"><i class="bx bx-money me-2"></i>Payment Transaction</h6>
                         </div>
                         <div class="card-body">
-                            <form id="paymentForm" action="{{ route('investments.payments.store', [$investment, $installment->id]) }}" method="POST">
+                            <form id="collectionForm" action="{{ route('investments.collection.store') }}" method="POST">
                                 @csrf
-                                
+                                <input type="hidden" id="form_account_id" name="account_id" value="">
+                                <input type="hidden" id="form_installment_id" name="installment_id" value="">
+
                                 <!-- Payment Method Section -->
                                 <div class="mb-4">
                                     <h6 class="mb-3 text-muted border-bottom pb-2">
@@ -142,7 +161,6 @@
                                     <!-- Conditional Fields Based on Payment Method -->
                                     <div id="payment_method_fields" class="mt-3" style="display: none;">
                                         <div class="row g-3">
-                                            <!-- Bank Name (for Check/Bank Transfer) -->
                                             <div class="col-md-6" id="bank_name_field" style="display: none;">
                                                 <label for="bank_name" class="form-label">Bank Name</label>
                                                 <input type="text" 
@@ -157,7 +175,6 @@
                                                 @enderror
                                             </div>
 
-                                            <!-- Check Number (for Check payments) -->
                                             <div class="col-md-6" id="check_number_field" style="display: none;">
                                                 <label for="check_number" class="form-label">Check Number</label>
                                                 <input type="text" 
@@ -181,7 +198,6 @@
                                         <i class="bx bx-receipt me-2"></i>Transaction Details
                                     </h6>
                                     <div class="row g-3">
-                                        <!-- Payment Date -->
                                         <div class="col-md-6">
                                             <label for="paid_date" class="form-label">
                                                 Payment Date <span class="text-danger">*</span>
@@ -198,7 +214,6 @@
                                             @enderror
                                         </div>
 
-                                        <!-- Transaction Reference -->
                                         <div class="col-md-6">
                                             <label for="transaction_reference" class="form-label">
                                                 Transaction Reference
@@ -224,7 +239,6 @@
                                         <i class="bx bx-calculator me-2"></i>Payment Amount
                                     </h6>
                                     <div class="row g-3">
-                                        <!-- Base Amount (Read-only) -->
                                         <div class="col-md-6">
                                             <label class="form-label">Base Amount</label>
                                             <div class="input-group">
@@ -232,17 +246,14 @@
                                                 <input type="text" 
                                                        class="form-control bg-light" 
                                                        id="base_amount_display" 
-                                                       value="{{ number_format($installment->principal_amount + $installment->rent + $fine, 2) }}" 
+                                                       value="0.00" 
                                                        readonly>
                                             </div>
                                             <small class="text-muted">
-                                                Principal: ${{ number_format($installment->principal_amount, 2) }} + 
-                                                Rent: ${{ number_format($installment->rent, 2) }} + 
-                                                Fine: $<span id="fine_in_base">{{ number_format($fine, 2) }}</span>
+                                                Principal + Rent + Fine
                                             </small>
                                         </div>
 
-                                        <!-- Discount Amount -->
                                         <div class="col-md-6">
                                             <label for="discount_amount" class="form-label">Discount Amount</label>
                                             <div class="input-group">
@@ -262,7 +273,6 @@
                                             @enderror
                                         </div>
 
-                                        <!-- Net Paid Amount (Auto-calculated) -->
                                         <div class="col-md-12">
                                             <label for="paid_amount" class="form-label">
                                                 Net Payment Amount <span class="text-danger">*</span>
@@ -273,7 +283,7 @@
                                                        class="form-control @error('paid_amount') is-invalid @enderror" 
                                                        id="paid_amount" 
                                                        name="paid_amount" 
-                                                       value="{{ old('paid_amount', number_format($installment->principal_amount + $installment->rent + $fine, 2)) }}" 
+                                                       value="0.00" 
                                                        step="0.01" 
                                                        min="0" 
                                                        required
@@ -319,14 +329,11 @@
                                 </div>
 
                                 <!-- Form Actions -->
-                                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                                    <a href="{{ route('investments.payments.index', $investment) }}" class="btn btn-outline-secondary">
-                                        <i class="bx bx-x me-1"></i> Cancel
-                                    </a>
-                                    <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">
+                                <div class="d-flex justify-content-end pt-3 border-top">
+                                    <button type="submit" id="submitBtn" class="btn btn-primary btn-lg" disabled>
                                         <span class="spinner-border spinner-border-sm d-none me-2" id="submitSpinner" role="status" aria-hidden="true"></span>
                                         <i class="bx bx-check-circle me-1" id="submitIcon"></i> 
-                                        <span id="submitText">Process Payment</span>
+                                        <span id="submitText">Process Collection</span>
                                     </button>
                                 </div>
                             </form>
@@ -340,14 +347,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('paymentForm');
+    const accountSelect = document.getElementById('account_id');
+    const installmentSelect = document.getElementById('installment_id');
     const paidDateInput = document.getElementById('paid_date');
-    const paidAmountInput = document.getElementById('paid_amount');
     const discountAmountInput = document.getElementById('discount_amount');
-    const fineDisplay = document.getElementById('fine_display');
-    const fineInBase = document.getElementById('fine_in_base');
+    const paidAmountInput = document.getElementById('paid_amount');
     const baseAmountDisplay = document.getElementById('base_amount_display');
-    const totalDueDisplay = document.getElementById('total_due_display');
     const netAmountCalculation = document.getElementById('net_amount_calculation');
     const submitBtn = document.getElementById('submitBtn');
     const submitSpinner = document.getElementById('submitSpinner');
@@ -357,39 +362,110 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentMethodFields = document.getElementById('payment_method_fields');
     const bankNameField = document.getElementById('bank_name_field');
     const checkNumberField = document.getElementById('check_number_field');
+    const form = document.getElementById('collectionForm');
 
-    const scheduleDate = '{{ $installment->schedule_date->format("Y-m-d") }}';
-    const principalAmount = {{ $installment->principal_amount }};
-    const rent = {{ $installment->rent }};
-    const interestRate = {{ $investment->rate }};
+    let currentInstallments = [];
+    let currentInstallment = null;
 
-    // Payment method change handler
-    paymentMethodSelect.addEventListener('change', function() {
-        const selectedMethod = this.options[this.selectedIndex].text.toLowerCase();
-        paymentMethodFields.style.display = 'block';
-        
-        // Show/hide fields based on payment method
-        if (selectedMethod.includes('check') || selectedMethod.includes('cheque')) {
-            bankNameField.style.display = 'block';
-            checkNumberField.style.display = 'block';
-            document.getElementById('bank_name').required = true;
-            document.getElementById('check_number').required = true;
-        } else if (selectedMethod.includes('bank') || selectedMethod.includes('transfer')) {
-            bankNameField.style.display = 'block';
-            checkNumberField.style.display = 'none';
-            document.getElementById('bank_name').required = true;
-            document.getElementById('check_number').required = false;
+    // Account selection change
+    accountSelect.addEventListener('change', function() {
+        const accountId = this.value;
+        const formAccountId = document.getElementById('form_account_id');
+        formAccountId.value = accountId;
+
+        if (accountId) {
+            const selectedOption = this.options[this.selectedIndex];
+            document.getElementById('display_account_number').textContent = selectedOption.dataset.accountNumber;
+            document.getElementById('display_member_name').textContent = selectedOption.dataset.memberName;
+            document.getElementById('display_member_id').textContent = selectedOption.dataset.memberId;
+            document.getElementById('account_info').style.display = 'block';
+
+            // Load installments
+            loadInstallments(accountId);
         } else {
-            bankNameField.style.display = 'none';
-            checkNumberField.style.display = 'none';
-            document.getElementById('bank_name').required = false;
-            document.getElementById('check_number').required = false;
+            document.getElementById('account_info').style.display = 'none';
+            document.getElementById('installment_selection').style.display = 'none';
+            document.getElementById('installment_details').style.display = 'none';
+            installmentSelect.innerHTML = '<option value="">-- Select Installment --</option>';
+            submitBtn.disabled = true;
         }
     });
 
+    // Load installments for selected account
+    function loadInstallments(accountId) {
+        installmentSelect.innerHTML = '<option value="">Loading...</option>';
+        installmentSelect.disabled = true;
+
+        $.ajax({
+            url: '{{ route("investments.collection.get-installments") }}',
+            type: 'GET',
+            data: { account_id: accountId },
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    currentInstallments = response.data.installments;
+                    installmentSelect.innerHTML = '<option value="">-- Select Installment --</option>';
+                    
+                    currentInstallments.forEach(function(inst) {
+                        const option = document.createElement('option');
+                        option.value = inst.id;
+                        option.textContent = `#${inst.installment_number} - ${inst.month_name} (Due: ${inst.schedule_date_formatted})`;
+                        option.dataset.installment = JSON.stringify(inst);
+                        installmentSelect.appendChild(option);
+                    });
+
+                    // Update account balance display
+                    document.getElementById('display_balance').textContent = '$' + parseFloat(response.data.account.current_balance).toFixed(2);
+                    
+                    document.getElementById('installment_selection').style.display = 'block';
+                    installmentSelect.disabled = false;
+                }
+            },
+            error: function(xhr) {
+                console.error('Error loading installments:', xhr);
+                installmentSelect.innerHTML = '<option value="">Error loading installments</option>';
+                toastr.error('Failed to load installments');
+            }
+        });
+    }
+
+    // Installment selection change
+    installmentSelect.addEventListener('change', function() {
+        const installmentId = this.value;
+        const formInstallmentId = document.getElementById('form_installment_id');
+        formInstallmentId.value = installmentId;
+
+        if (installmentId) {
+            const selectedOption = this.options[this.selectedIndex];
+            currentInstallment = JSON.parse(selectedOption.dataset.installment);
+            updateInstallmentDetails(currentInstallment);
+            calculateFine();
+            submitBtn.disabled = false;
+        } else {
+            document.getElementById('installment_details').style.display = 'none';
+            resetAmounts();
+            submitBtn.disabled = true;
+        }
+    });
+
+    // Update installment details display
+    function updateInstallmentDetails(installment) {
+        document.getElementById('display_installment_number').textContent = '#' + installment.installment_number;
+        document.getElementById('display_due_date').textContent = installment.schedule_date_formatted;
+        document.getElementById('display_principal').textContent = parseFloat(installment.principal_amount).toFixed(2);
+        document.getElementById('display_rent').textContent = parseFloat(installment.rent).toFixed(2);
+        document.getElementById('display_fine').textContent = parseFloat(installment.fine_amount).toFixed(2);
+        document.getElementById('display_total').textContent = parseFloat(installment.total_amount).toFixed(2);
+        document.getElementById('installment_details').style.display = 'block';
+    }
+
     // Calculate fine when paid date changes
     paidDateInput.addEventListener('change', function() {
-        calculateFine();
+        if (currentInstallment) {
+            calculateFine();
+        }
     });
 
     // Calculate net paid amount when discount changes
@@ -397,9 +473,40 @@ document.addEventListener('DOMContentLoaded', function() {
         calculateNetPaidAmount();
     });
 
+    // Calculate fine
+    function calculateFine() {
+        if (!currentInstallment || !paidDateInput.value) return;
+
+        $.ajax({
+            url: '{{ route("investments.collection.calculate-fine") }}',
+            type: 'POST',
+            data: {
+                installment_id: currentInstallment.id,
+                paid_date: paidDateInput.value,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    const data = response.data;
+                    currentInstallment.fine_amount = data.fine;
+                    currentInstallment.total_amount = data.base_amount;
+                    
+                    document.getElementById('display_fine').textContent = parseFloat(data.fine).toFixed(2);
+                    document.getElementById('display_total').textContent = parseFloat(data.base_amount).toFixed(2);
+                    
+                    baseAmountDisplay.value = parseFloat(data.base_amount).toFixed(2);
+                    calculateNetPaidAmount();
+                }
+            },
+            error: function(xhr) {
+                console.error('Error calculating fine:', xhr);
+            }
+        });
+    }
+
     // Calculate net paid amount
     function calculateNetPaidAmount() {
-        const baseAmount = parseFloat(baseAmountDisplay.value.replace(/,/g, '')) || 0;
+        const baseAmount = parseFloat(baseAmountDisplay.value) || 0;
         const discount = parseFloat(discountAmountInput.value) || 0;
         const netPaid = Math.max(0, baseAmount - discount);
         
@@ -408,51 +515,32 @@ document.addEventListener('DOMContentLoaded', function() {
             `$${baseAmount.toFixed(2)} - $${discount.toFixed(2)} = $${netPaid.toFixed(2)}`;
     }
 
-    // Calculate fine based on paid date
-    function calculateFine() {
-        const paidDate = paidDateInput.value;
-        
-        if (!paidDate) {
-            return;
-        }
-
-        // Show loading
-        if (fineDisplay) fineDisplay.textContent = 'Calculating...';
-        if (fineInBase) fineInBase.textContent = 'Calculating...';
-
-        $.ajax({
-            url: '{{ route("investments.payments.calculate-fine", [$investment, $installment->id]) }}',
-            type: 'POST',
-            data: {
-                paid_date: paidDate,
-                _token: $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    const data = response.data;
-                    const fine = parseFloat(data.fine);
-                    
-                    if (fineDisplay) fineDisplay.textContent = fine.toFixed(2);
-                    if (fineInBase) fineInBase.textContent = fine.toFixed(2);
-                    
-                    // Update base amount (principal + rent + fine)
-                    const baseAmount = parseFloat(data.base_amount);
-                    baseAmountDisplay.value = baseAmount.toFixed(2);
-                    if (totalDueDisplay) totalDueDisplay.textContent = baseAmount.toFixed(2);
-                    
-                    // Recalculate net paid amount with current discount
-                    calculateNetPaidAmount();
-                }
-            },
-            error: function(xhr) {
-                console.error('Error calculating fine:', xhr);
-                if (fineDisplay) fineDisplay.textContent = '0.00';
-                if (fineInBase) fineInBase.textContent = '0.00';
-            }
-        });
+    // Reset amounts
+    function resetAmounts() {
+        baseAmountDisplay.value = '0.00';
+        discountAmountInput.value = '0';
+        paidAmountInput.value = '0.00';
+        netAmountCalculation.textContent = 'Base Amount - Discount = Net Payment';
     }
 
-    // Form submission with AJAX
+    // Payment method change handler
+    paymentMethodSelect.addEventListener('change', function() {
+        const selectedMethod = this.options[this.selectedIndex].text.toLowerCase();
+        paymentMethodFields.style.display = 'block';
+        
+        if (selectedMethod.includes('check') || selectedMethod.includes('cheque')) {
+            bankNameField.style.display = 'block';
+            checkNumberField.style.display = 'block';
+        } else if (selectedMethod.includes('bank') || selectedMethod.includes('transfer')) {
+            bankNameField.style.display = 'block';
+            checkNumberField.style.display = 'none';
+        } else {
+            bankNameField.style.display = 'none';
+            checkNumberField.style.display = 'none';
+        }
+    });
+
+    // Form submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -467,7 +555,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show spinner and disable form
         submitSpinner.classList.remove('d-none');
         submitIcon.classList.add('d-none');
-        submitText.textContent = 'Processing Payment...';
+        submitText.textContent = 'Processing...';
         submitBtn.disabled = true;
         form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
             field.disabled = true;
@@ -486,20 +574,20 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             success: function(response) {
                 if (response.success) {
-                    toastr.success(response.message || 'Payment processed successfully! Receipt: ' + (response.data.receipt_number || 'N/A'));
+                    toastr.success(response.message || 'Collection processed successfully! Receipt: ' + (response.data.receipt_number || 'N/A'));
                     
-                    // Redirect to payments list after 2 seconds
+                    // Reset form after 2 seconds
                     setTimeout(function() {
-                        window.location.href = '{{ route("investments.payments.index", $investment) }}';
+                        form.reset();
+                        location.reload();
                     }, 2000);
                 } else {
-                    toastr.error(response.message || 'Failed to process payment');
+                    toastr.error(response.message || 'Failed to process collection');
                     resetForm();
                 }
             },
             error: function(xhr) {
                 if (xhr.status === 422) {
-                    // Validation errors
                     const errors = xhr.responseJSON.errors;
                     $.each(errors, function(field, messages) {
                         const input = document.getElementById(field);
@@ -514,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     toastr.error('Please fix the validation errors and try again.');
                 } else {
-                    const errorMessage = xhr.responseJSON?.message || 'An error occurred while processing the payment';
+                    const errorMessage = xhr.responseJSON?.message || 'An error occurred while processing the collection';
                     toastr.error(errorMessage);
                 }
                 resetForm();
@@ -525,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetForm() {
         submitSpinner.classList.add('d-none');
         submitIcon.classList.remove('d-none');
-        submitText.textContent = 'Process Payment';
+        submitText.textContent = 'Process Collection';
         submitBtn.disabled = false;
         form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
             field.disabled = false;
@@ -534,3 +622,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+
+
