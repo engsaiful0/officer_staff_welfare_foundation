@@ -106,6 +106,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Base URL for collection routes
+    const baseUrl = '{{ url("/app/investments/collection") }}';
+    
     const filterForm = document.getElementById('filterForm');
     const collectionBody = document.getElementById('collectionBody');
     const paginationLinks = document.getElementById('paginationLinks');
@@ -204,12 +207,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td><span class="badge bg-success">Paid</span></td>
                     <td>
                         <div class="d-flex gap-2 flex-wrap">
-                            <a href="/app/investments/collection/${item.id}" 
+                            <a href="${baseUrl}/${item.id}" 
                                class="btn btn-sm btn-outline-info" 
                                title="View">
                                 <i class="bx bx-show me-1"></i>View
                             </a>
-                            <a href="/app/investments/collection/${item.id}/edit" 
+                            <a href="${baseUrl}/${item.id}/edit" 
                                class="btn btn-sm btn-outline-primary" 
                                title="Edit">
                                 <i class="bx bx-edit-alt me-1"></i>Edit
@@ -232,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
                 const receipt = this.dataset.receipt;
-                const url = '/app/investments/collection/' + id;
+                const url = baseUrl + '/' + id;
 
                 if (confirm(`Are you sure you want to reverse this payment?\nReceipt: ${receipt}\n\nThis action will mark the installment as pending again.`)) {
                     fetch(url, {
