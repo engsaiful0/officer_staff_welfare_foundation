@@ -199,14 +199,20 @@ class InvestmentCollectionController extends Controller
             ], 422);
         }
 
-        $account = InvestmentAccount::with(['investment.member', 'investment.installments' => function($q) {
-            $q->where('status', 'pending')->orderBy('installment_number');
+        // Include paid installments if requested (for edit form)
+        $includePaid = $request->boolean('include_paid', false);
+        $statuses = $includePaid ? ['pending', 'paid'] : ['pending'];
+        
+        $account = InvestmentAccount::with(['investment.member', 'investment.installments' => function($q) use ($statuses) {
+            $q->whereIn('status', $statuses)->orderBy('installment_number');
         }])->findOrFail($request->account_id);
 
         $installments = $account->investment->installments->map(function($installment) {
             $daysLate = $installment->getDaysLate();
-            $fine = $installment->calculateFine();
-            $totalAmount = $installment->principal_amount + $installment->rent + $fine;
+            $fine = $installment->status === 'paid' ? ($installment->fine_amount ?? 0) : $installment->calculateFine();
+            $totalAmount = $installment->status === 'paid' 
+                ? $installment->total_amount 
+                : ($installment->principal_amount + $installment->rent + $fine);
 
             return [
                 'id' => $installment->id,
@@ -219,7 +225,8 @@ class InvestmentCollectionController extends Controller
                 'total_amount' => (float)$totalAmount,
                 'days_late' => $daysLate,
                 'is_overdue' => $installment->isOverdue(),
-                'month_name' => $installment->schedule_date->format('F Y')
+                'month_name' => $installment->schedule_date->format('F Y'),
+                'status' => $installment->status
             ];
         });
 
@@ -475,9 +482,15 @@ class InvestmentCollectionController extends Controller
             'paymentMethod'
         ]);
 
+        // Get all active investment accounts for dropdown
+        $accounts = InvestmentAccount::with(['investment.member'])
+            ->where('account_status', 'active')
+            ->orderBy('account_number')
+            ->get();
+
         $paymentMethods = PaymentMethod::orderBy('payment_method_name')->get();
 
-        return view('content.investments.collection.edit', compact('installment', 'paymentMethods'));
+        return view('content.investments.collection.edit', compact('installment', 'paymentMethods', 'accounts'));
     }
 
     /**
@@ -497,6 +510,8 @@ class InvestmentCollectionController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
+            'account_id' => 'nullable|exists:investment_accounts,id',
+            'installment_id' => 'nullable|exists:investment_installments,id',
             'paid_date' => 'required|date',
             'discount_amount' => 'nullable|numeric|min:0',
             'payment_method_id' => 'required|exists:payment_methods,id',
@@ -519,15 +534,33 @@ class InvestmentCollectionController extends Controller
         try {
             DB::beginTransaction();
 
+            // If a different installment is selected, use that one
+            $targetInstallment = $installment;
+            if ($request->filled('installment_id') && $request->installment_id != $installment->id) {
+                $targetInstallment = InvestmentInstallment::findOrFail($request->installment_id);
+                
+                // Verify it's a paid installment
+                if ($targetInstallment->status !== 'paid') {
+                    if ($request->expectsJson() || $request->ajax()) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Selected installment is not paid and cannot be edited.'
+                        ], 422);
+                    }
+                    return redirect()->back()->with('error', 'Selected installment is not paid.');
+                }
+            }
+
             $paidDate = Carbon::parse($request->paid_date);
             $discountAmount = (float)($request->discount_amount ?? 0);
             
             // Calculate net paid amount
-            $baseTotal = (float)$installment->principal_amount + (float)$installment->rent + (float)$installment->fine_amount;
+            $baseTotal = (float)$targetInstallment->principal_amount + (float)$targetInstallment->rent + (float)$targetInstallment->fine_amount;
             $netPaidAmount = max(0, $baseTotal - $discountAmount);
 
             // Update installment
-            $installment->update([
+            $targetInstallment->update([
                 'paid_date' => $paidDate,
                 'discount_amount' => $discountAmount,
                 'total_amount' => $baseTotal,
@@ -541,8 +574,8 @@ class InvestmentCollectionController extends Controller
 
             // Update related ledger entry if exists
             $ledgerEntry = LedgerEntry::where('entity_type', 'investment')
-                ->where('entity_id', $installment->investment_id)
-                ->where('description', 'like', "%installment #{$installment->installment_number}%")
+                ->where('entity_id', $targetInstallment->investment_id)
+                ->where('description', 'like', "%installment #{$targetInstallment->installment_number}%")
                 ->where('type', 'payment')
                 ->orderBy('entry_date', 'desc')
                 ->first();
@@ -551,8 +584,8 @@ class InvestmentCollectionController extends Controller
                 $ledgerEntry->update([
                     'entry_date' => $paidDate,
                     'amount' => $netPaidAmount,
-                    'description' => "Payment for installment #{$installment->installment_number}" . 
-                        ($installment->fine_amount > 0 ? " (Fine: $" . number_format($installment->fine_amount, 2) . ")" : "") .
+                    'description' => "Payment for installment #{$targetInstallment->installment_number}" . 
+                        ($targetInstallment->fine_amount > 0 ? " (Fine: $" . number_format($targetInstallment->fine_amount, 2) . ")" : "") .
                         ($discountAmount > 0 ? " (Discount: $" . number_format($discountAmount, 2) . ", Net: $" . number_format($netPaidAmount, 2) . ")" : "")
                 ]);
             }
@@ -563,11 +596,12 @@ class InvestmentCollectionController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Collection updated successfully',
-                    'data' => $installment->fresh()->load('paymentMethod')
+                    'data' => $targetInstallment->fresh()->load('paymentMethod'),
+                    'installment_id' => $targetInstallment->id
                 ]);
             }
 
-            return redirect()->route('investments.collection.show', $installment)
+            return redirect()->route('investments.collection.show', $targetInstallment)
                 ->with('success', 'Collection updated successfully.');
 
         } catch (\Exception $e) {
