@@ -77,7 +77,7 @@
     </div>
 
     <div class="receipt-info">
-        <table>
+        <table class="table table-bordered">
             <tr>
                 <td>Payment Date:</td>
                 <td>{{ $installment->paid_date->format('M d, Y') }}</td>
@@ -118,31 +118,31 @@
     <div class="amount-section">
         <div class="amount-row">
             <span>Principal Amount:</span>
-            <span>${{ number_format($installment->principal_amount, 2) }}</span>
+            <span><i class="bx bx-taka"></i> {{ number_format($installment->principal_amount, 2) }}</span>
         </div>
         <div class="amount-row">
             <span>Interest (Rent):</span>
-            <span>${{ number_format($installment->rent, 2) }}</span>
+            <span><i class="bx bx-taka"></i> {{ number_format($installment->rent, 2) }}</span>
         </div>
         @if($installment->fine_amount > 0)
         <div class="amount-row">
             <span>Late Fee:</span>
-            <span class="text-danger">${{ number_format($installment->fine_amount, 2) }}</span>
+            <span class="text-danger"><i class="bx bx-taka"></i> {{ number_format($installment->fine_amount, 2) }}</span>
         </div>
         @endif
         <div class="amount-row">
             <span>Gross Amount:</span>
-            <span><strong>${{ number_format($installment->total_amount, 2) }}</strong></span>
+            <span><strong><i class="bx bx-taka"></i> {{ number_format($installment->total_amount, 2) }}</strong></span>
         </div>
         @if($installment->discount_amount > 0)
         <div class="amount-row">
             <span>Discount:</span>
-            <span class="text-success">-${{ number_format($installment->discount_amount, 2) }}</span>
+            <span class="text-success">-<i class="bx bx-taka"></i> {{ number_format($installment->discount_amount, 2) }}</span>
         </div>
         @endif
         <div class="amount-row total-row">
             <span>Net Amount Paid:</span>
-            <span>${{ number_format($installment->total_amount - ($installment->discount_amount ?? 0), 2) }}</span>
+            <span><i class="bx bx-taka"></i> {{ number_format($installment->total_amount - ($installment->discount_amount ?? 0), 2) }}</span>
         </div>
     </div>
 
