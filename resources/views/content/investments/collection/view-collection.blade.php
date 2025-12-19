@@ -203,28 +203,64 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${item.payment_method?.payment_method_name || 'N/A'}</td>
                     <td><span class="badge bg-success">Paid</span></td>
                     <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                <i class="bx bx-dots-vertical-rounded"></i>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="/app/investments/collection/${item.id}" 
+                               class="btn btn-sm btn-outline-info" 
+                               title="View">
+                                <i class="bx bx-show me-1"></i>View
+                            </a>
+                            <a href="/app/investments/collection/${item.id}/edit" 
+                               class="btn btn-sm btn-outline-primary" 
+                               title="Edit">
+                                <i class="bx bx-edit-alt me-1"></i>Edit
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-collection" 
+                                data-id="${item.id}" 
+                                data-receipt="${item.receipt_number}"
+                                title="Delete">
+                                <i class="bx bx-trash me-1"></i>Delete
                             </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="javascript:void(0);" onclick="printReceipt('${item.id}')">
-                                    <i class="bx bx-printer me-1"></i> Print Receipt
-                                </a>
-                            </div>
                         </div>
                     </td>
                 </tr>
             `;
         });
         collectionBody.innerHTML = html;
+
+        // Attach delete event listeners
+        document.querySelectorAll('.delete-collection').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const receipt = this.dataset.receipt;
+                const url = '/app/investments/collection/' + id;
+
+                if (confirm(`Are you sure you want to reverse this payment?\nReceipt: ${receipt}\n\nThis action will mark the installment as pending again.`)) {
+                    fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success(data.message || 'Collection payment reversed successfully');
+                            fetchCollections();
+                        } else {
+                            toastr.error(data.message || 'Failed to reverse payment');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toastr.error('An error occurred while reversing the payment');
+                    });
+                }
+            });
+        });
     }
 });
-
-function printReceipt(id) {
-    // Implement receipt printing if needed, or redirect to a show page
-    toastr.info('Receipt printing feature coming soon.');
-}
 </script>
 @endsection
 
