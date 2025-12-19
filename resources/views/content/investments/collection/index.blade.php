@@ -574,17 +574,27 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             success: function(response) {
                 if (response.success) {
-                    toastr.success(
-                        response.message || 'Collection processed successfully! Receipt: ' + (response.data.receipt_number || 'N/A'),
-                        'Success',
-                        {
-                            timeOut: 2000,
-                            progressBar: true,
-                            positionClass: 'toast-top-right'
-                        }
-                    );
+                    // Show success toast
+                    const receiptNumber = response.data.receipt_number || 'N/A';
+                    const message = response.message || 'Collection processed successfully! Receipt: ' + receiptNumber;
                     
-                    // Redirect to view page after 1.5 seconds
+                    // Show toast with proper configuration
+                    if (typeof toastr !== 'undefined') {
+                        // Configure toastr options
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            timeOut: 3000,
+                            extendedTimeOut: 1000,
+                            positionClass: 'toast-top-right'
+                        };
+                        toastr.success(message);
+                    } else {
+                        // Fallback to alert if toastr is not available
+                        alert(message);
+                    }
+                    
+                    // Redirect to view page after 2.5 seconds to ensure toast is visible
                     setTimeout(function() {
                         const installmentId = response.data.installment_id || response.data.installment?.id;
                         if (installmentId) {
@@ -593,9 +603,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             // Fallback to collections list if no ID
                             window.location.href = '{{ route("investments.view-collection") }}';
                         }
-                    }, 1500);
+                    }, 2500);
                 } else {
-                    toastr.error(response.message || 'Failed to process collection');
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(response.message || 'Failed to process collection');
+                    } else {
+                        alert('Error: ' + (response.message || 'Failed to process collection'));
+                    }
                     resetForm();
                 }
             },

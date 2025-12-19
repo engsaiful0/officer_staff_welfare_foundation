@@ -52,7 +52,7 @@
                             @if($investment->account)
                             <div class="mb-0">
                                 <small class="text-muted d-block">Current Balance</small>
-                                <strong class="text-primary fs-5">${{ number_format($investment->account->current_balance, 2) }}</strong>
+                                <strong class="text-primary fs-5">৳{{ number_format($investment->account->current_balance, 2) }}</strong>
                             </div>
                             @endif
                         </div>
@@ -80,21 +80,21 @@
                                 </tr>
                                 <tr>
                                     <td class="text-muted">Principal</td>
-                                    <td class="text-end"><strong>${{ number_format($installment->principal_amount, 2) }}</strong></td>
+                                    <td class="text-end"><strong>৳{{ number_format($installment->principal_amount, 2) }}</strong></td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">Interest (Rent)</td>
-                                    <td class="text-end"><strong>${{ number_format($installment->rent, 2) }}</strong></td>
+                                    <td class="text-end"><strong>৳{{ number_format($installment->rent, 2) }}</strong></td>
                                 </tr>
                                 @if($fine > 0)
                                 <tr>
                                     <td class="text-muted">Late Fee</td>
-                                    <td class="text-end"><strong class="text-danger">$<span id="fine_display">{{ number_format($fine, 2) }}</span></strong></td>
+                                    <td class="text-end"><strong class="text-danger">৳<span id="fine_display">{{ number_format($fine, 2) }}</span></strong></td>
                                 </tr>
                                 @endif
                                 <tr class="border-top">
                                     <td class="text-muted"><strong>Total Due</strong></td>
-                                    <td class="text-end"><strong class="text-primary fs-5">$<span id="total_due_display">{{ number_format($installment->principal_amount + $installment->rent + $fine, 2) }}</span></strong></td>
+                                    <td class="text-end"><strong class="text-primary fs-5">৳<span id="total_due_display">{{ number_format($installment->principal_amount + $installment->rent + $fine, 2) }}</span></strong></td>
                                 </tr>
                             </table>
                         </div>
@@ -228,7 +228,7 @@
                                         <div class="col-md-6">
                                             <label class="form-label">Base Amount</label>
                                             <div class="input-group">
-                                                <span class="input-group-text">$</span>
+                                                <span class="input-group-text">৳</span>
                                                 <input type="text" 
                                                        class="form-control bg-light" 
                                                        id="base_amount_display" 
@@ -236,9 +236,9 @@
                                                        readonly>
                                             </div>
                                             <small class="text-muted">
-                                                Principal: ${{ number_format($installment->principal_amount, 2) }} + 
-                                                Rent: ${{ number_format($installment->rent, 2) }} + 
-                                                Fine: $<span id="fine_in_base">{{ number_format($fine, 2) }}</span>
+                                                Principal: ৳{{ number_format($installment->principal_amount, 2) }} + 
+                                                Rent: ৳{{ number_format($installment->rent, 2) }} + 
+                                                Fine: ৳<span id="fine_in_base">{{ number_format($fine, 2) }}</span>
                                             </small>
                                         </div>
 
@@ -246,7 +246,7 @@
                                         <div class="col-md-6">
                                             <label for="discount_amount" class="form-label">Discount Amount</label>
                                             <div class="input-group">
-                                                <span class="input-group-text">$</span>
+                                                <span class="input-group-text">৳</span>
                                                 <input type="number" 
                                                        class="form-control @error('discount_amount') is-invalid @enderror" 
                                                        id="discount_amount" 
@@ -268,7 +268,7 @@
                                                 Net Payment Amount <span class="text-danger">*</span>
                                             </label>
                                             <div class="input-group input-group-lg">
-                                                <span class="input-group-text bg-primary text-white">$</span>
+                                                <span class="input-group-text bg-primary text-white">৳</span>
                                                 <input type="number" 
                                                        class="form-control @error('paid_amount') is-invalid @enderror" 
                                                        id="paid_amount" 

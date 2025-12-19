@@ -86,29 +86,29 @@
                                         <tr class="{{ $isOverdue ? 'table-danger' : '' }}">
                                             <td>{{ $installment->installment_number }}</td>
                                             <td>{{ $installment->schedule_date->format('Y-m-d') }}</td>
-                                            <td>${{ number_format($installment->principal_amount, 2) }}</td>
-                                            <td>${{ number_format($installment->rent, 2) }}</td>
+                                            <td>৳{{ number_format($installment->principal_amount, 2) }}</td>
+                                            <td>৳{{ number_format($installment->rent, 2) }}</td>
                                             <td>
                                                 @if($installment->status === 'paid' && $installment->fine_amount > 0)
                                                     <span class="text-danger">${{ number_format($installment->fine_amount, 2) }}</span>
                                                 @elseif($isOverdue)
                                                     <span class="text-warning">${{ number_format($installment->calculateFine(), 2) }}</span>
                                                 @else
-                                                    $0.00
+                                                    ৳0.00
                                                 @endif
                                             </td>
                                             <td>
                                                 @if($installment->status === 'paid' && isset($installment->discount_amount) && $installment->discount_amount > 0)
                                                     <span class="text-success">${{ number_format($installment->discount_amount, 2) }}</span>
                                                 @else
-                                                    $0.00
+                                                    ৳0.00
                                                 @endif
                                             </td>
                                             <td>
                                                 @if($installment->status === 'paid')
-                                                    ${{ number_format($installment->total_amount - ($installment->discount_amount ?? 0), 2) }}
+                                                    ৳{{ number_format($installment->total_amount - ($installment->discount_amount ?? 0), 2) }}
                                                 @else
-                                                    ${{ number_format($installment->principal_amount + $installment->rent + ($isOverdue ? $installment->calculateFine() : 0), 2) }}
+                                                    ৳{{ number_format($installment->principal_amount + $installment->rent + ($isOverdue ? $installment->calculateFine() : 0), 2) }}
                                                 @endif
                                             </td>
                                             <td>
