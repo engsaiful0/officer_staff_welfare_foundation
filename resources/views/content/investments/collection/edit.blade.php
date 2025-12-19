@@ -446,12 +446,20 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             success: function(response) {
                 if (response.success) {
-                    toastr.success(response.message || 'Collection updated successfully!');
+                    toastr.success(
+                        response.message || 'Collection updated successfully!', 
+                        'Success', 
+                        {
+                            timeOut: 2000,
+                            progressBar: true,
+                            positionClass: 'toast-top-right'
+                        }
+                    );
                     
-                    // Redirect to show page after 2 seconds
+                    // Redirect to show page after 1.5 seconds
                     setTimeout(function() {
                         window.location.href = '{{ route("investments.collection.show", $installment) }}';
-                    }, 2000);
+                    }, 1500);
                 } else {
                     toastr.error(response.message || 'Failed to update collection');
                     resetForm();
