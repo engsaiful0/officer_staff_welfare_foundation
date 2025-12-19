@@ -425,8 +425,23 @@
 
 <script>
     function deleteCollection() {
-        if (confirm('Are you sure you want to reverse this payment?\n\nReceipt: {{ $installment->receipt_number }}\n\nThis action will mark the installment as pending again and reverse all related transactions.')) {
-            fetch('{{ route("investments.collection.destroy", $installment) }}', {
+        Swal.fire({
+            title: 'Reverse Payment?',
+            html: `<p>Are you sure you want to reverse this payment?</p>
+                   <p><strong>Receipt:</strong> {{ $installment->receipt_number }}</p>
+                   <p class="text-danger">This action will mark the installment as pending again and reverse all related transactions.</p>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, reverse it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                confirmButton: 'btn btn-danger me-3',
+                cancelButton: 'btn btn-label-secondary'
+            },
+            buttonsStyling: false,
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return fetch('{{ route("investments.collection.destroy", $installment) }}', {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -434,28 +449,39 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        toastr.success(
-                            data.message || 'Collection payment reversed successfully',
-                            'Success', {
-                                timeOut: 2000,
-                                progressBar: true
-                            }
-                        );
-                        setTimeout(() => {
-                            window.location.href = '{{ route("investments.view-collection") }}';
-                        }, 1500);
-                    } else {
-                        toastr.error(data.message || 'Failed to reverse payment');
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.message || 'Failed to reverse payment');
+                    }
+                    return data;
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    toastr.error('An error occurred while reversing the payment');
+                    Swal.showValidationMessage(error.message || 'An error occurred while reversing the payment');
                 });
-        }
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Reversed!',
+                    text: result.value.message || 'Payment has been reversed successfully.',
+                    customClass: {
+                        confirmButton: 'btn btn-success'
+                    },
+                    timer: 2000,
+                    showConfirmButton: true
+                }).then(() => {
+                    window.location.href = '{{ route("investments.view-collection") }}';
+                });
+            }
+        });
     }
 </script>
 @endsection

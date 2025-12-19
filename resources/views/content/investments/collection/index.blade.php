@@ -574,13 +574,26 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             success: function(response) {
                 if (response.success) {
-                    toastr.success(response.message || 'Collection processed successfully! Receipt: ' + (response.data.receipt_number || 'N/A'));
+                    toastr.success(
+                        response.message || 'Collection processed successfully! Receipt: ' + (response.data.receipt_number || 'N/A'),
+                        'Success',
+                        {
+                            timeOut: 2000,
+                            progressBar: true,
+                            positionClass: 'toast-top-right'
+                        }
+                    );
                     
-                    // Reset form after 2 seconds
+                    // Redirect to view page after 1.5 seconds
                     setTimeout(function() {
-                        form.reset();
-                        location.reload();
-                    }, 2000);
+                        const installmentId = response.data.installment_id || response.data.installment?.id;
+                        if (installmentId) {
+                            window.location.href = '{{ url("/app/investments/collection") }}/' + installmentId;
+                        } else {
+                            // Fallback to collections list if no ID
+                            window.location.href = '{{ route("investments.view-collection") }}';
+                        }
+                    }, 1500);
                 } else {
                     toastr.error(response.message || 'Failed to process collection');
                     resetForm();

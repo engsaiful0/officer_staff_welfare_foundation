@@ -386,9 +386,10 @@ class InvestmentCollectionController extends Controller
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Investment collection processed successfully',
+                    'message' => 'Investment collection processed successfully! Receipt: ' . $receiptNumber,
                     'data' => [
                         'installment' => $installment->fresh()->load('paymentMethod'),
+                        'installment_id' => $installment->id,
                         'receipt_number' => $receiptNumber,
                         'fine' => $fine,
                         'days_late' => $daysLate
@@ -685,7 +686,7 @@ class InvestmentCollectionController extends Controller
                 'status' => 'pending',
                 'paid_date' => null,
                 'fine_amount' => 0,
-                'discount_amount' => null,
+                'discount_amount' => 0,
                 'paid_by' => null,
                 'payment_method_id' => null,
                 'transaction_reference' => null,

@@ -236,30 +236,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 const id = this.dataset.id;
                 const receipt = this.dataset.receipt;
                 const url = baseUrl + '/' + id;
+                const $btn = $(this);
 
-                if (confirm(`Are you sure you want to reverse this payment?\nReceipt: ${receipt}\n\nThis action will mark the installment as pending again.`)) {
-                    fetch(url, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            toastr.success(data.message || 'Collection payment reversed successfully');
+                Swal.fire({
+                    title: 'Reverse Payment?',
+                    html: `<p>Are you sure you want to reverse this payment?</p>
+                           <p><strong>Receipt:</strong> ${receipt}</p>
+                           <p class="text-danger">This action will mark the installment as pending again and reverse all related transactions.</p>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, reverse it!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        confirmButton: 'btn btn-danger me-3',
+                        cancelButton: 'btn btn-label-secondary'
+                    },
+                    buttonsStyling: false,
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        // Show spinner on button
+                        const originalHtml = $btn.html();
+                        $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+                        $btn.prop('disabled', true);
+
+                        return fetch(url, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error(data.message || 'Failed to reverse payment');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            // Reset button
+                            $btn.html(originalHtml);
+                            $btn.prop('disabled', false);
+                            Swal.showValidationMessage(error.message || 'An error occurred while reversing the payment');
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Reversed!',
+                            text: result.value.message || 'Payment has been reversed successfully.',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            timer: 2000,
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Reload the collections table
                             fetchCollections();
-                        } else {
-                            toastr.error(data.message || 'Failed to reverse payment');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        toastr.error('An error occurred while reversing the payment');
-                    });
-                }
+                        });
+                    }
+                });
             });
         });
     }
