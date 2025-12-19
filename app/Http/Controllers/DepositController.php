@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Deposit;
 use App\Models\Member;
 use App\Models\LedgerEntry;
+use App\Models\DepositAccountNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -61,11 +62,13 @@ class DepositController extends Controller
      */
     public function create(Request $request)
     {
+        $latest = DepositAccountNumber::latest('serial')->first();
+        $nextAccountNumber = 'D' . Carbon::now()->year . str_pad($latest ? $latest->serial + 1 : 1, 6, '0', STR_PAD_LEFT);
         $memberId = $request->get('member_id');
         $member = $memberId ? Member::find($memberId) : null;
         $members = Member::select('id', 'name', 'unique_id')->get();
         
-        return view('content.deposits.create', compact('member', 'members'));
+        return view('content.deposits.create', compact('member', 'members', 'nextAccountNumber'));
     }
 
     /**
@@ -75,11 +78,12 @@ class DepositController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'member_id' => 'required|exists:members,id',
-            'deposit_amount' => 'required|numeric|min:0',
-            'product_name' => 'nullable|string|max:255',
+            'monthly_deposit_amount' => 'nullable|numeric|min:0',
+            'deposit_day_of_month' => 'nullable|integer|min:1|max:31',
+            'deposit_account_number' => 'required|string|max:255|unique:deposits,deposit_account_number',
             'start_date' => 'required|date',
             'maturity_date' => 'nullable|date|after:start_date',
-            'rate' => 'nullable|numeric|min:0|max:1',
+            'rate' => 'nullable|numeric|min:0|max:100',
             'deposit_type' => 'required|in:savings,fixed,recurring',
             'notes' => 'nullable|string'
         ]);
@@ -97,27 +101,37 @@ class DepositController extends Controller
         try {
             DB::beginTransaction();
 
+            // Convert rate from percentage to decimal (e.g., 8% -> 0.08)
+            $rate = $request->rate ? $request->rate / 100 : null;
+            
             $deposit = Deposit::create([
                 'member_id' => $request->member_id,
-                'deposit_amount' => $request->deposit_amount,
-                'product_name' => $request->product_name,
+                'monthly_deposit_amount' => $request->monthly_deposit_amount ?? null,
+                'deposit_day_of_month' => $request->deposit_day_of_month ?? 1,
+                'deposit_account_number' => $request->deposit_account_number,
                 'start_date' => $request->start_date,
                 'maturity_date' => $request->maturity_date,
-                'rate' => $request->rate,
+                'rate' => $rate,
                 'deposit_type' => $request->deposit_type,
                 'status' => 'active',
                 'notes' => $request->notes
             ]);
 
+            // Note: Account number is already provided from the form, so generateAccountNumber() is not needed
+            // If you need to track it in deposit_account_numbers table, you can add that logic here
+
             // Create initial ledger entry for deposit
+            // Use monthly_deposit_amount if provided, otherwise 0 for account opening
+            $initialAmount = $request->monthly_deposit_amount ?? 0;
+            
             LedgerEntry::create([
                 'entity_type' => 'deposit',
                 'entity_id' => $deposit->id,
                 'entry_date' => $request->start_date,
                 'type' => 'deposit',
-                'amount' => $request->deposit_amount,
-                'balance_after' => $request->deposit_amount,
-                'description' => 'Initial deposit',
+                'amount' => $initialAmount,
+                'balance_after' => $initialAmount,
+                'description' => $initialAmount > 0 ? 'Initial deposit / Account opening' : 'Account opening',
                 'created_by' => auth()->id()
             ]);
 
@@ -277,7 +291,7 @@ class DepositController extends Controller
                 ]);
             }
 
-            return redirect()->route('deposits.index')
+            return redirect()->route('deposits.view-deposits')
                 ->with('success', 'Deposit deleted successfully.');
 
         } catch (\Exception $e) {

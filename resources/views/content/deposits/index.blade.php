@@ -14,6 +14,43 @@
 
 @section('page-script')
 <script src="{{asset('assets/js/deposits-list.js')}}"></script>
+<style>
+  /* Make action dropdown button more visible */
+  .btn-text-primary.dropdown-toggle {
+    color: #696cff !important;
+    background-color: rgba(105, 108, 255, 0.08);
+    border: 1px solid rgba(105, 108, 255, 0.2);
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+    min-width: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-text-primary.dropdown-toggle:hover {
+    color: #696cff !important;
+    background-color: rgba(105, 108, 255, 0.15) !important;
+    border-color: rgba(105, 108, 255, 0.4) !important;
+    transform: scale(1.05);
+  }
+  .btn-text-primary.dropdown-toggle:focus,
+  .btn-text-primary.dropdown-toggle.show {
+    color: #696cff !important;
+    background-color: rgba(105, 108, 255, 0.2) !important;
+    border-color: rgba(105, 108, 255, 0.5) !important;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.25);
+  }
+  .btn-text-primary.dropdown-toggle::after {
+    display: none; /* Hide default Bootstrap dropdown arrow */
+  }
+  .btn-text-primary.dropdown-toggle span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 3px;
+  }
+</style>
 @endsection
 
 @section('content')
@@ -75,7 +112,7 @@
       <table class="table table-hover" id="depositsTable">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>Account Number</th>
             <th>Member</th>
             <th>Product</th>
             <th>Type</th>
@@ -91,7 +128,10 @@
         <tbody>
           @foreach($deposits as $deposit)
             <tr>
-              <td>{{ $deposit->id }}</td>
+              <td>
+                <span class="fw-semibold text-primary">{{ $deposit->deposit_account_number ?: ($deposit->account_number ?: 'N/A') }}</span>
+                <br><small class="text-muted">ID: #{{ $deposit->id }}</small>
+              </td>
               <td>
                 <div class="d-flex flex-column">
                   <span class="fw-semibold">{{ $deposit->member->name }}</span>
@@ -116,26 +156,49 @@
               </td>
               <td>
                 <div class="dropdown">
-                  <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                    <i class="bx bx-dots-vertical-rounded"></i>
+                  <button type="button" class="btn btn-sm btn-text-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                    <span style="font-size: 1.25rem; font-weight: 600; letter-spacing: 2px;">⋯</span>
                   </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item" href="{{ route('deposits.show', $deposit) }}">
-                      <i class="bx bx-show me-1"></i> View
-                    </a>
-                    <a class="dropdown-item" href="{{ route('deposits.edit', $deposit) }}">
-                      <i class="bx bx-edit me-1"></i> Edit
-                    </a>
-                    <a class="dropdown-item" href="{{ route('deposits.ledger.index', $deposit) }}">
-                      <i class="bx bx-list-ul me-1"></i> Ledger
-                    </a>
-                    @if($deposit->status === 'active')
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item text-warning" href="#" onclick="closeDeposit({{ $deposit->id }})">
-                        <i class="bx bx-x-circle me-1"></i> Close
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item" href="{{ route('deposits.show', $deposit) }}">
+                        <i class="bx bx-show me-2"></i> View
                       </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{ route('deposits.edit', $deposit) }}">
+                        <i class="bx bx-edit me-2"></i> Edit
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{ route('deposits.ledger.index', $deposit) }}">
+                        <i class="bx bx-list-ul me-2"></i> Ledger
+                      </a>
+                    </li>
+                    @if($deposit->status === 'active')
+                      <li><hr class="dropdown-divider"></li>
+                      <li>
+                        <a class="dropdown-item text-warning close-deposit-btn" href="#" data-deposit-id="{{ $deposit->id }}">
+                          <i class="bx bx-x-circle me-2"></i> Close
+                        </a>
+                      </li>
                     @endif
-                  </div>
+                    @if($deposit->ledgerEntries()->count() <= 1)
+                      <li><hr class="dropdown-divider"></li>
+                      <li>
+                        @php
+                          $accountNum = $deposit->deposit_account_number ?: ($deposit->account_number ?: 'N/A');
+                          $deleteUrl = route('deposits.destroy', $deposit);
+                        @endphp
+                        <a class="dropdown-item text-danger delete-deposit-btn" href="#" 
+                           data-deposit-id="{{ $deposit->id }}" 
+                           data-account-number="{{ $accountNum }}" 
+                           data-delete-url="{{ $deleteUrl }}">
+                          <i class="bx bx-trash me-2"></i> Delete
+                        </a>
+                      </li>
+                    @endif
+                  </ul>
                 </div>
               </td>
             </tr>
@@ -169,6 +232,29 @@
     </div>
   </div>
 </div>
+
+<!-- Delete Deposit Modal -->
+<div class="modal fade" id="deleteDepositModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">Delete Deposit</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this deposit account?</p>
+        <p class="mb-0"><strong>Account Number:</strong> <span id="deleteAccountNumber"></span></p>
+        <p class="text-danger mt-2"><small>This action cannot be undone. The deposit will be permanently deleted.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDelete">
+          <i class="bx bx-trash me-1"></i> Delete Deposit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -177,16 +263,86 @@ function closeDeposit(depositId) {
   $('#closeDepositModal').modal('show');
   $('#confirmClose').off('click').on('click', function() {
     $.ajax({
-      url: `/deposits/${depositId}/close`,
+      url: `/app/deposits/${depositId}/close`,
       type: 'PATCH',
       headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
       },
       success: function(response) {
-        location.reload();
+        if (response.success) {
+          if (typeof toastr !== 'undefined') {
+            toastr.success(response.message || 'Deposit closed successfully');
+          } else {
+            alert(response.message || 'Deposit closed successfully');
+          }
+          setTimeout(function() {
+            location.reload();
+          }, 1000);
+        }
       },
       error: function(xhr) {
-        alert('Error closing deposit: ' + xhr.responseJSON.message);
+        const errorMessage = xhr.responseJSON?.message || 'Error closing deposit';
+        if (typeof toastr !== 'undefined') {
+          toastr.error(errorMessage);
+        } else {
+          alert(errorMessage);
+        }
+      }
+    });
+  });
+}
+
+function deleteDeposit(depositId, accountNumber, deleteUrl) {
+  $('#deleteAccountNumber').text(accountNumber || 'N/A');
+  $('#deleteDepositModal').modal('show');
+  
+  $('#confirmDelete').off('click').on('click', function() {
+    const btn = $(this);
+    const originalText = btn.html();
+    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Deleting...');
+    
+    $.ajax({
+      url: deleteUrl || ('{{ url("/app/deposits") }}/' + depositId),
+      type: 'POST',
+      data: {
+        _method: 'DELETE',
+        _token: $('meta[name="csrf-token"]').attr('content')
+      },
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      success: function(response) {
+        if (response.success) {
+          $('#deleteDepositModal').modal('hide');
+          if (typeof toastr !== 'undefined') {
+            toastr.success(response.message || 'Deposit deleted successfully');
+          } else {
+            alert(response.message || 'Deposit deleted successfully');
+          }
+          setTimeout(function() {
+            location.reload();
+          }, 1000);
+        } else {
+          btn.prop('disabled', false).html(originalText);
+          const errorMessage = response.message || 'Failed to delete deposit';
+          if (typeof toastr !== 'undefined') {
+            toastr.error(errorMessage);
+          } else {
+            alert(errorMessage);
+          }
+        }
+      },
+      error: function(xhr) {
+        btn.prop('disabled', false).html(originalText);
+        const errorMessage = xhr.responseJSON?.message || 'Error deleting deposit';
+        if (typeof toastr !== 'undefined') {
+          toastr.error(errorMessage);
+        } else {
+          alert(errorMessage);
+        }
       }
     });
   });
@@ -198,6 +354,22 @@ $(document).ready(function() {
     responsive: true,
     pageLength: 25,
     order: [[0, 'desc']]
+  });
+
+  // Close deposit button handler
+  $(document).on('click', '.close-deposit-btn', function(e) {
+    e.preventDefault();
+    const depositId = $(this).data('deposit-id');
+    closeDeposit(depositId);
+  });
+
+  // Delete deposit button handler
+  $(document).on('click', '.delete-deposit-btn', function(e) {
+    e.preventDefault();
+    const depositId = $(this).data('deposit-id');
+    const accountNumber = $(this).data('account-number');
+    const deleteUrl = $(this).data('delete-url');
+    deleteDeposit(depositId, accountNumber, deleteUrl);
   });
 
   // Filter functionality

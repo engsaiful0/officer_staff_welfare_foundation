@@ -14,7 +14,7 @@
       </div>
       
       <div class="card-body">
-        <form action="{{ route('deposits.store') }}" method="POST" id="depositForm">
+        <form action="{{ route('deposits.store') }}" method="POST" id="depositForm" novalidate>
           @csrf
           
           <div class="row">
@@ -25,7 +25,7 @@
                 <option value="">Select Member</option>
                 @foreach($members as $member)
                   <option value="{{ $member->id }}" {{ (old('member_id') == $member->id || ($member && $member->id == $member->id)) ? 'selected' : '' }}>
-                    {{ $member->name }} ({{ $member->member_unique_id }})
+                    {{ $member->name }} ({{ $member->unique_id }})
                   </option>
                 @endforeach
               </select>
@@ -36,27 +36,35 @@
 
             <!-- Product Name -->
             <div class="col-md-6 mb-3">
-              <label for="product_name" class="form-label">Product Name</label>
-              <input type="text" class="form-control @error('product_name') is-invalid @enderror" 
-                     id="product_name" name="product_name" value="{{ old('product_name') }}" 
-                     placeholder="e.g., Savings Account, Fixed Deposit">
-              @error('product_name')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
+              <label for="deposit_account_number" class="form-label">Account Number</label>
+              <input type="text" value="{{ $nextAccountNumber }}" class="form-control @error('deposit_account_number') is-invalid @enderror" 
+                     id="deposit_account_number" name="deposit_account_number" readonly required>
             </div>
-
-            <!-- Deposit Amount -->
+            <!-- Monthly Deposit Amount -->
             <div class="col-md-6 mb-3">
-              <label for="deposit_amount" class="form-label">Deposit Amount <span class="text-danger">*</span></label>
+              <label for="monthly_deposit_amount" class="form-label">Monthly Deposit Amount</label>
               <div class="input-group">
                 <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('deposit_amount') is-invalid @enderror" 
-                       id="deposit_amount" name="deposit_amount" value="{{ old('deposit_amount') }}" 
-                       step="0.01" min="0" required placeholder="0.00">
+                <input type="number" class="form-control @error('monthly_deposit_amount') is-invalid @enderror" 
+                       id="monthly_deposit_amount" name="monthly_deposit_amount" value="{{ old('monthly_deposit_amount') }}" 
+                       step="0.01" min="0" placeholder="0.00">
               </div>
-              @error('deposit_amount')
+              @error('monthly_deposit_amount')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
+              <div class="form-text">Fixed amount to deposit every month (leave empty if not applicable)</div>
+            </div>
+
+            <!-- Deposit Day of Month -->
+            <div class="col-md-6 mb-3" id="deposit_day_container" style="display: none;">
+              <label for="deposit_day_of_month" class="form-label">Deposit Day of Month</label>
+              <input type="number" class="form-control @error('deposit_day_of_month') is-invalid @enderror" 
+                     id="deposit_day_of_month" name="deposit_day_of_month" value="{{ old('deposit_day_of_month', 1) }}" 
+                     min="1" max="31">
+              @error('deposit_day_of_month')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+              <div class="form-text">Day of month when monthly deposit should be processed (1-31)</div>
             </div>
 
             <!-- Deposit Type -->
@@ -128,8 +136,10 @@
                 <a href="{{ route('deposits.view-deposits') }}" class="btn btn-outline-secondary">
                   Cancel
                 </a>
-                <button type="submit" class="btn btn-primary">
-                  <i class="bx bx-save me-1"></i> Create Deposit
+                <button type="button" class="btn btn-primary" id="submitBtn">
+                  <span class="spinner-border spinner-border-sm me-2 d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
+                  <i class="bx bx-save me-1" id="submitIcon"></i> 
+                  <span id="submitText">Create Deposit</span>
                 </button>
               </div>
             </div>
@@ -139,11 +149,42 @@
     </div>
   </div>
 </div>
+
 @endsection
 
-@push('scripts')
+@section('page-script')
 <script>
-$(document).ready(function() {
+// Ensure jQuery is loaded
+if (typeof jQuery === 'undefined') {
+  console.error('jQuery is not loaded!');
+} else {
+  console.log('jQuery version:', jQuery.fn.jquery);
+}
+
+jQuery(document).ready(function($) {
+  console.log('Document ready - initializing deposit form handlers');
+  const monthlyDepositInput = $('#monthly_deposit_amount');
+  const depositDayContainer = $('#deposit_day_container');
+  const depositDayInput = $('#deposit_day_of_month');
+
+  // Show/hide deposit day field based on monthly deposit amount
+  monthlyDepositInput.on('input', function() {
+    if (this.value && parseFloat(this.value) > 0) {
+      depositDayContainer.show();
+      depositDayInput.attr('required', 'required');
+    } else {
+      depositDayContainer.hide();
+      depositDayInput.removeAttr('required');
+      depositDayInput.val('1');
+    }
+  });
+
+  // Initialize on page load
+  if (monthlyDepositInput.val() && parseFloat(monthlyDepositInput.val()) > 0) {
+    depositDayContainer.show();
+    depositDayInput.attr('required', 'required');
+  }
+
   // Auto-calculate maturity date based on deposit type
   $('#deposit_type, #start_date').on('change', function() {
     const depositType = $('#deposit_type').val();
@@ -174,23 +215,155 @@ $(document).ready(function() {
     }
   });
 
-  // Form validation
-  $('#depositForm').on('submit', function(e) {
-    const depositAmount = parseFloat($('#deposit_amount').val());
-    const rate = parseFloat($('#rate').val());
+  // Function to handle form submission via AJAX
+  function submitFormViaAjax() {
+    console.log('submitFormViaAjax called');
+    const form = $('#depositForm');
+    const submitBtn = $('#submitBtn');
+    const submitSpinner = $('#submitSpinner');
+    const submitIcon = $('#submitIcon');
     
-    if (depositAmount <= 0) {
-      e.preventDefault();
-      alert('Deposit amount must be greater than 0');
+    // Basic validation
+    if (!form[0].checkValidity()) {
+      form[0].reportValidity();
       return false;
     }
     
-    if (rate < 0 || rate > 100) {
-      e.preventDefault();
-      alert('Interest rate must be between 0 and 100');
-      return false;
-    }
+    // Disable button and show spinner
+    submitBtn.prop('disabled', true);
+    submitSpinner.removeClass('d-none');
+    submitIcon.addClass('d-none');
+    
+    // Clear previous error messages
+    $('.is-invalid').removeClass('is-invalid');
+    $('.invalid-feedback').remove();
+    $('.alert').remove();
+    
+    // Get form data including CSRF token
+    const formData = form.serialize();
+    console.log('Form data:', formData);
+    console.log('Form action:', form.attr('action'));
+    
+    // Make AJAX request
+    $.ajax({
+      url: form.attr('action'),
+      type: 'POST',
+      data: formData,
+      dataType: 'json',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      success: function(response) {
+        if (response.success) {
+          // Show success message
+          if (typeof toastr !== 'undefined') {
+            toastr.success(response.message || 'Deposit created successfully');
+          } else {
+            alert(response.message || 'Deposit created successfully');
+          }
+          
+          // Redirect to show page or index
+          setTimeout(function() {
+            if (response.data && response.data.id) {
+              window.location.href = '{{ url("/app/deposits") }}/' + response.data.id;
+            } else {
+              window.location.href = '{{ route("deposits.view-deposits") }}';
+            }
+          }, 1000);
+        } else {
+          // Show error message
+          if (typeof toastr !== 'undefined') {
+            toastr.error(response.message || 'Failed to create deposit');
+          } else {
+            alert(response.message || 'Failed to create deposit');
+          }
+          
+          // Re-enable button
+          submitBtn.prop('disabled', false);
+          submitSpinner.addClass('d-none');
+          submitIcon.removeClass('d-none');
+        }
+      },
+      error: function(xhr, status, error) {
+        // Re-enable button
+        submitBtn.prop('disabled', false);
+        submitSpinner.addClass('d-none');
+        submitIcon.removeClass('d-none');
+        
+        // Check if response is JSON
+        let responseJSON = null;
+        try {
+          responseJSON = xhr.responseJSON;
+        } catch (e) {
+          // Response is not JSON
+        }
+        
+        if (xhr.status === 422 && responseJSON && responseJSON.errors) {
+          // Validation errors
+          const errors = responseJSON.errors;
+          let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+          errorHtml += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+          errorHtml += '<strong>Please fix the following errors:</strong><ul class="mb-0 mt-2">';
+          
+          // Display validation errors
+          $.each(errors, function(field, messages) {
+            const fieldElement = $('[name="' + field + '"]');
+            fieldElement.addClass('is-invalid');
+            
+            let errorMessage = '';
+            $.each(messages, function(index, message) {
+              errorMessage += message + ' ';
+            });
+            
+            // Remove existing invalid feedback for this field
+            fieldElement.siblings('.invalid-feedback').remove();
+            fieldElement.after('<div class="invalid-feedback">' + errorMessage.trim() + '</div>');
+            errorHtml += '<li>' + errorMessage.trim() + '</li>';
+          });
+          
+          errorHtml += '</ul></div>';
+          form.prepend(errorHtml);
+          
+          // Scroll to top to show errors
+          $('html, body').animate({
+            scrollTop: 0
+          }, 500);
+        } else {
+          // Other errors
+          const errorMessage = (responseJSON && responseJSON.message) 
+            ? responseJSON.message 
+            : 'An error occurred while creating the deposit. Please try again.';
+          
+          if (typeof toastr !== 'undefined') {
+            toastr.error(errorMessage);
+          } else {
+            alert(errorMessage);
+          }
+        }
+      }
+    });
+  }
+
+  // Handle button click - primary method
+  $('#submitBtn').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Submit button clicked');
+    submitFormViaAjax();
+    return false;
   });
+
+  // Handle form submission - prevent default form submission (backup)
+  $('#depositForm').on('submit', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Form submit event triggered');
+    submitFormViaAjax();
+    return false;
+  });
+  
+  console.log('Deposit form AJAX handlers initialized');
 });
 </script>
-@endpush
+@endsection

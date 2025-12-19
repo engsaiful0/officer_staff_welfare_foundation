@@ -60,6 +60,7 @@
                             <table class="table table-striped table-bordered table-hover">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>#</th>
                                         <th>Account #</th>
                                         <th>Member</th>
                                         <th>Product</th>
@@ -74,6 +75,7 @@
                                 <tbody>
                                     @foreach($investments as $investment)
                                         <tr>
+                                            <td>{{ $loop->iteration }}</td>
                                             <td>
                                                 @if($investment->account && $investment->account->account_number)
                                                     <span class="fw-semibold">{{ $investment->account->account_number }}</span>

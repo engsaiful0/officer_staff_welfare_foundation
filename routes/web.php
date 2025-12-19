@@ -400,6 +400,7 @@ Route::get('/app/deposits/view-deposits', [DepositController::class, 'index'])->
 Route::get('/app/deposits/add-deposit', [DepositController::class, 'create'])->name('deposits.add-deposit');
 Route::get('/app/deposits/{deposit}', [DepositController::class, 'show'])->name('deposits.show');
 Route::get('/app/deposits/{deposit}/edit', [DepositController::class, 'edit'])->name('deposits.edit');
+Route::delete('/app/deposits/{deposit}', [DepositController::class, 'destroy'])->name('deposits.destroy');
 Route::patch('/app/deposits/{deposit}/close', [DepositController::class, 'close'])->name('deposits.close');
 Route::get('/app/deposits/member/{memberId}', [DepositController::class, 'getByMember'])->name('deposits.by-member');
 
@@ -411,6 +412,10 @@ Route::post('/app/deposits/{deposit}/ledger/accrue', [DepositLedgerController::c
 Route::post('/app/deposits/{deposit}/ledger/adjustment', [DepositLedgerController::class, 'adjustment'])->name('deposits.ledger.adjustment');
 Route::put('/app/deposits/{deposit}/ledger/{ledgerEntry}', [DepositLedgerController::class, 'update'])->name('deposits.ledger.update');
 Route::delete('/app/deposits/{deposit}/ledger/{ledgerEntry}', [DepositLedgerController::class, 'destroy'])->name('deposits.ledger.destroy');
+
+// Member Deposit Ledger Routes
+Route::get('/app/deposits/member-ledger', [DepositLedgerController::class, 'memberLedger'])->name('deposits.member-ledger');
+Route::get('/app/deposits/member/{memberId}/ledger', [DepositLedgerController::class, 'getMemberLedger'])->name('deposits.member-ledger.get');
 
 // Deposit Import Routes
 Route::get('/app/deposits/import', [DepositImportController::class, 'index'])->name('deposits.import');

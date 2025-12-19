@@ -96,6 +96,7 @@
                                 <table class="table table-striped table-bordered table-hover">
                                     <thead class="table-light">
                                         <tr>
+                                            <th>#</th>
                                             <th>Installment #</th>
                                             <th>Due Date</th>
                                             <th>Principal</th>
@@ -116,6 +117,7 @@
                                                 $totalAmount = $installment->principal_amount + $installment->rent + $estimatedFine;
                                             @endphp
                                             <tr class="{{ $isOverdue ? 'table-danger' : '' }}">
+                                                <td>{{ $loop->iteration }}</td>
                                                 <td>
                                                     <strong>#{{ $installment->installment_number }}</strong>
                                                 </td>

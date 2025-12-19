@@ -134,6 +134,12 @@
           "name": "Reports",
           "slug": "deposits.reports",
           "permission": "deposit-reports"
+        },
+        {
+          "url": "/app/deposits/member-ledger",
+          "name": "Member Deposit Ledger",
+          "slug": "deposits.member-ledger",
+          "permission": "deposit-view"
         }
       ]
     },
