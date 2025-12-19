@@ -263,9 +263,9 @@
                                         </div>
 
                                         <!-- Net Paid Amount (Auto-calculated) -->
-                                        <div class="col-md-12">
+                                        <div class="col-md-12 mt-3">
                                             <label for="paid_amount" class="form-label">
-                                                Net Payment Amount <span class="text-danger">*</span>
+                                                <strong>Net Payment Amount <span class="text-danger">*</span></strong>
                                             </label>
                                             <div class="input-group input-group-lg">
                                                 <span class="input-group-text bg-primary text-white">৳</span>
@@ -273,14 +273,14 @@
                                                        class="form-control @error('paid_amount') is-invalid @enderror" 
                                                        id="paid_amount" 
                                                        name="paid_amount" 
-                                                       value="{{ old('paid_amount', number_format($installment->principal_amount + $installment->rent + $fine, 2)) }}" 
+                                                       value="{{ old('paid_amount', $installment->principal_amount + $installment->rent + $fine) }}" 
                                                        step="0.01" 
                                                        min="0" 
                                                        required
                                                        readonly
                                                        style="background-color: #e7f3ff; font-size: 1.25rem; font-weight: bold;">
                                             </div>
-                                            <small class="text-muted">
+                                            <small class="text-muted d-block mt-2">
                                                 <span id="net_amount_calculation">Base Amount - Discount = Net Payment</span>
                                             </small>
                                             <div class="invalid-feedback"></div>
@@ -405,8 +405,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         paidAmountInput.value = netPaid.toFixed(2);
         netAmountCalculation.textContent = 
-            `$${baseAmount.toFixed(2)} - $${discount.toFixed(2)} = $${netPaid.toFixed(2)}`;
+            `৳${baseAmount.toFixed(2)} - ৳${discount.toFixed(2)} = ৳${netPaid.toFixed(2)}`;
     }
+
+    // Initialize calculation on page load
+    calculateNetPaidAmount();
 
     // Calculate fine based on paid date
     function calculateFine() {
@@ -469,9 +472,7 @@ document.addEventListener('DOMContentLoaded', function() {
         submitIcon.classList.add('d-none');
         submitText.textContent = 'Processing Payment...';
         submitBtn.disabled = true;
-        form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
-            field.disabled = true;
-        });
+      
 
         const formData = new FormData(form);
 
