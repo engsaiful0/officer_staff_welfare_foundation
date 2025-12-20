@@ -124,6 +124,12 @@
           "permission": "deposit-view"
         },
         {
+          "url": "/app/deposits/monthly-collections",
+          "name": "Monthly Deposit Collections",
+          "slug": "deposits.monthly-collections.index",
+          "permission": "deposit-view"
+        },
+        {
           "url": "/app/deposits/import",
           "name": "Import Data",
           "slug": "deposits.import",

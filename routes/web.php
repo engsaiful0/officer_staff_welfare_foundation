@@ -398,12 +398,24 @@ use App\Http\Controllers\DepositReportController;
 Route::resource('deposits', DepositController::class);
 Route::get('/app/deposits/view-deposits', [DepositController::class, 'index'])->name('deposits.view-deposits');
 Route::get('/app/deposits/add-deposit', [DepositController::class, 'create'])->name('deposits.add-deposit');
+Route::get('/app/deposits/member/{memberId}', [DepositController::class, 'getByMember'])->name('deposits.by-member');
+
+// Monthly Deposit Collection Routes (must come before {deposit} routes)
+use App\Http\Controllers\MonthlyDepositCollectionController;
+Route::get('/app/deposits/monthly-collections', [MonthlyDepositCollectionController::class, 'index'])->name('deposits.monthly-collections.index');
+Route::get('/app/deposits/monthly-collections/create', [MonthlyDepositCollectionController::class, 'create'])->name('deposits.monthly-collections.create');
+Route::get('/app/deposits/monthly-collections/export', [MonthlyDepositCollectionController::class, 'export'])->name('deposits.monthly-collections.export');
+Route::post('/app/deposits/monthly-collections', [MonthlyDepositCollectionController::class, 'store'])->name('deposits.monthly-collections.store');
+Route::get('/app/deposits/monthly-collections/{id}', [MonthlyDepositCollectionController::class, 'show'])->name('deposits.monthly-collections.show');
+Route::get('/app/deposits/monthly-collections/{id}/edit', [MonthlyDepositCollectionController::class, 'edit'])->name('deposits.monthly-collections.edit');
+Route::put('/app/deposits/monthly-collections/{id}', [MonthlyDepositCollectionController::class, 'update'])->name('deposits.monthly-collections.update');
+Route::delete('/app/deposits/monthly-collections/{id}', [MonthlyDepositCollectionController::class, 'destroy'])->name('deposits.monthly-collections.destroy');
+
 Route::get('/app/deposits/{deposit}', [DepositController::class, 'show'])->name('deposits.show');
 Route::get('/app/deposits/{deposit}/edit', [DepositController::class, 'edit'])->name('deposits.edit');
 Route::put('/app/deposits/{deposit}', [DepositController::class, 'update'])->name('deposits.update');
 Route::delete('/app/deposits/{deposit}', [DepositController::class, 'destroy'])->name('deposits.destroy');
 Route::patch('/app/deposits/{deposit}/close', [DepositController::class, 'close'])->name('deposits.close');
-Route::get('/app/deposits/member/{memberId}', [DepositController::class, 'getByMember'])->name('deposits.by-member');
 
 // Deposit Ledger Routes
 Route::get('/app/deposits/{deposit}/ledger', [DepositLedgerController::class, 'index'])->name('deposits.ledger.index');
