@@ -241,19 +241,25 @@ jQuery(document).ready(function($) {
             toastr.options = {
               closeButton: true,
               progressBar: true,
-              timeOut: 3000,
+              timeOut: 4000,
               extendedTimeOut: 1000,
               positionClass: 'toast-top-right'
             };
-            toastr.success(response.message || 'Monthly deposit collection updated successfully');
+            toastr.success(response.message || 'Monthly deposit collection updated successfully!');
           } else {
-            alert(response.message || 'Monthly deposit collection updated successfully');
+            alert(response.message || 'Monthly deposit collection updated successfully!');
           }
           
-          // Redirect to index page
+          // Redirect to invoice page
           setTimeout(function() {
-            window.location.href = '{{ route("deposits.monthly-collections.index") }}';
-          }, 1500);
+            if (response.redirect) {
+              window.location.href = response.redirect;
+            } else if (response.data && response.data.id) {
+              window.location.href = '{{ route("deposits.monthly-collections.index") }}/' + response.data.id + '/invoice';
+            } else {
+              window.location.href = '{{ route("deposits.monthly-collections.index") }}';
+            }
+          }, 2000);
         } else {
           // Show error message
           if (typeof toastr !== 'undefined') {

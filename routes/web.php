@@ -407,6 +407,7 @@ Route::get('/app/deposits/monthly-collections/create', [MonthlyDepositCollection
 Route::get('/app/deposits/monthly-collections/export', [MonthlyDepositCollectionController::class, 'export'])->name('deposits.monthly-collections.export');
 Route::post('/app/deposits/monthly-collections', [MonthlyDepositCollectionController::class, 'store'])->name('deposits.monthly-collections.store');
 Route::get('/app/deposits/monthly-collections/{id}', [MonthlyDepositCollectionController::class, 'show'])->name('deposits.monthly-collections.show');
+Route::get('/app/deposits/monthly-collections/{id}/invoice', [MonthlyDepositCollectionController::class, 'invoice'])->name('deposits.monthly-collections.invoice');
 Route::get('/app/deposits/monthly-collections/{id}/edit', [MonthlyDepositCollectionController::class, 'edit'])->name('deposits.monthly-collections.edit');
 Route::put('/app/deposits/monthly-collections/{id}', [MonthlyDepositCollectionController::class, 'update'])->name('deposits.monthly-collections.update');
 Route::delete('/app/deposits/monthly-collections/{id}', [MonthlyDepositCollectionController::class, 'destroy'])->name('deposits.monthly-collections.destroy');

@@ -221,11 +221,19 @@ class MonthlyDepositCollectionController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Monthly deposit collection recorded successfully',
-                'data' => $collection->load(['deposit', 'member', 'createdBy'])
-            ], 201);
+            $collection->load(['deposit', 'member', 'createdBy']);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Monthly deposit collection recorded successfully! Collection Number: ' . $collectionNumber,
+                    'data' => $collection,
+                    'redirect' => route('deposits.monthly-collections.invoice', $collection->id)
+                ], 201);
+            }
+
+            return redirect()->route('deposits.monthly-collections.invoice', $collection->id)
+                ->with('success', 'Monthly deposit collection recorded successfully! Collection Number: ' . $collectionNumber);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -240,15 +248,30 @@ class MonthlyDepositCollectionController extends Controller
     /**
      * Display the specified collection
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $collection = MonthlyDepositCollection::with(['deposit', 'member', 'createdBy'])
             ->findOrFail($id);
 
-        return response()->json([
-            'success' => true,
-            'data' => $collection
-        ]);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => $collection
+            ]);
+        }
+
+        return view('content.deposits.monthly-collections.invoice', compact('collection'));
+    }
+
+    /**
+     * Display invoice for a collection
+     */
+    public function invoice($id)
+    {
+        $collection = MonthlyDepositCollection::with(['deposit', 'member', 'createdBy'])
+            ->findOrFail($id);
+
+        return view('content.deposits.monthly-collections.invoice', compact('collection'));
     }
 
     /**
@@ -385,11 +408,19 @@ class MonthlyDepositCollectionController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Monthly deposit collection updated successfully',
-                'data' => $collection->load(['deposit', 'member', 'createdBy'])
-            ]);
+            $collection->load(['deposit', 'member', 'createdBy']);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Monthly deposit collection updated successfully!',
+                    'data' => $collection,
+                    'redirect' => route('deposits.monthly-collections.invoice', $collection->id)
+                ]);
+            }
+
+            return redirect()->route('deposits.monthly-collections.invoice', $collection->id)
+                ->with('success', 'Monthly deposit collection updated successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
