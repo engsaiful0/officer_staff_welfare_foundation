@@ -272,6 +272,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function fetchCollections(page = 1) {
   const formData = new FormData(document.getElementById('filterForm'));
   formData.append('page', page);
+  const tbody = document.getElementById('collectionsTableBody');
+  
+  // Show loading spinner
+  tbody.innerHTML = '<tr><td colspan="9" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
   
   fetch('{{ route("deposits.monthly-collections.index") }}?' + new URLSearchParams(formData), {
     headers: {
@@ -279,11 +283,16 @@ function fetchCollections(page = 1) {
       'Accept': 'application/json'
     }
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(err => Promise.reject(err));
+    }
+    return response.json();
+  })
   .then(data => {
     if (data.success) {
       renderTable(data.data);
-      document.getElementById('paginationLinks').innerHTML = data.pagination;
+      document.getElementById('paginationLinks').innerHTML = data.pagination || '';
       
       // Update summary
       if (data.summary) {
@@ -292,11 +301,20 @@ function fetchCollections(page = 1) {
         document.getElementById('totalAmount').textContent = '৳' + parseFloat(data.summary.total_amount || 0).toFixed(2);
         document.getElementById('pageTotal').textContent = '৳' + parseFloat(data.summary.current_page_total || 0).toFixed(2);
       }
+    } else {
+      tbody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">' + (data.message || 'Failed to load collections') + '</td></tr>';
+      if (typeof toastr !== 'undefined') {
+        toastr.error(data.message || 'Failed to load collections');
+      }
     }
   })
   .catch(error => {
     console.error('Error:', error);
-    toastr.error('Failed to load collections');
+    const errorMessage = error.message || 'Failed to load collections. Please check your connection and try again.';
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">' + errorMessage + '</td></tr>';
+    if (typeof toastr !== 'undefined') {
+      toastr.error(errorMessage);
+    }
   });
 }
 
