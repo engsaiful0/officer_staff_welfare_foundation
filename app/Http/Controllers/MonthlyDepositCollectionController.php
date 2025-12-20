@@ -126,21 +126,25 @@ class MonthlyDepositCollectionController extends Controller
             ->orderBy('deposit_account_number')
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'deposits' => $deposits->map(function($deposit) {
-                    return [
-                        'id' => $deposit->id,
-                        'deposit_account_number' => $deposit->deposit_account_number,
-                        'member_name' => $deposit->member->name,
-                        'member_id' => $deposit->member->unique_id,
-                        'monthly_deposit_amount' => (float)$deposit->monthly_deposit_amount,
-                        'current_balance' => (float)$deposit->current_balance
-                    ];
-                })
-            ]
-        ]);
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'deposits' => $deposits->map(function($deposit) {
+                        return [
+                            'id' => $deposit->id,
+                            'deposit_account_number' => $deposit->deposit_account_number,
+                            'member_name' => $deposit->member->name,
+                            'member_id' => $deposit->member->unique_id,
+                            'monthly_deposit_amount' => (float)$deposit->monthly_deposit_amount,
+                            'current_balance' => (float)$deposit->current_balance
+                        ];
+                    })
+                ]
+            ]);
+        }
+
+        return view('content.deposits.monthly-collections.create', compact('deposits'));
     }
 
     /**
@@ -152,7 +156,9 @@ class MonthlyDepositCollectionController extends Controller
             'deposit_id' => 'required|exists:deposits,id',
             'collection_date' => 'required|date',
             'amount' => 'required|numeric|min:0.01',
-            'month' => 'nullable|string|max:50',
+            'month' => 'nullable|string|max:20',
+            'year' => 'nullable|integer|min:2000|max:2100',
+            'month_year' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:1000'
         ]);
 
@@ -171,8 +177,15 @@ class MonthlyDepositCollectionController extends Controller
             // Generate collection number
             $collectionNumber = MonthlyDepositCollection::generateCollectionNumber();
 
-            // Get month string if not provided
-            $month = $request->month ?? Carbon::parse($request->collection_date)->format('F Y');
+            // Get month string from month_year or month+year or generate from date
+            $month = $request->month_year;
+            if (!$month) {
+                if ($request->month && $request->year) {
+                    $month = $request->month . ' ' . $request->year;
+                } else {
+                    $month = Carbon::parse($request->collection_date)->format('F Y');
+                }
+            }
 
             // Create collection
             $collection = MonthlyDepositCollection::create([
@@ -253,21 +266,25 @@ class MonthlyDepositCollectionController extends Controller
             ->orderBy('deposit_account_number')
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'collection' => $collection,
-                'deposits' => $deposits->map(function($deposit) {
-                    return [
-                        'id' => $deposit->id,
-                        'deposit_account_number' => $deposit->deposit_account_number,
-                        'member_name' => $deposit->member->name,
-                        'member_id' => $deposit->member->unique_id,
-                        'monthly_deposit_amount' => (float)$deposit->monthly_deposit_amount
-                    ];
-                })
-            ]
-        ]);
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'collection' => $collection,
+                    'deposits' => $deposits->map(function($deposit) {
+                        return [
+                            'id' => $deposit->id,
+                            'deposit_account_number' => $deposit->deposit_account_number,
+                            'member_name' => $deposit->member->name,
+                            'member_id' => $deposit->member->unique_id,
+                            'monthly_deposit_amount' => (float)$deposit->monthly_deposit_amount
+                        ];
+                    })
+                ]
+            ]);
+        }
+
+        return view('content.deposits.monthly-collections.edit', compact('collection', 'deposits'));
     }
 
     /**
@@ -279,7 +296,9 @@ class MonthlyDepositCollectionController extends Controller
             'deposit_id' => 'required|exists:deposits,id',
             'collection_date' => 'required|date',
             'amount' => 'required|numeric|min:0.01',
-            'month' => 'nullable|string|max:50',
+            'month' => 'nullable|string|max:20',
+            'year' => 'nullable|integer|min:2000|max:2100',
+            'month_year' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:1000'
         ]);
 
@@ -297,8 +316,15 @@ class MonthlyDepositCollectionController extends Controller
             $oldAmount = $collection->amount;
             $oldDate = $collection->collection_date;
 
-            // Get month string if not provided
-            $month = $request->month ?? Carbon::parse($request->collection_date)->format('F Y');
+            // Get month string from month_year or month+year or generate from date
+            $month = $request->month_year;
+            if (!$month) {
+                if ($request->month && $request->year) {
+                    $month = $request->month . ' ' . $request->year;
+                } else {
+                    $month = Carbon::parse($request->collection_date)->format('F Y');
+                }
+            }
 
             // Update collection
             $collection->update([

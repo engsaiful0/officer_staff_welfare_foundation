@@ -130,6 +130,12 @@
           "permission": "deposit-view"
         },
         {
+          "url": "/app/deposits/monthly-collections/create",
+          "name": "Add Monthly Deposit Collection",
+          "slug": "deposits.monthly-collections.create",
+          "permission": "deposit-add"
+        },
+        {
           "url": "/app/deposits/import",
           "name": "Import Data",
           "slug": "deposits.import",

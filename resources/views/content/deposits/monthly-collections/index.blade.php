@@ -18,9 +18,9 @@
           <button type="button" class="btn btn-outline-danger export-btn" data-type="pdf">
             <i class="bx bx-file-blank me-1"></i> PDF
           </button>
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#collectionModal" onclick="openCreateModal()">
+          <a href="{{ route('deposits.monthly-collections.create') }}" class="btn btn-primary">
             <i class="bx bx-plus me-1"></i> Add Collection
-          </button>
+          </a>
         </div>
       </div>
 
@@ -134,75 +134,13 @@
   </div>
 </div>
 
-<!-- Create/Edit Modal -->
-<div class="modal fade" id="collectionModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">Add Monthly Deposit Collection</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="collectionForm">
-        <div class="modal-body">
-          <input type="hidden" id="collection_id" name="id">
-          
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="deposit_id" class="form-label">Deposit Account <span class="text-danger">*</span></label>
-              <select class="form-select" id="deposit_id" name="deposit_id" required>
-                <option value="">Select Deposit Account</option>
-              </select>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="collection_date" class="form-label">Collection Date <span class="text-danger">*</span></label>
-              <input type="date" class="form-control" id="collection_date" name="collection_date" value="{{ date('Y-m-d') }}" required>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required>
-              </div>
-              <div class="form-text" id="monthlyAmountHint"></div>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="month" class="form-label">Month</label>
-              <input type="text" class="form-control" id="month" name="month" placeholder="e.g., January 2024">
-              <div class="form-text">Leave empty to auto-generate from date</div>
-              <div class="invalid-feedback"></div>
-            </div>
-            <div class="col-12 mb-3">
-              <label for="description" class="form-label">Description</label>
-              <textarea class="form-control" id="description" name="description" rows="3" placeholder="Additional notes..."></textarea>
-              <div class="invalid-feedback"></div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="submitBtn">
-            <span class="spinner-border spinner-border-sm me-2 d-none" id="submitSpinner"></span>
-            <span id="submitText">Save Collection</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 @endsection
 
 @section('page-script')
 <script>
-let isEditMode = false;
-let currentCollectionId = null;
-
 document.addEventListener('DOMContentLoaded', function() {
   const filterForm = document.getElementById('filterForm');
   const resetBtn = document.getElementById('resetFilters');
-  const collectionModal = new bootstrap.Modal(document.getElementById('collectionModal'));
   
   // Initial load
   fetchCollections();
@@ -228,34 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
       params.append('type', type);
       window.open('{{ route("deposits.monthly-collections.export") }}?' + params.toString(), '_blank');
     });
-  });
-
-  // Form submission
-  document.getElementById('collectionForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    saveCollection();
-  });
-
-  // Deposit selection change
-  document.getElementById('deposit_id').addEventListener('change', function() {
-    const depositId = this.value;
-    if (depositId) {
-      const option = this.options[this.selectedIndex];
-      const monthlyAmount = option.dataset.monthlyAmount;
-      if (monthlyAmount) {
-        document.getElementById('amount').value = monthlyAmount;
-        document.getElementById('monthlyAmountHint').textContent = `Monthly deposit amount: ৳${parseFloat(monthlyAmount).toFixed(2)}`;
-      }
-    }
-  });
-
-  // Date change - auto-generate month
-  document.getElementById('collection_date').addEventListener('change', function() {
-    if (!document.getElementById('month').value) {
-      const date = new Date(this.value);
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      document.getElementById('month').value = monthNames[date.getMonth()] + ' ' + date.getFullYear();
-    }
   });
 
   // Pagination click handling
@@ -326,7 +236,9 @@ function renderTable(collections) {
     return;
   }
   
-  tbody.innerHTML = collections.map(collection => `
+  tbody.innerHTML = collections.map(collection => {
+    const editUrl = '{{ route("deposits.monthly-collections.index") }}/' + collection.id + '/edit';
+    return `
     <tr>
       <td>${new Date(collection.collection_date).toLocaleDateString()}</td>
       <td><strong>${collection.collection_number}</strong></td>
@@ -343,7 +255,7 @@ function renderTable(collections) {
           </button>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="#" onclick="viewCollection(${collection.id})"><i class="bx bx-show me-2"></i> View</a></li>
-            <li><a class="dropdown-item" href="#" onclick="openEditModal(${collection.id})"><i class="bx bx-edit me-2"></i> Edit</a></li>
+            <li><a class="dropdown-item" href="#" onclick="editCollection(${collection.id})"><i class="bx bx-edit me-2"></i> Edit</a></li>
             <li><a class="dropdown-item text-danger" href="#" onclick="deleteCollection(${collection.id})"><i class="bx bx-trash me-2"></i> Delete</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="#" onclick="exportCollection(${collection.id}, 'print')"><i class="bx bx-printer me-2"></i> Print</a></li>
@@ -352,132 +264,12 @@ function renderTable(collections) {
         </div>
       </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 
-function openCreateModal() {
-  isEditMode = false;
-  currentCollectionId = null;
-  document.getElementById('modalTitle').textContent = 'Add Monthly Deposit Collection';
-  document.getElementById('submitText').textContent = 'Save Collection';
-  document.getElementById('collectionForm').reset();
-  document.getElementById('collection_id').value = '';
-  document.getElementById('collection_date').value = '{{ date('Y-m-d') }}';
-  document.getElementById('monthlyAmountHint').textContent = '';
-  
-  // Load deposits
-  fetch('{{ route("deposits.monthly-collections.create") }}', {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'Accept': 'application/json'
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const select = document.getElementById('deposit_id');
-      select.innerHTML = '<option value="">Select Deposit Account</option>' +
-        data.data.deposits.map(deposit => 
-          `<option value="${deposit.id}" data-monthly-amount="${deposit.monthly_deposit_amount}">
-            ${deposit.deposit_account_number} - ${deposit.member_name} (${deposit.member_id})
-          </option>`
-        ).join('');
-    }
-  });
-}
-
-function openEditModal(id) {
-  isEditMode = true;
-  currentCollectionId = id;
-  document.getElementById('modalTitle').textContent = 'Edit Monthly Deposit Collection';
-  document.getElementById('submitText').textContent = 'Update Collection';
-  
-  fetch(`{{ route("deposits.monthly-collections.index") }}/${id}/edit`, {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'Accept': 'application/json'
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const collection = data.data.collection;
-      document.getElementById('collection_id').value = collection.id;
-      document.getElementById('collection_date').value = collection.collection_date;
-      document.getElementById('amount').value = collection.amount;
-      document.getElementById('month').value = collection.month || '';
-      document.getElementById('description').value = collection.description || '';
-      
-      // Load deposits
-      const select = document.getElementById('deposit_id');
-      select.innerHTML = '<option value="">Select Deposit Account</option>' +
-        data.data.deposits.map(deposit => 
-          `<option value="${deposit.id}" data-monthly-amount="${deposit.monthly_deposit_amount}" ${deposit.id == collection.deposit_id ? 'selected' : ''}>
-            ${deposit.deposit_account_number} - ${deposit.member_name} (${deposit.member_id})
-          </option>`
-        ).join('');
-      
-      new bootstrap.Modal(document.getElementById('collectionModal')).show();
-    }
-  });
-}
-
-function saveCollection() {
-  const form = document.getElementById('collectionForm');
-  const formData = new FormData(form);
-  const submitBtn = document.getElementById('submitBtn');
-  const submitSpinner = document.getElementById('submitSpinner');
-  const submitText = document.getElementById('submitText');
-  
-  submitBtn.disabled = true;
-  submitSpinner.classList.remove('d-none');
-  
-  const url = isEditMode 
-    ? `{{ route("deposits.monthly-collections.index") }}/${currentCollectionId}`
-    : '{{ route("deposits.monthly-collections.store") }}';
-  const method = isEditMode ? 'PUT' : 'POST';
-  
-  formData.append('_method', method);
-  formData.append('_token', '{{ csrf_token() }}');
-  
-  fetch(url, {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'Accept': 'application/json'
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      toastr.success(data.message || 'Collection saved successfully');
-      bootstrap.Modal.getInstance(document.getElementById('collectionModal')).hide();
-      fetchCollections();
-    } else {
-      if (data.errors) {
-        Object.keys(data.errors).forEach(field => {
-          const input = document.getElementById(field) || document.querySelector(`[name="${field}"]`);
-          if (input) {
-            input.classList.add('is-invalid');
-            const feedback = input.nextElementSibling;
-            if (feedback && feedback.classList.contains('invalid-feedback')) {
-              feedback.textContent = data.errors[field][0];
-            }
-          }
-        });
-      }
-      toastr.error(data.message || 'Failed to save collection');
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    toastr.error('An error occurred while saving the collection');
-  })
-  .finally(() => {
-    submitBtn.disabled = false;
-    submitSpinner.classList.add('d-none');
-  });
+function editCollection(id) {
+  window.location.href = `{{ route("deposits.monthly-collections.index") }}/${id}/edit`;
 }
 
 function deleteCollection(id) {
