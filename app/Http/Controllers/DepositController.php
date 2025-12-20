@@ -201,11 +201,11 @@ class DepositController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'member_id' => 'required|exists:members,id',
-            'deposit_amount' => 'required|numeric|min:0',
-            'product_name' => 'nullable|string|max:255',
+            'monthly_deposit_amount' => 'nullable|numeric|min:0',
+            'deposit_day_of_month' => 'nullable|integer|min:1|max:31',
             'start_date' => 'required|date',
             'maturity_date' => 'nullable|date|after:start_date',
-            'rate' => 'nullable|numeric|min:0|max:1',
+            'rate' => 'nullable|numeric|min:0|max:100',
             'deposit_type' => 'required|in:savings,fixed,recurring',
             'status' => 'required|in:active,matured,closed',
             'notes' => 'nullable|string'
@@ -224,13 +224,16 @@ class DepositController extends Controller
         try {
             DB::beginTransaction();
 
+            // Convert rate from percentage to decimal (e.g., 8% -> 0.08)
+            $rate = $request->rate ? $request->rate / 100 : null;
+
             $deposit->update([
                 'member_id' => $request->member_id,
-                'deposit_amount' => $request->deposit_amount,
-                'product_name' => $request->product_name,
+                'monthly_deposit_amount' => $request->monthly_deposit_amount ?? null,
+                'deposit_day_of_month' => $request->deposit_day_of_month ?? 1,
                 'start_date' => $request->start_date,
                 'maturity_date' => $request->maturity_date,
-                'rate' => $request->rate,
+                'rate' => $rate,
                 'deposit_type' => $request->deposit_type,
                 'status' => $request->status,
                 'notes' => $request->notes

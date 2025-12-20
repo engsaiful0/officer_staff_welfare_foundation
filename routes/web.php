@@ -400,6 +400,7 @@ Route::get('/app/deposits/view-deposits', [DepositController::class, 'index'])->
 Route::get('/app/deposits/add-deposit', [DepositController::class, 'create'])->name('deposits.add-deposit');
 Route::get('/app/deposits/{deposit}', [DepositController::class, 'show'])->name('deposits.show');
 Route::get('/app/deposits/{deposit}/edit', [DepositController::class, 'edit'])->name('deposits.edit');
+Route::put('/app/deposits/{deposit}', [DepositController::class, 'update'])->name('deposits.update');
 Route::delete('/app/deposits/{deposit}', [DepositController::class, 'destroy'])->name('deposits.destroy');
 Route::patch('/app/deposits/{deposit}/close', [DepositController::class, 'close'])->name('deposits.close');
 Route::get('/app/deposits/member/{memberId}', [DepositController::class, 'getByMember'])->name('deposits.by-member');

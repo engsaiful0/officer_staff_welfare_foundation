@@ -3,6 +3,20 @@
 @section('title', 'Deposit Details')
 
 @section('content')
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>Success!</strong> {{ session('success') }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <strong>Error!</strong> {{ session('error') }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <div class="row">
   <!-- Deposit Information -->
   <div class="col-md-8">
@@ -381,6 +395,35 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Show toast message from session flash if available
+  @if(session('success'))
+    if (typeof toastr !== 'undefined') {
+      toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        timeOut: 3000,
+        extendedTimeOut: 1000,
+        positionClass: 'toast-top-right',
+        showMethod: 'fadeIn',
+        hideMethod: 'fadeOut'
+      };
+      toastr.success('{{ session('success') }}');
+    }
+  @endif
+  
+  @if(session('error'))
+    if (typeof toastr !== 'undefined') {
+      toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        timeOut: 5000,
+        extendedTimeOut: 1000,
+        positionClass: 'toast-top-right'
+      };
+      toastr.error('{{ session('error') }}');
+    }
+  @endif
+  
   const depositForm = document.getElementById('depositForm');
   const monthlyAmount = {{ $deposit->monthly_deposit_amount ?? 0 }};
 
