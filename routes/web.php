@@ -412,6 +412,11 @@ Route::get('/app/deposits/monthly-collections/{id}/edit', [MonthlyDepositCollect
 Route::put('/app/deposits/monthly-collections/{id}', [MonthlyDepositCollectionController::class, 'update'])->name('deposits.monthly-collections.update');
 Route::delete('/app/deposits/monthly-collections/{id}', [MonthlyDepositCollectionController::class, 'destroy'])->name('deposits.monthly-collections.destroy');
 
+// Deposit Account Ledger Routes (must come before {deposit} routes)
+Route::get('/app/deposits/account-ledger', [DepositLedgerController::class, 'accountLedger'])->name('deposits.account-ledger');
+Route::get('/app/deposits/account-ledger/{depositId}', [DepositLedgerController::class, 'getAccountLedger'])->name('deposits.account-ledger.get');
+Route::get('/app/deposits/account-ledger/{depositId}/export', [DepositLedgerController::class, 'exportAccountLedger'])->name('deposits.account-ledger.export');
+
 Route::get('/app/deposits/{deposit}', [DepositController::class, 'show'])->name('deposits.show');
 Route::get('/app/deposits/{deposit}/edit', [DepositController::class, 'edit'])->name('deposits.edit');
 Route::put('/app/deposits/{deposit}', [DepositController::class, 'update'])->name('deposits.update');

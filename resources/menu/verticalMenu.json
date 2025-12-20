@@ -152,6 +152,12 @@
           "name": "Member Deposit Ledger",
           "slug": "deposits.member-ledger",
           "permission": "deposit-view"
+        },
+        {
+          "url": "/app/deposits/account-ledger",
+          "name": "Deposit Account Ledger",
+          "slug": "deposits.account-ledger",
+          "permission": "deposit-view"
         }
       ]
     },
