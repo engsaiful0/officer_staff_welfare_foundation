@@ -43,8 +43,37 @@ class MonthlyDepositCollectionController extends Controller
     private function getCollections(Request $request)
     {
         $query = MonthlyDepositCollection::with(['deposit', 'member', 'createdBy']);
+        $this->applyFilters($query, $request);
 
-        // Apply filters
+        // Get total amount before pagination (without orderBy for better performance)
+        $totalAmountQuery = MonthlyDepositCollection::query();
+        $this->applyFilters($totalAmountQuery, $request);
+        $totalAmount = $totalAmountQuery->sum('amount');
+
+        $collections = $query->orderBy('collection_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(15);
+
+        // Calculate current page total
+        $currentPageTotal = collect($collections->items())->sum('amount');
+
+        return response()->json([
+            'success' => true,
+            'data' => $collections->items(),
+            'pagination' => (string) $collections->links(),
+            'summary' => [
+                'total_collections' => $collections->total(),
+                'total_amount' => $totalAmount,
+                'current_page_total' => $currentPageTotal
+            ]
+        ]);
+    }
+
+    /**
+     * Apply filters to query
+     */
+    private function applyFilters($query, Request $request)
+    {
         if ($request->filled('deposit_id')) {
             $query->where('deposit_id', $request->deposit_id);
         }
@@ -83,21 +112,6 @@ class MonthlyDepositCollectionController extends Controller
                   });
             });
         }
-
-        $collections = $query->orderBy('collection_date', 'desc')
-            ->orderBy('id', 'desc')
-            ->paginate(15);
-
-        return response()->json([
-            'success' => true,
-            'data' => $collections->items(),
-            'pagination' => (string) $collections->links(),
-            'summary' => [
-                'total_collections' => $collections->total(),
-                'total_amount' => $collections->sum('amount'),
-                'current_page_total' => $collections->sum('amount')
-            ]
-        ]);
     }
 
     /**
@@ -454,45 +468,7 @@ class MonthlyDepositCollectionController extends Controller
         
         // Get collections with same filters as index
         $query = MonthlyDepositCollection::with(['deposit', 'member', 'createdBy']);
-
-        if ($request->filled('deposit_id')) {
-            $query->where('deposit_id', $request->deposit_id);
-        }
-
-        if ($request->filled('member_id')) {
-            $query->where('member_id', $request->member_id);
-        }
-
-        if ($request->filled('collection_number')) {
-            $query->where('collection_number', 'like', '%' . $request->collection_number . '%');
-        }
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('collection_date', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('collection_date', '<=', $request->date_to);
-        }
-
-        if ($request->filled('month')) {
-            $query->where('month', $request->month);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('collection_number', 'like', "%$search%")
-                  ->orWhere('description', 'like', "%$search%")
-                  ->orWhereHas('deposit', function($dq) use ($search) {
-                      $dq->where('deposit_account_number', 'like', "%$search%");
-                  })
-                  ->orWhereHas('member', function($mq) use ($search) {
-                      $mq->where('name', 'like', "%$search%")
-                        ->orWhere('unique_id', 'like', "%$search%");
-                  });
-            });
-        }
+        $this->applyFilters($query, $request);
 
         $collections = $query->orderBy('collection_date', 'desc')->get();
         $summary = [
