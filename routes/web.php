@@ -358,6 +358,12 @@ Route::get('/app/investments/collection/{installment}/edit', [InvestmentCollecti
 Route::put('/app/investments/collection/{installment}', [InvestmentCollectionController::class, 'update'])->name('investments.collection.update');
 Route::delete('/app/investments/collection/{installment}', [InvestmentCollectionController::class, 'destroy'])->name('investments.collection.destroy');
 
+// Investment Account Ledger Routes (must come before {investment} routes)
+use App\Http\Controllers\InvestmentLedgerController;
+Route::get('/app/investments/account-ledger', [InvestmentLedgerController::class, 'accountLedger'])->name('investments.account-ledger');
+Route::get('/app/investments/account-ledger/{investmentId}', [InvestmentLedgerController::class, 'getAccountLedger'])->name('investments.account-ledger.get');
+Route::get('/app/investments/account-ledger/{investmentId}/export', [InvestmentLedgerController::class, 'exportAccountLedger'])->name('investments.account-ledger.export');
+
 Route::get('/app/investments/view-investments', [InvestmentController::class, 'index'])->name('investments.view-investments');
 Route::get('/app/investments/add-investment', [InvestmentController::class, 'create'])->name('investments.add-investment');
 Route::get('/app/investments/member/{memberId}', [InvestmentController::class, 'getByMember'])->name('investments.by-member');

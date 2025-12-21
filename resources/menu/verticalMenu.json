@@ -103,6 +103,12 @@
           "name": "Reports",
           "slug": "investments.reports",
           "permission": "investment-reports"
+        },
+        {
+          "url": "/app/investments/account-ledger",
+          "name": "Account Ledger",
+          "slug": "investments.account-ledger",
+          "permission": "investment-view"
         }
       ]
     },
@@ -124,33 +130,22 @@
           "permission": "deposit-view"
         },
         {
-          "url": "/app/deposits/monthly-collections",
-          "name": "Monthly Deposit Collections",
-          "slug": "deposits.monthly-collections.index",
-          "permission": "deposit-view"
-        },
-        {
           "url": "/app/deposits/monthly-collections/create",
-          "name": "Add Monthly Deposit Collection",
+          "name": "Add Collection",
           "slug": "deposits.monthly-collections.create",
           "permission": "deposit-add"
         },
         {
-          "url": "/app/deposits/import",
-          "name": "Import Data",
-          "slug": "deposits.import",
-          "permission": "deposit-import"
+          "url": "/app/deposits/monthly-collections",
+          "name": "View Collection",
+          "slug": "deposits.monthly-collections.index",
+          "permission": "deposit-view"
         },
-        {
-          "url": "/app/deposits/reports",
-          "name": "Reports",
-          "slug": "deposits.reports",
-          "permission": "deposit-reports"
-        },
+       
        
         {
           "url": "/app/deposits/account-ledger",
-          "name": "Deposit Account Ledger",
+          "name": "Deposit Ledger",
           "slug": "deposits.account-ledger",
           "permission": "deposit-view"
         }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Deposit Account Ledger - {{ $deposit->deposit_account_number }}</title>
+    <title>Investment Account Ledger - {{ $investment->account->account_number ?? $investment->id }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -79,30 +79,34 @@
 <body>
     <div class="no-print" style="margin-bottom: 20px; text-align: center;">
         <button onclick="window.print()" style="padding: 10px 20px; font-size: 14px; cursor: pointer;">Print</button>
-        <a href="{{ route('deposits.account-ledger') }}" style="padding: 10px 20px; font-size: 14px; text-decoration: none; background: #6c757d; color: white; border-radius: 4px; display: inline-block; margin-left: 10px;">Back</a>
+        <a href="{{ route('investments.account-ledger') }}" style="padding: 10px 20px; font-size: 14px; text-decoration: none; background: #6c757d; color: white; border-radius: 4px; display: inline-block; margin-left: 10px;">Back</a>
     </div>
 
     <div class="header">
-        <h2>Deposit Account Ledger</h2>
+        <h2>Investment Account Ledger</h2>
     </div>
 
     <div class="info">
         <table>
             <tr>
                 <td>Account Number:</td>
-                <td>{{ $deposit->deposit_account_number }}</td>
+                <td>{{ $investment->account->account_number ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td>Member Name:</td>
-                <td>{{ $deposit->member->name ?? 'N/A' }}</td>
+                <td>{{ $investment->member->name ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td>Member ID:</td>
-                <td>{{ $deposit->member->unique_id ?? 'N/A' }}</td>
+                <td>{{ $investment->member->unique_id ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td>Start Date:</td>
-                <td>{{ $deposit->start_date->format('d/m/Y') }}</td>
+                <td>{{ $investment->start_date->format('d/m/Y') }}</td>
+            </tr>
+            <tr>
+                <td>Principal Amount:</td>
+                <td>{{ number_format($investment->principal_amount, 2) }}</td>
             </tr>
             <tr>
                 <td>Generated On:</td>
@@ -125,7 +129,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($ledgerData as $row)
+            @foreach($ledger as $row)
             <tr>
                 <td>{{ $row['date'] }}</td>
                 <td>{{ $row['ending_date'] }}</td>
@@ -153,5 +157,4 @@
     </div>
 </body>
 </html>
-
 
