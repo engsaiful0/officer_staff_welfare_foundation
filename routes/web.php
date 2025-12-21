@@ -70,6 +70,7 @@ use App\Http\Controllers\settings\User;
 use App\Http\Controllers\settings\Branch;
 use App\Http\Controllers\settings\Relation;
 use App\Http\Controllers\settings\InvestmentType;
+use App\Http\Controllers\settings\DepositType;
 use App\Http\Controllers\CacheController;
 
 
@@ -204,6 +205,12 @@ Route::get('/app/settings/get-investment-type', [InvestmentType::class, 'getInve
 Route::post('/app/settings/investment-type', [InvestmentType::class, 'store'])->name('app-settings-investment-type.store');
 Route::put('/app/settings/investment-type/{id}', [InvestmentType::class, 'update'])->name('app-settings-investment-type.update');
 Route::delete('/app/settings/investment-type/{id}', [InvestmentType::class, 'destroy'])->name('app-settings-investment-type.destroy');
+
+Route::get('/app/settings/deposit-type', [DepositType::class, 'index'])->name('app-settings-deposit-type');
+Route::get('/app/settings/get-deposit-type', [DepositType::class, 'getDepositTypes'])->name('app-settings-get-deposit-type');
+Route::post('/app/settings/deposit-type', [DepositType::class, 'store'])->name('app-settings-deposit-type.store');
+Route::put('/app/settings/deposit-type/{id}', [DepositType::class, 'update'])->name('app-settings-deposit-type.update');
+Route::delete('/app/settings/deposit-type/{id}', [DepositType::class, 'destroy'])->name('app-settings-deposit-type.destroy');
 
 // Cache Management Routes
 Route::get('/app/settings/cache-clear', [CacheController::class, 'index'])->name('app-settings-cache-clear');

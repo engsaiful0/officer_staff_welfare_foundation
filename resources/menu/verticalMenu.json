@@ -157,14 +157,14 @@
       "slug": "report-management",
       "submenu": [
         {
-          "url": "/app/student-list-report",
-          "name": "Student List",
-          "slug": "student-list-report"
+          "url": "/app/member-list-report",
+          "name": "Member List",
+          "slug": "member-list-report"
         },
         {
-          "url": "app/fee-collection-report",
-          "name": "Fee Collection Report",
-          "slug": "fee-collection-report"
+          "url": "app/investment-collection-report",
+          "name": "Investment Collection Report", 
+          "slug": "investment-collection-report"
         },
         {
           "url": "app/expense-report",
@@ -177,30 +177,9 @@
           "slug": "employee-list-report"
         },
         {
-          "url": "app/teacher-list-report",
-          "name": "Teacher List Report",
-          "slug": "teacher-list-report"
-        },
-        {
-          "url": "app/head-wise-fee-report",
-          "name": "Head Wise Fee Report",
-          "slug": "head-wise-fee-report"
-        },
-        {
-          "url": "app/fee-summary",
-          "name": "Student Fee Summary",
-          "slug": "fee-summary",
-          "permission": "fee-summary-view"
-        },
-        {
-          "url": "app/my-collection-report",
-          "name": "My Collection Report",
-          "slug": "my-collection-report"
-        },
-        {
-          "url": "app/fee-management/monthly-report",
-          "name": "Monthly Fee Due Report",
-          "slug": "monthly-fee-due-report"
+          "url": "app/deposit-collection-report",
+          "name": "Deposit Collection Report",
+          "slug": "deposit-collection-report"
         }
       ]
     },
@@ -259,6 +238,11 @@
           "url": "app/settings/investment-type",
           "name": "Investment Type",
           "slug": "investment-type"
+        },
+        {
+          "url": "app/settings/deposit-type",
+          "name": "Deposit Type",
+          "slug": "deposit-type"
         },
         {
           "url": "app/settings/cache-clear",
