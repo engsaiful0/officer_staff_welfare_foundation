@@ -22,7 +22,7 @@ class Deposit extends Model
         'start_date',
         'maturity_date',
         'rate',
-        'deposit_type',
+        'deposit_type_id',
         'status',
         'notes'
     ];
@@ -43,6 +43,11 @@ class Deposit extends Model
     public function member()
     {
         return $this->belongsTo(Member::class);
+    }
+
+    public function depositType()
+    {
+        return $this->belongsTo(DepositType::class);
     }
 
     public function ledgerEntries()
@@ -123,9 +128,9 @@ class Deposit extends Model
         return $query->where('member_id', $memberId);
     }
 
-    public function scopeByType($query, $type)
+    public function scopeByType($query, $typeId)
     {
-        return $query->where('deposit_type', $type);
+        return $query->where('deposit_type_id', $typeId);
     }
 
     public function scopeWithInterest($query)

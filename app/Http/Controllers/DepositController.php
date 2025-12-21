@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Deposit;
+use App\Models\DepositType;
 use App\Models\Member;
 use App\Models\LedgerEntry;
 use App\Models\DepositAccountNumber;
@@ -18,7 +19,7 @@ class DepositController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Deposit::with(['member', 'ledgerEntries' => function($q) {
+        $query = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
             $q->orderBy('entry_date', 'desc')->limit(1);
         }]);
 
@@ -31,8 +32,8 @@ class DepositController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('deposit_type')) {
-            $query->where('deposit_type', $request->deposit_type);
+        if ($request->filled('deposit_type_id')) {
+            $query->where('deposit_type_id', $request->deposit_type_id);
         }
 
         if ($request->filled('date_from')) {
@@ -53,8 +54,9 @@ class DepositController extends Controller
         }
 
         $members = Member::select('id', 'name', 'unique_id')->get();
+        $depositTypes = DepositType::all();
         
-        return view('content.deposits.index', compact('deposits', 'members'));
+        return view('content.deposits.index', compact('deposits', 'members', 'depositTypes'));
     }
 
     /**
@@ -67,8 +69,9 @@ class DepositController extends Controller
         $memberId = $request->get('member_id');
         $member = $memberId ? Member::find($memberId) : null;
         $members = Member::select('id', 'name', 'unique_id')->get();
+        $depositTypes = DepositType::all();
         
-        return view('content.deposits.create', compact('member', 'members', 'nextAccountNumber'));
+        return view('content.deposits.create', compact('member', 'members', 'nextAccountNumber', 'depositTypes'));
     }
 
     /**
@@ -84,7 +87,7 @@ class DepositController extends Controller
             'start_date' => 'required|date',
             'maturity_date' => 'nullable|date|after:start_date',
             'rate' => 'nullable|numeric|min:0|max:100',
-            'deposit_type' => 'required|in:savings,fixed,recurring',
+            'deposit_type_id' => 'required|exists:deposit_types,id',
             'notes' => 'nullable|string'
         ]);
 
@@ -112,7 +115,7 @@ class DepositController extends Controller
                 'start_date' => $request->start_date,
                 'maturity_date' => $request->maturity_date,
                 'rate' => $rate,
-                'deposit_type' => $request->deposit_type,
+                'deposit_type_id' => $request->deposit_type_id,
                 'status' => 'active',
                 'notes' => $request->notes
             ]);
@@ -169,7 +172,7 @@ class DepositController extends Controller
      */
     public function show(Deposit $deposit)
     {
-        $deposit->load(['member', 'ledgerEntries.createdBy']);
+        $deposit->load(['member', 'depositType', 'ledgerEntries.createdBy']);
         $ledgerEntries = $deposit->ledgerEntries()->orderBy('entry_date', 'desc')->paginate(10);
 
         if (request()->expectsJson()) {
@@ -191,7 +194,8 @@ class DepositController extends Controller
     public function edit(Deposit $deposit)
     {
         $members = Member::select('id', 'name', 'unique_id')->get();
-        return view('content.deposits.edit', compact('deposit', 'members'));
+        $depositTypes = DepositType::all();
+        return view('content.deposits.edit', compact('deposit', 'members', 'depositTypes'));
     }
 
     /**
@@ -206,7 +210,7 @@ class DepositController extends Controller
             'start_date' => 'required|date',
             'maturity_date' => 'nullable|date|after:start_date',
             'rate' => 'nullable|numeric|min:0|max:100',
-            'deposit_type' => 'required|in:savings,fixed,recurring',
+            'deposit_type_id' => 'required|exists:deposit_types,id',
             'status' => 'required|in:active,matured,closed',
             'notes' => 'nullable|string'
         ]);
@@ -234,7 +238,7 @@ class DepositController extends Controller
                 'start_date' => $request->start_date,
                 'maturity_date' => $request->maturity_date,
                 'rate' => $rate,
-                'deposit_type' => $request->deposit_type,
+                'deposit_type_id' => $request->deposit_type_id,
                 'status' => $request->status,
                 'notes' => $request->notes
             ]);
@@ -344,7 +348,7 @@ class DepositController extends Controller
      */
     public function getByMember($memberId)
     {
-        $deposits = Deposit::with(['member', 'ledgerEntries' => function($q) {
+        $deposits = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
             $q->orderBy('entry_date', 'desc')->limit(1);
         }])
         ->where('member_id', $memberId)

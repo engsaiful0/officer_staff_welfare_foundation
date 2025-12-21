@@ -87,6 +87,10 @@
         <label for="type_filter" class="form-label">Type</label>
         <select class="form-select" id="type_filter">
           <option value="">All Types</option>
+          @foreach($depositTypes as $type)
+            <option value="{{ $type->id }}" {{ request('deposit_type_id') == $type->id ? 'selected' : '' }}>{{ $type->deposit_type_name }}</option>
+          @endforeach
+          <option value="">All Types</option>
           <option value="savings">Savings</option>
           <option value="fixed">Fixed</option>
           <option value="recurring">Recurring</option>
@@ -140,8 +144,8 @@
               </td>
               <td>{{ $deposit->product_name ?: 'N/A' }}</td>
               <td>
-                <span class="badge bg-label-{{ $deposit->deposit_type === 'savings' ? 'info' : ($deposit->deposit_type === 'fixed' ? 'warning' : 'success') }}">
-                  {{ ucfirst($deposit->deposit_type) }}
+                <span class="badge bg-label-info">
+                  {{ $deposit->depositType ? $deposit->depositType->deposit_type_name : 'N/A' }}
                 </span>
               </td>
               <td>৳{{ number_format($deposit->deposit_amount, 2) }}</td>
@@ -387,7 +391,7 @@ $(document).ready(function() {
     
     if ($('#member_filter').val()) params.append('member_id', $('#member_filter').val());
     if ($('#status_filter').val()) params.append('status', $('#status_filter').val());
-    if ($('#type_filter').val()) params.append('deposit_type', $('#type_filter').val());
+    if ($('#type_filter').val()) params.append('deposit_type_id', $('#type_filter').val());
     if ($('#date_from').val()) params.append('date_from', $('#date_from').val());
     if ($('#date_to').val()) params.append('date_to', $('#date_to').val());
     

@@ -43,7 +43,7 @@ class ProcessDepositAccruals extends Command
         }
 
         try {
-            $query = Deposit::withInterest()
+            $query = Deposit::withInterest()->with('depositType')
                 ->active()
                 ->where('start_date', '<=', $date);
 
@@ -185,26 +185,26 @@ class ProcessDepositAccruals extends Command
         }
 
         // Calculate interest based on deposit type
-        switch ($deposit->deposit_type) {
-            case 'savings':
-                // Daily interest for savings
-                $dailyRate = $deposit->rate / 365;
-                return $currentBalance * $dailyRate * $days;
-
-            case 'fixed':
-                // Monthly interest for fixed deposits
-                $months = $days / 30;
-                $monthlyRate = $deposit->rate / 12;
-                return $currentBalance * $monthlyRate * $months;
-
-            case 'recurring':
-                // Monthly interest for recurring deposits
-                $months = $days / 30;
-                $monthlyRate = $deposit->rate / 12;
-                return $currentBalance * $monthlyRate * $months;
-
-            default:
-                return 0;
+        $depositTypeName = $deposit->depositType ? strtolower($deposit->depositType->deposit_type_name) : '';
+        
+        if (str_contains($depositTypeName, 'savings')) {
+            // Daily interest for savings
+            $dailyRate = $deposit->rate / 365;
+            return $currentBalance * $dailyRate * $days;
+        } elseif (str_contains($depositTypeName, 'fixed')) {
+            // Monthly interest for fixed deposits
+            $months = $days / 30;
+            $monthlyRate = $deposit->rate / 12;
+            return $currentBalance * $monthlyRate * $months;
+        } elseif (str_contains($depositTypeName, 'recurring')) {
+            // Monthly interest for recurring deposits
+            $months = $days / 30;
+            $monthlyRate = $deposit->rate / 12;
+            return $currentBalance * $monthlyRate * $months;
         }
+
+        // Default: daily interest
+        $dailyRate = $deposit->rate / 365;
+        return $currentBalance * $dailyRate * $days;
     }
 }

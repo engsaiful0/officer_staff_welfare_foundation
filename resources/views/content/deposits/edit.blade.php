@@ -88,14 +88,14 @@
 
             <!-- Deposit Type -->
             <div class="col-md-6 mb-3">
-              <label for="deposit_type" class="form-label">Deposit Type <span class="text-danger">*</span></label>
-              <select class="form-select @error('deposit_type') is-invalid @enderror" id="deposit_type" name="deposit_type" required>
+              <label for="deposit_type_id" class="form-label">Deposit Type <span class="text-danger">*</span></label>
+              <select class="form-select @error('deposit_type_id') is-invalid @enderror" id="deposit_type_id" name="deposit_type_id" required>
                 <option value="">Select Type</option>
-                <option value="savings" {{ old('deposit_type', $deposit->deposit_type) == 'savings' ? 'selected' : '' }}>Savings</option>
-                <option value="fixed" {{ old('deposit_type', $deposit->deposit_type) == 'fixed' ? 'selected' : '' }}>Fixed Deposit</option>
-                <option value="recurring" {{ old('deposit_type', $deposit->deposit_type) == 'recurring' ? 'selected' : '' }}>Recurring Deposit</option>
+                @foreach($depositTypes as $type)
+                  <option value="{{ $type->id }}" {{ old('deposit_type_id', $deposit->deposit_type_id) == $type->id ? 'selected' : '' }}>{{ $type->deposit_type_name }}</option>
+                @endforeach
               </select>
-              @error('deposit_type')
+              @error('deposit_type_id')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
@@ -249,30 +249,31 @@ jQuery(document).ready(function($) {
   }
 
   // Auto-calculate maturity date based on deposit type
-  $('#deposit_type, #start_date').on('change', function() {
-    const depositType = $('#deposit_type').val();
+  // Note: This logic may need to be adjusted based on your deposit type names
+  $('#deposit_type_id, #start_date').on('change', function() {
+    const depositTypeId = $('#deposit_type_id').val();
+    const depositTypeName = $('#deposit_type_id option:selected').text().toLowerCase();
     const startDate = $('#start_date').val();
     
-    if (depositType && startDate) {
+    if (depositTypeId && startDate) {
       const start = new Date(startDate);
       let maturityDate = new Date(start);
       
-      switch(depositType) {
-        case 'savings':
-          // No maturity date for savings
-          $('#maturity_date').val('');
-          break;
-        case 'fixed':
-          // 1 year for fixed deposits
-          maturityDate.setFullYear(maturityDate.getFullYear() + 1);
-          break;
-        case 'recurring':
-          // 2 years for recurring deposits
-          maturityDate.setFullYear(maturityDate.getFullYear() + 2);
-          break;
-      }
-      
-      if (depositType !== 'savings') {
+      // Check deposit type name (case-insensitive)
+      if (depositTypeName.includes('savings')) {
+        // No maturity date for savings
+        $('#maturity_date').val('');
+      } else if (depositTypeName.includes('fixed')) {
+        // 1 year for fixed deposits
+        maturityDate.setFullYear(maturityDate.getFullYear() + 1);
+        $('#maturity_date').val(maturityDate.toISOString().split('T')[0]);
+      } else if (depositTypeName.includes('recurring')) {
+        // 2 years for recurring deposits
+        maturityDate.setFullYear(maturityDate.getFullYear() + 2);
+        $('#maturity_date').val(maturityDate.toISOString().split('T')[0]);
+      } else {
+        // Default: 1 year for other types
+        maturityDate.setFullYear(maturityDate.getFullYear() + 1);
         $('#maturity_date').val(maturityDate.toISOString().split('T')[0]);
       }
     }

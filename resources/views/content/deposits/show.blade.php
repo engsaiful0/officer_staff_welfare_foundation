@@ -55,8 +55,8 @@
               <tr>
                 <td><strong>Deposit Type:</strong></td>
                 <td>
-                  <span class="badge bg-label-{{ $deposit->deposit_type === 'savings' ? 'info' : ($deposit->deposit_type === 'fixed' ? 'warning' : 'success') }}">
-                    {{ ucfirst($deposit->deposit_type) }}
+                  <span class="badge bg-label-info">
+                    {{ $deposit->depositType ? $deposit->depositType->deposit_type_name : 'N/A' }}
                   </span>
                 </td>
               </tr>

@@ -34,7 +34,7 @@ class DepositReportController extends Controller
      */
     public function portfolioReport(Request $request)
     {
-        $query = Deposit::with(['member', 'ledgerEntries' => function($q) {
+        $query = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
             $q->orderBy('entry_date', 'desc')->limit(1);
         }]);
 
@@ -47,8 +47,8 @@ class DepositReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('deposit_type')) {
-            $query->where('deposit_type', $request->deposit_type);
+        if ($request->filled('deposit_type_id')) {
+            $query->where('deposit_type_id', $request->deposit_type_id);
         }
 
         if ($request->filled('date_from')) {
@@ -119,7 +119,7 @@ class DepositReportController extends Controller
             return [
                 'deposit_id' => $deposit->id,
                 'member_name' => $deposit->member->name,
-                'deposit_type' => $deposit->deposit_type,
+                'deposit_type' => $deposit->depositType ? $deposit->depositType->deposit_type_name : 'N/A',
                 'rate' => $deposit->rate_percentage,
                 'total_interest' => $entries->sum('amount'),
                 'entries_count' => $entries->count(),
@@ -158,7 +158,7 @@ class DepositReportController extends Controller
         $daysAhead = $request->get('days_ahead', 30);
         $includePast = $request->get('include_past', true);
 
-        $query = Deposit::with(['member'])
+        $query = Deposit::with(['member', 'depositType'])
             ->whereNotNull('maturity_date');
 
         if ($includePast) {
