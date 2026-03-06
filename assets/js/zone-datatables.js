@@ -1,5 +1,5 @@
 /**
- * DataTables Basic
+ * Zone DataTables - CRUD with AJAX and Spinners
  */
 
 'use strict';
@@ -13,34 +13,26 @@ document.addEventListener('DOMContentLoaded', function (e) {
       const newRecord = document.querySelector('.create-new'),
         offCanvasElement = document.querySelector('#add-new-record');
 
-      // To open offCanvas, to add new record
       if (newRecord) {
         newRecord.addEventListener('click', function () {
-          offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
-          // Empty fields on offCanvas open
-          offCanvasElement.querySelector('.dt-full-name').value = '';
-          offCanvasElement.querySelector('#branch_address').value = '';
-          $('#form-add-new-record').removeAttr('data-id');
-          // Open offCanvas with form
-          offCanvasEl.show();
+          showAddButtonSpinner(this);
+          setTimeout(function () {
+            offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
+            offCanvasElement.querySelector('.dt-full-name').value = '';
+            $('#form-add-new-record').removeAttr('data-id');
+            offCanvasEl.show();
+            hideAddButtonSpinner(newRecord);
+          }, 200);
         });
       }
     }, 200);
 
-    // Form validation for Add new record
     fv = FormValidation.formValidation(formAddNewRecord, {
       fields: {
-        branch_name: {
+        zone_name: {
           validators: {
             notEmpty: {
-              message: 'The branch name is required'
-            }
-          }
-        },
-        branch_address: {
-          validators: {
-            notEmpty: {
-              message: 'The branch address is required'
+              message: 'The zone name is required'
             }
           }
         }
@@ -48,13 +40,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
       plugins: {
         trigger: new FormValidation.plugins.Trigger(),
         bootstrap5: new FormValidation.plugins.Bootstrap5({
-          // Use this for enabling/changing valid/invalid class
-          // eleInvalidClass: '',
           eleValidClass: '',
           rowSelector: '.col-sm-12'
         }),
         submitButton: new FormValidation.plugins.SubmitButton(),
-        // defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
         autoFocus: new FormValidation.plugins.AutoFocus()
       },
       init: instance => {
@@ -68,46 +57,40 @@ document.addEventListener('DOMContentLoaded', function (e) {
   })();
 });
 
-// datatable (jquery)
 $(function () {
+  var getDataUrl = (typeof window.zoneUrls !== 'undefined' && window.zoneUrls.getData)
+    ? window.zoneUrls.getData
+    : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/get-zone') : '/app/settings/get-zone');
+
   var dt_basic_table = $('.datatables-basic'),
     dt_basic;
 
-  // DataTable with buttons
-  // --------------------------------------------------------------------
-
   if (dt_basic_table.length) {
-    var getDataUrl = (typeof window.branchUrls !== 'undefined' && window.branchUrls.getData)
-      ? window.branchUrls.getData
-      : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/get-branch') : '/app/settings/get-branch');
     dt_basic = dt_basic_table.DataTable({
       ajax: {
         url: getDataUrl,
         type: 'GET',
         dataSrc: 'data',
-        beforeSend: function() {
-          // Show loading message
-          $('.datatables-basic tbody').html('<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+        beforeSend: function () {
+          $('.datatables-basic tbody').html('<tr><td colspan="3" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
         },
         error: function (xhr, error, code) {
-          var msg = 'Failed to load branches. ';
+          var msg = 'Failed to load zones. ';
           if (xhr && xhr.status) msg += 'Status: ' + xhr.status + '. ';
           if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg += xhr.responseJSON.message;
           else if (xhr && xhr.responseText) msg += (xhr.responseText.substring(0, 100) || 'Invalid response.');
-          console.error('Branch DataTables Ajax error:', { xhr: xhr, error: error, code: code });
+          console.error('Zone DataTables Ajax error:', { xhr: xhr, error: error, code: code });
           if (typeof toastr !== 'undefined') toastr.error(msg);
-          $('.datatables-basic tbody').html('<tr><td colspan="4" class="text-center text-danger">' + msg + '</td></tr>');
+          $('.datatables-basic tbody').html('<tr><td colspan="3" class="text-center text-danger">' + msg + '</td></tr>');
         }
       },
       columns: [
         { data: 'id' },
-        { data: 'branch_name' },
-        { data: 'branch_address' },
+        { data: 'zone_name' },
         { data: '' }
       ],
       columnDefs: [
         {
-          // Actions
           targets: -1,
           title: 'Actions',
           orderable: false,
@@ -138,71 +121,41 @@ $(function () {
           className: 'create-new btn btn-primary waves-effect waves-light'
         }
       ],
-      responsive: {
-        details: {
-          display: $.fn.dataTable.Responsive.display.modal({
-            header: function (row) {
-              var data = row.data();
-              return 'Details of ' + data['branch_name'];
-            }
-          }),
-          type: 'column',
-          renderer: function (api, rowIdx, columns) {
-            var data = $.map(columns, function (col, i) {
-              return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                ? '<tr data-dt-row="' +
-                col.rowIndex +
-                '" data-dt-column="' +
-                col.columnIndex +
-                '">' +
-                '<td>' +
-                col.title +
-                ':' +
-                '</td> ' +
-                '<td>' +
-                col.data +
-                '</td>' +
-                '</tr>'
-                : '';
-            }).join('');
-
-            return data ? $('<table class="table"/><tbody />').append(data) : false;
-          }
-        }
-      },
       initComplete: function (settings, json) {
         $('.card-header').after('<hr class="my-0">');
       }
     });
-    $('div.head-label').html('<h5 class="card-title mb-0">Branches</h5>');
+    $('div.head-label').html('<h5 class="card-title mb-0">Zones</h5>');
   }
 
   // Add/Update Record
   fv.on('core.form.valid', function () {
     var $new_name = $('.add-new-record .dt-full-name').val();
-    var $new_address = $('#branch_address').val();
     var id = $('#form-add-new-record').attr('data-id');
-    var $submitBtn = $('.data-submit');
-    var $cancelBtn = $('.btn-outline-secondary');
+    var $submitBtn = $('#submit-btn');
+    var $submitSpinner = $('#submit-spinner');
+    var $submitText = $('#submit-text');
+    var $cancelBtn = $('.add-new-record .btn-outline-secondary');
 
-    if ($new_name != '') {
-      var url = (typeof window.branchUrls !== 'undefined' && window.branchUrls.store) ? window.branchUrls.store : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/branch') : '/app/settings/branch');
+    if ($new_name !== '') {
+      var baseUrl = (typeof window.zoneUrls !== 'undefined' && window.zoneUrls.store) ? window.zoneUrls.store : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/zone') : '/app/settings/zone');
+      var url = baseUrl;
       var method = 'POST';
-      var message = 'Branch added successfully.';
+      var message = 'Zone added successfully.';
       var data = {
         _token: $('meta[name="csrf-token"]').attr('content'),
-        branch_name: $new_name,
-        branch_address: $new_address
+        zone_name: $new_name
       };
 
       if (id) {
-        url = (typeof window.branchUrls !== 'undefined' && window.branchUrls.update) ? window.branchUrls.update + '/' + id : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/branch/' + id) : '/app/settings/branch/' + id);
+        url = (typeof window.zoneUrls !== 'undefined' && window.zoneUrls.update) ? window.zoneUrls.update + '/' + id : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/zone/' + id) : '/app/settings/zone/' + id);
         method = 'PUT';
-        message = 'Branch updated successfully.';
+        message = 'Zone updated successfully.';
       }
 
-      // Show loading state
-      $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...');
+      $submitBtn.prop('disabled', true);
+      $submitSpinner.removeClass('d-none');
+      $submitText.text('Processing...');
       $cancelBtn.prop('disabled', true);
 
       $.ajax({
@@ -210,30 +163,23 @@ $(function () {
         type: method,
         data: data,
         success: function (response) {
-          // Show loading state for table reload
-          $('.datatables-basic tbody').html('<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Updating...</span></div></td></tr>');
-          
-          dt_basic.ajax.reload(function() {
+          $('.datatables-basic tbody').html('<tr><td colspan="3" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Updating...</span></div></td></tr>');
+          dt_basic.ajax.reload(function () {
             offCanvasEl.hide();
             $('#form-add-new-record').removeAttr('data-id');
-            // Reset form fields
             $('.dt-full-name').val('');
-            $('#branch_address').val('');
             toastr.success(message);
           });
         },
         error: function (error) {
-          if (error.responseJSON && error.responseJSON.message) {
-            message = error.responseJSON.message;
-          } else {
-            message = 'An error occurred while processing your request.';
-          }
-          toastr.error(message);
+          var errMsg = (error.responseJSON && error.responseJSON.message) ? error.responseJSON.message : 'An error occurred.';
+          toastr.error(errMsg);
           console.log(error);
         },
-        complete: function() {
-          // Reset button state
-          $submitBtn.prop('disabled', false).html('Submit');
+        complete: function () {
+          $submitBtn.prop('disabled', false);
+          $submitSpinner.addClass('d-none');
+          $submitText.text('Submit');
           $cancelBtn.prop('disabled', false);
         }
       });
@@ -245,7 +191,7 @@ $(function () {
     var row = dt_basic.row($(this).parents('tr'));
     var data = row.data();
     var $deleteBtn = $(this);
-    
+
     Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -259,30 +205,26 @@ $(function () {
       buttonsStyling: false
     }).then(function (result) {
       if (result.value) {
-        // Show loading state on delete button
         $deleteBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
         $deleteBtn.prop('disabled', true);
-        
+
+        var deleteUrl = (typeof window.zoneUrls !== 'undefined' && window.zoneUrls.destroy) ? window.zoneUrls.destroy + '/' + data.id : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/zone/' + data.id) : '/app/settings/zone/' + data.id);
         $.ajax({
-          url: (typeof window.branchUrls !== 'undefined' && window.branchUrls.destroy) ? window.branchUrls.destroy + '/' + data.id : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/branch/' + data.id) : '/app/settings/branch/' + data.id),
+          url: deleteUrl,
           type: 'DELETE',
           data: {
             _token: $('meta[name="csrf-token"]').attr('content')
           },
           success: function (response) {
             row.remove().draw();
-            toastr.success("Branch has been deleted.");
+            toastr.success('Zone has been deleted.');
           },
           error: function (error) {
-            if (error.responseJSON && error.responseJSON.message) {
-              toastr.error(error.responseJSON.message);
-            } else {
-              toastr.error('An error occurred while deleting the branch.');
-            }
+            var errMsg = (error.responseJSON && error.responseJSON.message) ? error.responseJSON.message : 'An error occurred.';
+            toastr.error(errMsg);
             console.log(error);
           },
-          complete: function() {
-            // Reset button state
+          complete: function () {
             $deleteBtn.html('<i class="ti ti-trash ti-md"></i>');
             $deleteBtn.prop('disabled', false);
           }
@@ -293,12 +235,36 @@ $(function () {
 
   // Edit Record
   $('.datatables-basic tbody').on('click', '.item-edit', function () {
+    var $editBtn = $(this);
     var row = dt_basic.row($(this).parents('tr'));
     var data = row.data();
-    offCanvasEl = new bootstrap.Offcanvas(document.querySelector('#add-new-record'));
-    document.querySelector('.dt-full-name').value = data.branch_name;
-    document.querySelector('#branch_address').value = data.branch_address;
-    $('#form-add-new-record').attr('data-id', data.id);
-    offCanvasEl.show();
+
+    $editBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+    $editBtn.prop('disabled', true);
+
+    setTimeout(function () {
+      offCanvasEl = new bootstrap.Offcanvas(document.querySelector('#add-new-record'));
+      document.querySelector('.dt-full-name').value = data.zone_name;
+      $('#form-add-new-record').attr('data-id', data.id);
+      offCanvasEl.show();
+      $editBtn.html('<i class="ti ti-pencil ti-md"></i>');
+      $editBtn.prop('disabled', false);
+    }, 200);
   });
+
+  function showAddButtonSpinner(button) {
+    var originalContent = button.innerHTML;
+    button.setAttribute('data-original-content', originalContent);
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-sm-1"></span> <span class="d-none d-sm-inline-block">Loading...</span>';
+    button.disabled = true;
+  }
+
+  function hideAddButtonSpinner(button) {
+    var originalContent = button.getAttribute('data-original-content');
+    if (originalContent) {
+      button.innerHTML = originalContent;
+      button.removeAttribute('data-original-content');
+    }
+    button.disabled = false;
+  }
 });

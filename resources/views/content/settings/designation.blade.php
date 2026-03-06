@@ -5,8 +5,19 @@
 
 @section('page-script')
     <script>
-        window.designationUrls = AppUtils.buildApiUrls('app/settings/designation');
-        console.log('Designation URLs:', window.designationUrls);
+        window.designationUrls = {
+            getData: '{{ url("app/settings/get-designation") }}',
+            store: '{{ url("app/settings/designation") }}',
+            update: '{{ url("app/settings/designation") }}',
+            destroy: '{{ url("app/settings/designation") }}'
+        };
+        if (typeof AppUtils !== 'undefined' && AppUtils.buildApiUrls) {
+            var fallback = AppUtils.buildApiUrls('app/settings/designation');
+            if (!window.designationUrls.getData) window.designationUrls.getData = fallback.getData;
+            if (!window.designationUrls.store) window.designationUrls.store = fallback.store;
+            if (!window.designationUrls.update) window.designationUrls.update = fallback.update;
+            if (!window.designationUrls.destroy) window.designationUrls.destroy = fallback.destroy;
+        }
     </script>
     <script src="{{ asset('assets/js/designation-datatables.js') }}?v={{ time() }}"></script>
 @endsection

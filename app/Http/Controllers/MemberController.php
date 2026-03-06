@@ -112,19 +112,11 @@ class MemberController extends Controller
                 'max:15',
                 Rule::unique('members', 'mobile'),
             ],
-            'email' => [
-                'string',
-                'max:255',
-                Rule::unique('members', 'email'),
-            ],
-            'nid_number' => [
-                'string',
-                'max:20',
-                Rule::unique('members', 'nid_number'),
-            ],
+          
             'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'designation_id' => 'required|exists:designations,id',
             'date_of_join' => 'required|date',
+            'date_of_birth' => 'required|date',
             'branch_id' => 'required|exists:branches,id',
             'religion_id' => 'required|exists:religions,id',
             'employees_id' => 'required|string|max:50',
@@ -134,6 +126,7 @@ class MemberController extends Controller
             'serial' => 'nullable|integer',
             'member_unique_id' => 'nullable|string|max:50',
             'nominee_name' => 'nullable|string|max:255',
+            'nominee_nid_number' => 'nullable|string|max:255',
             'nominee_father_name' => 'nullable|string|max:255',
             'nominee_mother_name' => 'nullable|string|max:255',
             'nominee_spouse_name' => 'nullable|string|max:255',
@@ -241,21 +234,10 @@ class MemberController extends Controller
                     'max:15',
                     Rule::unique('members', 'mobile')->ignore($member->id),
                 ],
-                'email' => [
-                    
-                    'string',
-                    'email',
-                    'max:255',
-                    Rule::unique('members', 'email')->ignore($member->id),
-                ],
-                'nid_number' => [
-                    
-                    'string',
-                    'max:20',
-                    Rule::unique('members', 'nid_number')->ignore($member->id),
-                ],
+             
                 'designation_id' => 'required|exists:designations,id',
                 'date_of_join' => 'required|date',
+                'date_of_birth' => 'required|date',
                 'branch_id' => 'required|exists:branches,id',
                 'religion_id' => 'required|exists:religions,id',
                 'employees_id' => 'nullable|string|max:50',
@@ -272,6 +254,7 @@ class MemberController extends Controller
                 'nominee_phone' => 'nullable|string|max:15',
                 'nominee_present_address' => 'nullable|string',
                 'nominee_permanent_address' => 'nullable|string',
+                'nominee_nid_number' => 'nullable|string|max:255',
                 'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ], $messages);
 

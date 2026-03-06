@@ -68,6 +68,7 @@ use App\Http\Controllers\settings\Month;
 use App\Http\Controllers\settings\User;
 
 use App\Http\Controllers\settings\Branch;
+use App\Http\Controllers\settings\Zone;
 use App\Http\Controllers\settings\Relation;
 use App\Http\Controllers\settings\InvestmentType;
 use App\Http\Controllers\CacheController;
@@ -192,6 +193,12 @@ Route::get('/app/settings/get-branch', [Branch::class, 'getbranch'])->name('app-
 Route::post('/app/settings/branch', [Branch::class, 'store'])->name('app-settings-branch.store');
 Route::put('/app/settings/branch/{id}', [Branch::class, 'update'])->name('app-settings-branch.update');
 Route::delete('/app/settings/branch/{id}', [Branch::class, 'destroy'])->name('app-settings-branch.destroy');
+
+Route::get('/app/settings/zone', [Zone::class, 'index'])->name('app-settings-zone');
+Route::get('/app/settings/get-zone', [Zone::class, 'getZone'])->name('app-settings-get-zone');
+Route::post('/app/settings/zone', [Zone::class, 'store'])->name('app-settings-zone.store');
+Route::put('/app/settings/zone/{id}', [Zone::class, 'update'])->name('app-settings-zone.update');
+Route::delete('/app/settings/zone/{id}', [Zone::class, 'destroy'])->name('app-settings-zone.destroy');
 
 Route::get('/app/settings/relation', [Relation::class, 'index'])->name('app-settings-relation');
 Route::get('/app/settings/get-relation', [Relation::class, 'getrelation'])->name('app-settings-get-relation');

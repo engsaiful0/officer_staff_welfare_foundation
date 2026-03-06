@@ -84,7 +84,16 @@ $(function () {
       ajax: {
         url: getDataUrl,
         type: 'GET',
-        dataSrc: 'data'
+        dataSrc: 'data',
+        error: function (xhr, error, code) {
+          var msg = 'Failed to load designations. ';
+          if (xhr && xhr.status) msg += 'Status: ' + xhr.status + '. ';
+          if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg += xhr.responseJSON.message;
+          else if (xhr && xhr.responseText) msg += (xhr.responseText.substring(0, 100) || 'Invalid response.');
+          console.error('Designation DataTables Ajax error:', { xhr: xhr, error: error, code: code });
+          if (typeof toastr !== 'undefined') toastr.error(msg);
+          $('.datatables-basic tbody').html('<tr><td colspan="4" class="text-center text-danger">' + msg + '</td></tr>');
+        }
       },
       columns: [
         { data: 'id' },

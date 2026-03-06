@@ -4,8 +4,19 @@
 
 @section('page-script')
     <script>
-        window.branchUrls = AppUtils.buildApiUrls('app/settings/branch');
-        console.log('Branch URLs:', window.branchUrls);
+        window.branchUrls = {
+            getData: '{{ url("app/settings/get-branch") }}',
+            store: '{{ url("app/settings/branch") }}',
+            update: '{{ url("app/settings/branch") }}',
+            destroy: '{{ url("app/settings/branch") }}'
+        };
+        if (typeof AppUtils !== 'undefined' && AppUtils.buildApiUrls) {
+            var fallback = AppUtils.buildApiUrls('app/settings/branch');
+            if (!window.branchUrls.getData) window.branchUrls.getData = fallback.getData;
+            if (!window.branchUrls.store) window.branchUrls.store = fallback.store;
+            if (!window.branchUrls.update) window.branchUrls.update = fallback.update;
+            if (!window.branchUrls.destroy) window.branchUrls.destroy = fallback.destroy;
+        }
     </script>
     <script src="{{ asset('assets/js/branch-datatables.js') }}?v={{ time() }}"></script>
 @endsection
