@@ -8,24 +8,7 @@ let fv, offCanvasEl;
 document.addEventListener('DOMContentLoaded', function (e) {
   (function () {
     const formAddNewRecord = document.getElementById('form-add-new-record');
-
-    setTimeout(() => {
-      const newRecord = document.querySelector('.create-new'),
-        offCanvasElement = document.querySelector('#add-new-record');
-
-      if (newRecord) {
-        newRecord.addEventListener('click', function () {
-          showAddButtonSpinner(this);
-          setTimeout(function () {
-            offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
-            offCanvasElement.querySelector('.dt-full-name').value = '';
-            $('#form-add-new-record').removeAttr('data-id');
-            offCanvasEl.show();
-            hideAddButtonSpinner(newRecord);
-          }, 200);
-        });
-      }
-    }, 200);
+    if (!formAddNewRecord) return;
 
     fv = FormValidation.formValidation(formAddNewRecord, {
       fields: {
@@ -127,6 +110,22 @@ $(function () {
     });
     $('div.head-label').html('<h5 class="card-title mb-0">Zones</h5>');
   }
+
+  // Add New Record button - use delegation so it works when button is created by DataTables
+  $(document).on('click', '.create-new', function () {
+    var offCanvasElement = document.querySelector('#add-new-record');
+    if (!offCanvasElement) return;
+    showAddButtonSpinner(this);
+    var btn = this;
+    setTimeout(function () {
+      offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
+      var fullNameEl = offCanvasElement.querySelector('.dt-full-name');
+      if (fullNameEl) fullNameEl.value = '';
+      $('#form-add-new-record').removeAttr('data-id');
+      offCanvasEl.show();
+      hideAddButtonSpinner(btn);
+    }, 200);
+  });
 
   // Add/Update Record
   fv.on('core.form.valid', function () {
