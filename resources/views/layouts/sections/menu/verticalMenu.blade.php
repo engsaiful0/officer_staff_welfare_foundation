@@ -381,6 +381,11 @@ function isMenuActive($slug, $currentRoute) {
             <div>Branch</div>
           </a>
         </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-zone' || $currentRouteName === 'zone') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/zone') }}" class="menu-link">
+            <div>Zone</div>
+          </a>
+        </li>
         <li class="menu-item {{ ($currentRouteName === 'app-settings-relation' || $currentRouteName === 'relation') ? 'active' : '' }}">
           <a href="{{ url('app/settings/relation') }}" class="menu-link">
             <div>Relation</div>
