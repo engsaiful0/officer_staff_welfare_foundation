@@ -18,10 +18,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
         newRecord.addEventListener('click', function () {
           offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
           // Empty fields on offCanvas open
-          offCanvasElement.querySelector('.dt-full-name').value = '';
-          offCanvasElement.querySelector('#branch_address').value = '';
+          $('#branch_zone_id').val('');
+          $('#branch_name').val('');
+          $('#branch_code').val('');
+          $('#branch_phone').val('');
+          $('#branch_address').val('');
           $('#form-add-new-record').removeAttr('data-id');
-          // Open offCanvas with form
           offCanvasEl.show();
         });
       }
@@ -87,7 +89,7 @@ $(function () {
         dataSrc: 'data',
         beforeSend: function() {
           // Show loading message
-          $('.datatables-basic tbody').html('<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+          $('.datatables-basic tbody').html('<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
         },
         error: function (xhr, error, code) {
           var msg = 'Failed to load branches. ';
@@ -96,13 +98,16 @@ $(function () {
           else if (xhr && xhr.responseText) msg += (xhr.responseText.substring(0, 100) || 'Invalid response.');
           console.error('Branch DataTables Ajax error:', { xhr: xhr, error: error, code: code });
           if (typeof toastr !== 'undefined') toastr.error(msg);
-          $('.datatables-basic tbody').html('<tr><td colspan="4" class="text-center text-danger">' + msg + '</td></tr>');
+          $('.datatables-basic tbody').html('<tr><td colspan="7" class="text-center text-danger">' + msg + '</td></tr>');
         }
       },
       columns: [
         { data: 'id' },
+        { data: 'zone', defaultContent: '', render: function (data) { return data && data.zone_name ? data.zone_name : (data || '—'); } },
         { data: 'branch_name' },
         { data: 'branch_address' },
+        { data: 'branch_code', defaultContent: '—' },
+        { data: 'branch_phone', defaultContent: '—' },
         { data: '' }
       ],
       columnDefs: [
@@ -179,8 +184,11 @@ $(function () {
 
   // Add/Update Record
   fv.on('core.form.valid', function () {
-    var $new_name = $('.add-new-record .dt-full-name').val();
+    var $new_name = $('#branch_name').val();
     var $new_address = $('#branch_address').val();
+    var $branch_code = $('#branch_code').val();
+    var $branch_phone = $('#branch_phone').val();
+    var $zone_id = $('#branch_zone_id').val();
     var id = $('#form-add-new-record').attr('data-id');
     var $submitBtn = $('.data-submit');
     var $cancelBtn = $('.btn-outline-secondary');
@@ -191,8 +199,11 @@ $(function () {
       var message = 'Branch added successfully.';
       var data = {
         _token: $('meta[name="csrf-token"]').attr('content'),
+        zone_id: $zone_id || '',
         branch_name: $new_name,
-        branch_address: $new_address
+        branch_address: $new_address,
+        branch_code: $branch_code,
+        branch_phone: $branch_phone
       };
 
       if (id) {
@@ -211,14 +222,17 @@ $(function () {
         data: data,
         success: function (response) {
           // Show loading state for table reload
-          $('.datatables-basic tbody').html('<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Updating...</span></div></td></tr>');
+          $('.datatables-basic tbody').html('<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Updating...</span></div></td></tr>');
           
           dt_basic.ajax.reload(function() {
             offCanvasEl.hide();
             $('#form-add-new-record').removeAttr('data-id');
             // Reset form fields
-            $('.dt-full-name').val('');
+            $('#branch_zone_id').val('');
+            $('#branch_name').val('');
             $('#branch_address').val('');
+            $('#branch_code').val('');
+            $('#branch_phone').val('');
             toastr.success(message);
           });
         },
@@ -296,8 +310,11 @@ $(function () {
     var row = dt_basic.row($(this).parents('tr'));
     var data = row.data();
     offCanvasEl = new bootstrap.Offcanvas(document.querySelector('#add-new-record'));
-    document.querySelector('.dt-full-name').value = data.branch_name;
-    document.querySelector('#branch_address').value = data.branch_address;
+    $('#branch_zone_id').val(data.zone_id || '');
+    $('#branch_name').val(data.branch_name || '');
+    $('#branch_address').val(data.branch_address || '');
+    $('#branch_code').val(data.branch_code || '');
+    $('#branch_phone').val(data.branch_phone || '');
     $('#form-add-new-record').attr('data-id', data.id);
     offCanvasEl.show();
   });

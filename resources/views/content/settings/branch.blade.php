@@ -29,6 +29,7 @@
                 <thead>
                     <tr>
                         <th>Id</th>
+                        <th>Zone</th>
                         <th>Branch Name</th>
                         <th>Branch Address</th>
                         <th>Branch Code</th>
@@ -48,6 +49,18 @@
         </div>
         <div class="offcanvas-body flex-grow-1">
             <form class="add-new-record pt-0 row g-2" id="form-add-new-record" onsubmit="return false">
+                    <div class="col-sm-12">
+                        <label class="form-label" for="branch_zone_id">Zone</label>
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="ti ti-map-2"></i></span>
+                            <select id="branch_zone_id" name="zone_id" class="form-select">
+                                <option value="">Select Zone</option>
+                                @foreach($zones as $zone)
+                                    <option value="{{ $zone->id }}">{{ $zone->zone_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                     <div class="col-sm-12">
                         <label class="form-label" for="branch_name">Branch Name</label>
                         <div class="input-group input-group-merge">
