@@ -150,6 +150,11 @@
                         class="form-control" placeholder="Member ID" value="{{ $member->member_unique_id }}" />
                   
                 </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="account_opening_date">Account Opening Date <span class="text-danger">*</span></label>
+                    <input  type="date" id="account_opening_date" class="form-control" placeholder="Account Opening Date" name="account_opening_date" value="{{ is_object($member->account_opening_date) && method_exists($member->account_opening_date, 'format') ? $member->account_opening_date->format('Y-m-d') : ($member->account_opening_date ?? '') }}" required
+                        class="form-control" placeholder="Account Opening Date"  />
+                </div>
                 
                 <!-- Address Information -->
                 <div class="col-12 mt-4">
@@ -207,6 +212,23 @@
                     <label for="nominee_nid_number" class="form-label">Nominee NID Number</label>
                     <input type="text" class="form-control" id="nominee_nid_number" name="nominee_nid_number" value="{{ $member->nominee_nid_number }}">
                     <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_date_of_birth" class="form-label">Nominee Date of Birth</label>
+                    <input type="date" class="form-control" id="nominee_date_of_birth" name="nominee_date_of_birth" value="{{ is_object($member->nominee_date_of_birth) && method_exists($member->nominee_date_of_birth, 'format') ? $member->nominee_date_of_birth->format('Y-m-d') : ($member->nominee_date_of_birth ?? '') }}">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_picture" class="form-label">Nominee Picture</label>
+                    <input type="file" class="form-control" id="nominee_picture" accept="image/*" name="nominee_picture">
+                    @if($member->nominee_picture)
+                    <div class="mt-2">
+                        <img src="{{ asset('storage/app/public/' . $member->nominee_picture) }}" alt="Current Picture" class="img-thumbnail" style="max-width: 100px;">
+                        <small class="text-muted d-block">Current picture</small>
+                    </div>
+                </div>
+                @endif
+                <div class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="nominee_present_address" class="form-label">Nominee Present Address</label>

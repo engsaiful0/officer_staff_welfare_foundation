@@ -104,8 +104,8 @@
                     <div class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="date_of_join" class="form-label">Date of Join <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_join" placeholder="Date of Join" name="date_of_join" required>
+                    <label for="date_of_join_in_ibbl" class="form-label">Date of Join in IBBL <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="date_of_join_in_ibbl" placeholder="Date of Join in IBBL" name="date_of_join_in_ibbl" required>
                     <div class="invalid-feedback"></div>
                 </div>
 
@@ -143,6 +143,11 @@
                         class="form-control" placeholder="ID"  />
                     <input type="hidden" id="serial" name="serial" class="form-control"
                         value="{{ $nextSerial }}" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="account_opening_date">Account Opening Date <span class="text-danger">*</span></label>
+                    <input  type="date" id="account_opening_date" class="form-control" placeholder="Account Opening Date" name="account_opening_date" required
+                        class="form-control" placeholder="Account Opening Date"  />
                 </div>
 
                 <!-- Address Information -->
@@ -207,6 +212,16 @@
                 <div class="col-md-4 mb-3">
                     <label for="nominee_nid_number" class="form-label">Nominee NID Number</label>
                     <input type="text" class="form-control" id="nominee_nid_number" placeholder="Nominee NID Number" name="nominee_nid_number">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_date_of_birth" class="form-label">Nominee Date of Birth</label>
+                    <input type="date" class="form-control" id="nominee_date_of_birth" placeholder="Nominee Date of Birth" name="nominee_date_of_birth">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_nid_number" class="form-label">Nominee Picture</label>
+                    <input type="file" class="form-control" id="nominee_picture" accept="image/*" name="nominee_picture">
                     <div class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-4 mb-3">

@@ -111,6 +111,7 @@ class MemberController extends Controller
                 'max:15',
                 Rule::unique('members', 'mobile'),
             ],
+
           
             'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'diposit_account_number' => 'nullable|string|max:50',
@@ -183,8 +184,8 @@ class MemberController extends Controller
      */
     public function show(Member $member)
     {
-        $member->load(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user']);
-        return response()->json(['member' => $member]);
+        $member->load(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
+        return view('content.members.show', compact('member'));
     }
     /**
      * Show the form for editing the specified resource.
