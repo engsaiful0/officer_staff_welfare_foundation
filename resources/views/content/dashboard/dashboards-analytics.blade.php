@@ -1,6 +1,6 @@
 @extends('layouts/layoutMaster')
 
-@section('title', 'Polytechnic Analytics Dashboard')
+@section('title', 'Dashboard')
 
 @section('vendor-style')
   <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}">

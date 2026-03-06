@@ -19,7 +19,7 @@ $navbarDetached = ($navbarDetached ?? '');
         <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-4">
           <a href="{{url('/')}}" class="app-brand-link">
             <span class="app-brand-logo demo"><img style="height: 100px;width: 100px;" src="{{ asset('assets/img/branding/'.$appSettings->logo) }}" alt="Logo"></span>
-            <span class="app-brand-text demo menu-text fw-bold">{{config('variables.templateName')}}</span>
+            <span class="app-brand-text demo menu-text fw-bold">{{ ($appSettings && $appSettings->app_name) ? $appSettings->app_name : config('variables.templateName') }}</span>
           </a>
           @if(isset($menuHorizontal))
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none">
