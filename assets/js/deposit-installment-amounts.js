@@ -1,0 +1,198 @@
+/**
+ * Deposit Installment Amounts - list and add; member pays last installment amount (pre-filled).
+ */
+'use strict';
+
+$(function () {
+  var urls = window.depositInstallmentUrls || {};
+  var getDataUrl = urls.getData || '/app/members/deposit-installment-amounts/get-data';
+  var lastAmountUrl = urls.lastAmount || '/app/members/deposit-installment-amounts/last-amount';
+  var storeUrl = urls.store || '/app/members/deposit-installment-amounts';
+  var destroyUrl = urls.destroy || '/app/members/deposit-installment-amounts';
+
+  var dt_basic_table = $('.datatables-basic');
+  var dt_basic;
+
+  if (dt_basic_table.length) {
+    dt_basic = dt_basic_table.DataTable({
+      ajax: {
+        url: getDataUrl,
+        type: 'GET',
+        dataSrc: 'data',
+        data: function (d) {
+          if ($('#filter_member_id').length && $('#filter_member_id').val()) {
+            d.member_id = $('#filter_member_id').val();
+          }
+        },
+        beforeSend: function () {
+          $('.datatables-basic tbody').html('<tr><td colspan="6" class="text-center"><div class="spinner-border text-primary" role="status"></div></td></tr>');
+        },
+        error: function (xhr, error, code) {
+          var msg = 'Failed to load data. ';
+          if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg += xhr.responseJSON.message;
+          if (typeof toastr !== 'undefined') toastr.error(msg);
+          $('.datatables-basic tbody').html('<tr><td colspan="6" class="text-center text-danger">' + msg + '</td></tr>');
+        }
+      },
+      columns: [
+        { data: 'id' },
+        { data: 'member_name', render: function (d, type, row) { return d + ' <span class="text-muted">(' + (row.member_unique_id || '') + ')</span>'; } },
+        { data: 'installment_amount' },
+        { data: 'date_formatted' },
+        { data: 'user_name' },
+        { data: '' }
+      ],
+      columnDefs: [
+        {
+          targets: -1,
+          title: 'Actions',
+          orderable: false,
+          searchable: false,
+          render: function (data, type, full) {
+            return '<div class="d-inline-block">' +
+              '<a href="javascript:;" class="btn btn-sm btn-text-secondary rounded-pill btn-icon delete-record" data-id="' + full.id + '"><i class="ti ti-trash ti-md"></i></a>' +
+              '</div>';
+          }
+        }
+      ],
+      order: [[0, 'desc']],
+      dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end mt-n6 mt-md-0"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+      displayLength: 10,
+      lengthMenu: [10, 25, 50, 75, 100],
+      buttons: [
+        {
+          text: '<i class="ti ti-plus me-sm-1"></i> Add Installment',
+          className: 'create-new btn btn-primary'
+        }
+      ],
+      initComplete: function () {
+        $('.head-label').html('<h5 class="card-title mb-0">Deposit Installment Amounts</h5>');
+      }
+    });
+  }
+
+  $(document).on('click', '.create-new', function () {
+    var offCanvasEl = document.querySelector('#add-new-record');
+    if (!offCanvasEl) return;
+    var today = new Date().toISOString().slice(0, 10);
+    $('#member_id').val('').trigger('change');
+    $('#installment_amount').val('');
+    $('#date').val(today);
+    $('#form-add-installment').removeClass('was-validated');
+    var oc = new bootstrap.Offcanvas(offCanvasEl);
+    oc.show();
+    // Ensure select2 is initialized (element may be in hidden offcanvas at page load)
+    if (!$('#member_id').hasClass('select2-hidden-accessible')) {
+      $('#member_id').select2({ dropdownParent: $('#add-new-record'), width: '100%' });
+    }
+  });
+
+  // When member is selected, fetch last installment amount and pre-fill (member always pays last amount)
+  $('#member_id').on('change', function () {
+    var memberId = $(this).val();
+    if (!memberId) {
+      $('#installment_amount').val('');
+      return;
+    }
+    $.ajax({
+      url: lastAmountUrl + '/' + memberId,
+      type: 'GET',
+      success: function (res) {
+        if (res.installment_amount != null) {
+          $('#installment_amount').val(res.installment_amount);
+        }
+        if (res.date) {
+          $('#date').val(res.date);
+        }
+      }
+    });
+  });
+
+  $('#form-add-installment').on('submit', function (e) {
+    e.preventDefault();
+    var $form = $(this);
+    var $btn = $('#submit-btn');
+    var $spinner = $('#submit-spinner');
+    var $text = $('#submit-text');
+
+    if (!$('#member_id').val() || !$('#installment_amount').val() || !$('#date').val()) {
+      $form.addClass('was-validated');
+      return;
+    }
+
+    $btn.prop('disabled', true);
+    $spinner.removeClass('d-none');
+    $text.text('Saving...');
+
+    $.ajax({
+      url: storeUrl,
+      type: 'POST',
+      data: {
+        _token: $('meta[name="csrf-token"]').attr('content'),
+        member_id: $('#member_id').val(),
+        installment_amount: $('#installment_amount').val(),
+        date: $('#date').val()
+      },
+      success: function () {
+        if (typeof toastr !== 'undefined') toastr.success('Deposit installment saved successfully.');
+        $('#add-new-record').length && bootstrap.Offcanvas.getInstance(document.querySelector('#add-new-record')) && bootstrap.Offcanvas.getInstance(document.querySelector('#add-new-record')).hide();
+        $form[0].reset();
+        $('#member_id').val('').trigger('change');
+        if (dt_basic && dt_basic.ajax) dt_basic.ajax.reload();
+      },
+      error: function (xhr) {
+        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to save.';
+        if (xhr.responseJSON && xhr.responseJSON.errors) {
+          var err = xhr.responseJSON.errors;
+          msg = Object.keys(err).map(function (k) { return err[k][0]; }).join(' ');
+        }
+        if (typeof toastr !== 'undefined') toastr.error(msg);
+      },
+      complete: function () {
+        $btn.prop('disabled', false);
+        $spinner.addClass('d-none');
+        $text.text('Save');
+      }
+    });
+  });
+
+  $('.datatables-basic tbody').on('click', '.delete-record', function () {
+    var id = $(this).data('id');
+    var $btn = $(this);
+    if (typeof Swal === 'undefined') {
+      if (confirm('Delete this record?')) doDelete(id, $btn);
+      return;
+    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This installment record will be deleted.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it',
+      customClass: { confirmButton: 'btn btn-primary me-3', cancelButton: 'btn btn-label-secondary' },
+      buttonsStyling: false
+    }).then(function (result) {
+      if (result.isConfirmed) doDelete(id, $btn);
+    });
+  });
+
+  function doDelete(id, $btn) {
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+    $.ajax({
+      url: destroyUrl + '/' + id,
+      type: 'DELETE',
+      data: { _token: $('meta[name="csrf-token"]').attr('content') },
+      success: function () {
+        if (typeof toastr !== 'undefined') toastr.success('Record deleted.');
+        if (dt_basic && dt_basic.ajax) dt_basic.ajax.reload();
+      },
+      error: function (xhr) {
+        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Delete failed.';
+        if (typeof toastr !== 'undefined') toastr.error(msg);
+      },
+      complete: function () {
+        $btn.prop('disabled', false).html('<i class="ti ti-trash ti-md"></i>');
+      }
+    });
+  }
+});

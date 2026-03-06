@@ -91,6 +91,11 @@ class Member extends Model
         return $this->hasMany(Deposit::class);
     }
 
+    public function depositInstallmentAmounts()
+    {
+        return $this->hasMany(DepositInstallmentAmount::class);
+    }
+
     public function memberUniqueId()
     {
         return $this->hasOne(MemberUniqueId::class);
