@@ -56,7 +56,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ $member->date_of_birth ? $member->date_of_birth->format('Y-m-d') : '' }}" required>
+                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ is_object($member->date_of_birth) && method_exists($member->date_of_birth, 'format') ? $member->date_of_birth->format('Y-m-d') : ($member->date_of_birth ?? '') }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -112,7 +112,7 @@
                 
                 <div class="col-md-4 mb-3">
                     <label for="date_of_join" class="form-label">Date of Join <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_join" name="date_of_join" value="{{ $member->date_of_join ? $member->date_of_join->format('Y-m-d') : '' }}" required>
+                    <input type="date" class="form-control" id="date_of_join" name="date_of_join" value="{{ is_object($member->date_of_join) && method_exists($member->date_of_join, 'format') ? $member->date_of_join->format('Y-m-d') : ($member->date_of_join ?? '') }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
                 
