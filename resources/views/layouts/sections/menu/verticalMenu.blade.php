@@ -84,9 +84,9 @@ function isMenuActive($slug, $currentRoute) {
           </a>
         </li>
         @endpermission
-        <li class="menu-item {{ $currentRouteName === 'members.deposit-installment-amounts.index' ? 'active' : '' }}">
-          <a href="{{ url('/app/members/deposit-installment-amounts') }}" class="menu-link">
-            <div>Deposit Installment Amount</div>
+        <li class="menu-item {{ $currentRouteName === 'members.monthly-deposit-installment-settings.index' ? 'active' : '' }}">
+          <a href="{{ url('/app/members/monthly-deposit-installment-settings') }}" class="menu-link">
+            <div>Monthly Deposit Installment Settings</div>
           </a>
         </li>
       </ul>

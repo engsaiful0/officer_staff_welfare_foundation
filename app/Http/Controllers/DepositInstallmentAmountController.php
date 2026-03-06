@@ -16,7 +16,16 @@ class DepositInstallmentAmountController extends Controller
     public function index()
     {
         $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
-        return view('content.members.deposit-installment-amounts.index', compact('members'));
+        return view('content.members.monthly-deposit-installment-settings.index', compact('members'));
+    }
+
+    /**
+     * Get members list for dropdown (same format as members.get-members).
+     */
+    public function getMembers()
+    {
+        $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
+        return response()->json(['members' => $members]);
     }
 
     /**

@@ -340,12 +340,13 @@ Route::post('/members/check-nid-unique', [MemberController::class, 'checkNidUniq
 Route::get('/members/export/excel', [MemberController::class, 'exportExcel'])->name('members.export-excel');
 Route::get('/members/export/pdf', [MemberController::class, 'exportPdf'])->name('members.export-pdf');
 
-// Deposit Installment Amount (under Member)
-Route::get('/app/members/deposit-installment-amounts', [DepositInstallmentAmountController::class, 'index'])->name('members.deposit-installment-amounts.index');
-Route::get('/app/members/deposit-installment-amounts/get-data', [DepositInstallmentAmountController::class, 'getData'])->name('members.deposit-installment-amounts.get-data');
-Route::get('/app/members/deposit-installment-amounts/last-amount/{memberId}', [DepositInstallmentAmountController::class, 'getLastAmount'])->name('members.deposit-installment-amounts.last-amount');
-Route::post('/app/members/deposit-installment-amounts', [DepositInstallmentAmountController::class, 'store'])->name('members.deposit-installment-amounts.store');
-Route::delete('/app/members/deposit-installment-amounts/{id}', [DepositInstallmentAmountController::class, 'destroy'])->name('members.deposit-installment-amounts.destroy');
+// Monthly Deposit Installment Settings (under Member)
+Route::get('/app/members/monthly-deposit-installment-settings', [DepositInstallmentAmountController::class, 'index'])->name('members.monthly-deposit-installment-settings.index');
+Route::get('/app/members/monthly-deposit-installment-settings/get-members', [DepositInstallmentAmountController::class, 'getMembers'])->name('members.monthly-deposit-installment-settings.get-members');
+Route::get('/app/members/monthly-deposit-installment-settings/get-data', [DepositInstallmentAmountController::class, 'getData'])->name('members.monthly-deposit-installment-settings.get-data');
+Route::get('/app/members/monthly-deposit-installment-settings/last-amount/{memberId}', [DepositInstallmentAmountController::class, 'getLastAmount'])->name('members.monthly-deposit-installment-settings.last-amount');
+Route::post('/app/members/monthly-deposit-installment-settings', [DepositInstallmentAmountController::class, 'store'])->name('members.monthly-deposit-installment-settings.store');
+Route::delete('/app/members/monthly-deposit-installment-settings/{id}', [DepositInstallmentAmountController::class, 'destroy'])->name('members.monthly-deposit-installment-settings.destroy');
 
 // Investment Module Routes
 use App\Http\Controllers\InvestmentController;

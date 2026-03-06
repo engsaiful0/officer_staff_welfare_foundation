@@ -1,14 +1,46 @@
 /**
- * Deposit Installment Amounts - list and add; member pays last installment amount (pre-filled).
+ * Monthly Deposit Installment Settings - list and add; member pays last installment amount (pre-filled).
  */
 'use strict';
 
 $(function () {
-  var urls = window.depositInstallmentUrls || {};
-  var getDataUrl = urls.getData || '/app/members/deposit-installment-amounts/get-data';
-  var lastAmountUrl = urls.lastAmount || '/app/members/deposit-installment-amounts/last-amount';
-  var storeUrl = urls.store || '/app/members/deposit-installment-amounts';
-  var destroyUrl = urls.destroy || '/app/members/deposit-installment-amounts';
+  var urls = window.monthlyDepositInstallmentSettingsUrls || {};
+  var getDataUrl = urls.getData || '/app/members/monthly-deposit-installment-settings/get-data';
+  var lastAmountUrl = urls.lastAmount || '/app/members/monthly-deposit-installment-settings/last-amount';
+  var storeUrl = urls.store || '/app/members/monthly-deposit-installment-settings';
+  var destroyUrl = urls.destroy || '/app/members/monthly-deposit-installment-settings';
+  var getMembersUrl = urls.getMembers || '/app/members/monthly-deposit-installment-settings/get-members';
+
+  function loadMembersIntoSelect(callback) {
+    var $select = $('#member_id');
+    if (!$select.length) return;
+    $('#member_id_loading').removeClass('d-none');
+    $.ajax({
+      url: getMembersUrl,
+      type: 'GET',
+      dataType: 'json',
+      success: function (res) {
+        var members = (res && res.members) ? res.members : [];
+        var firstOpt = $select.find('option:first').clone();
+        $select.find('option').remove();
+        $select.append(firstOpt);
+        members.forEach(function (m) {
+          var uid = m.unique_id || m.member_unique_id || '';
+          $select.append($('<option></option>').attr('value', m.id).attr('data-name', m.name).text(m.name + (uid ? ' (' + uid + ')' : '')));
+        });
+        if (typeof callback === 'function') callback();
+      },
+      error: function () {
+        if (typeof toastr !== 'undefined') toastr.error('Could not load members.');
+        if (typeof callback === 'function') callback();
+      },
+      complete: function () {
+        $('#member_id_loading').addClass('d-none');
+      }
+    });
+  }
+
+  loadMembersIntoSelect();
 
   var dt_basic_table = $('.datatables-basic');
   var dt_basic;
@@ -66,7 +98,7 @@ $(function () {
         }
       ],
       initComplete: function () {
-        $('.head-label').html('<h5 class="card-title mb-0">Deposit Installment Amounts</h5>');
+        $('.head-label').html('<h5 class="card-title mb-0">Monthly Deposit Installment Settings</h5>');
       }
     });
   }
@@ -81,9 +113,17 @@ $(function () {
     $('#form-add-installment').removeClass('was-validated');
     var oc = new bootstrap.Offcanvas(offCanvasEl);
     oc.show();
-    // Ensure select2 is initialized (element may be in hidden offcanvas at page load)
-    if (!$('#member_id').hasClass('select2-hidden-accessible')) {
-      $('#member_id').select2({ dropdownParent: $('#add-new-record'), width: '100%' });
+    var $memberSelect = $('#member_id');
+    if ($memberSelect.find('option').length <= 1) {
+      loadMembersIntoSelect(function () {
+        if (!$memberSelect.hasClass('select2-hidden-accessible')) {
+          $memberSelect.select2({ dropdownParent: $('#add-new-record'), width: '100%' });
+        } else {
+          $memberSelect.trigger('change.select2');
+        }
+      });
+    } else if (!$memberSelect.hasClass('select2-hidden-accessible')) {
+      $memberSelect.select2({ dropdownParent: $('#add-new-record'), width: '100%' });
     }
   });
 

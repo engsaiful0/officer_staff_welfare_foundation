@@ -1,18 +1,19 @@
 @extends('layouts/layoutMaster')
 
-@section('title', 'Deposit Installment Amount')
+@section('title', 'Monthly Deposit Installment Settings')
 
 @section('page-script')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
-    window.depositInstallmentUrls = {
-        getData: '{{ url("app/members/deposit-installment-amounts/get-data") }}',
-        lastAmount: '{{ url("app/members/deposit-installment-amounts/last-amount") }}',
-        store: '{{ url("app/members/deposit-installment-amounts") }}',
-        destroy: '{{ url("app/members/deposit-installment-amounts") }}'
+    window.monthlyDepositInstallmentSettingsUrls = {
+        getData: '{{ url("app/members/monthly-deposit-installment-settings/get-data") }}',
+        lastAmount: '{{ url("app/members/monthly-deposit-installment-settings/last-amount") }}',
+        store: '{{ url("app/members/monthly-deposit-installment-settings") }}',
+        destroy: '{{ url("app/members/monthly-deposit-installment-settings") }}',
+        getMembers: '{{ route("members.monthly-deposit-installment-settings.get-members") }}'
     };
 </script>
-<script src="{{ asset('assets/js/deposit-installment-amounts.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('assets/js/monthly-deposit-installment-settings.js') }}?v={{ time() }}"></script>
 @endsection
 
 @section('content')
@@ -36,7 +37,7 @@
 <!-- Offcanvas: Add new installment -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
     <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title">Add Deposit Installment</h5>
+        <h5 class="offcanvas-title">Add Monthly Deposit Installment</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body flex-grow-1">
@@ -46,10 +47,13 @@
                 <label class="form-label" for="member_id">Member <span class="text-danger">*</span></label>
                 <select class="form-select select2" id="member_id" name="member_id" required>
                     <option value="">Select Member</option>
+                    @if(isset($members) && count($members) > 0)
                     @foreach($members as $m)
-                    <option value="{{ $m->id }}" data-name="{{ $m->name }}">{{ $m->name }} ({{ $m->unique_id }})</option>
+                    <option value="{{ $m->id }}" data-name="{{ $m->name }}">{{ $m->name }} ({{ $m->unique_id ?? '' }})</option>
                     @endforeach
+                    @endif
                 </select>
+                <div id="member_id_loading" class="form-text text-muted d-none">Loading members...</div>
             </div>
             <div class="col-sm-12">
                 <label class="form-label" for="installment_amount">Installment Amount <span class="text-danger">*</span></label>
