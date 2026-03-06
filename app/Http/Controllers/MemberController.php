@@ -82,8 +82,7 @@ class MemberController extends Controller
         // Get the last serial
         $latest = MemberUniqueId::latest('serial')->first();
         $nextSerial = $latest ? $latest->serial + 1 : 1;
-        // Format as M-0001, M-0002, ...
-        $member_unique_id =  str_pad($nextSerial, 4, '0', STR_PAD_LEFT);
+        $member_unique_id = $nextSerial;
 
         return view('content.members.create', compact('designations', 'branches', 'religions', 'relations', 'members', 'member_unique_id', 'nextSerial'));
     }
@@ -114,6 +113,7 @@ class MemberController extends Controller
             ],
           
             'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'diposit_account_number' => 'nullable|string|max:50',
             'designation_id' => 'required|exists:designations,id',
             'date_of_join' => 'required|date',
             'date_of_birth' => 'required|date',
@@ -234,7 +234,7 @@ class MemberController extends Controller
                     'max:15',
                     Rule::unique('members', 'mobile')->ignore($member->id),
                 ],
-             
+                'diposit_account_number' => 'nullable|string|max:50',
                 'designation_id' => 'required|exists:designations,id',
                 'date_of_join' => 'required|date',
                 'date_of_birth' => 'required|date',
@@ -267,18 +267,34 @@ class MemberController extends Controller
                 $validatedData['picture'] = $request->file('picture')->store('profile_pictures', 'public');
             }
 
-            // Update member record
-            $member->update($validatedData);
+            // Update member record (exclude member_unique_id - it belongs to member_unique_ids table)
+            $memberData = collect($validatedData)->except('member_unique_id', 'serial')->all();
+            $member->update($memberData);
 
-            // Handle MemberUniqueId relationship
+            // Handle MemberUniqueId: only update when value changed and is unique
             if ($request->filled('member_unique_id')) {
-                $memberUniqueId = $member->memberUniqueId;
-                if ($memberUniqueId) {
-                    $memberUniqueId->update(['member_unique_id' => $request->member_unique_id]);
+                $memberUniqueId = $member->memberUniqueId()->first();
+                $newValue = trim($request->member_unique_id);
+                if ($memberUniqueId && is_object($memberUniqueId)) {
+                    $currentValue = $memberUniqueId->member_unique_id ?? '';
+                    if ($newValue !== $currentValue) {
+                        $request->validate([
+                            'member_unique_id' => [
+                                'required',
+                                'string',
+                                'max:50',
+                                Rule::unique('member_unique_ids', 'member_unique_id')->ignore($memberUniqueId->id),
+                            ],
+                        ], ['member_unique_id.unique' => 'This Member ID is already assigned to another member.']);
+                        $memberUniqueId->update(['member_unique_id' => $newValue]);
+                    }
                 } else {
+                    $request->validate([
+                        'member_unique_id' => 'required|string|max:50|unique:member_unique_ids,member_unique_id',
+                    ], ['member_unique_id.unique' => 'This Member ID is already assigned to another member.']);
                     MemberUniqueId::create([
                         'member_id' => $member->id,
-                        'member_unique_id' => $request->member_unique_id,
+                        'member_unique_id' => $newValue,
                         'serial' => $request->get('serial', 1),
                     ]);
                 }
@@ -299,11 +315,17 @@ class MemberController extends Controller
                 'updated_fields' => array_keys($validatedData)
             ]);
 
-            return response()->json([
+            $payload = [
                 'success' => true,
                 'message' => 'Member updated successfully.',
+                'redirect_url' => route('members.view-member'),
                 'member' => $member->load(['designation', 'branch', 'religion', 'introducer', 'memberUniqueId']),
-            ]);
+            ];
+
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json($payload);
+            }
+            return redirect()->route('members.view-member')->with('success', $payload['message']);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([

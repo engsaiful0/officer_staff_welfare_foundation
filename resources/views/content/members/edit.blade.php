@@ -44,7 +44,21 @@
                     <input type="text" class="form-control" id="father_name" name="father_name" value="{{ $member->father_name }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
-                
+                <div class="col-md-4 mb-3">
+                    <label for="mother_name" class="form-label">Mother Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="mother_name" name="mother_name" value="{{ $member->mother_name }}" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="spouse_name" class="form-label">Spouse Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="spouse_name" name="spouse_name" value="{{ $member->spouse_name }}" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ $member->date_of_birth ? $member->date_of_birth->format('Y-m-d') : '' }}" required>
+                    <div class="invalid-feedback"></div>
+                </div>
                 <div class="col-md-4 mb-3">
                     <label for="mobile" class="form-label">Mobile <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="mobile" name="mobile" value="{{ $member->mobile }}" required>
@@ -74,6 +88,11 @@
                     @endif
                     <div class="invalid-feedback"></div>
                 </div>
+                <div class="col-md-4 mb-3">
+                    <label for="diposit_account_number" class="form-label">Diposit Account Number </label>
+                    <input type="text" class="form-control" id="diposit_account_number" name="diposit_account_number" value="{{ $member->diposit_account_number }}">
+                    <div class="invalid-feedback"></div>
+                </div>
                 
                 <!-- Professional Information -->
                 <div class="col-12 mt-4">
@@ -93,7 +112,7 @@
                 
                 <div class="col-md-4 mb-3">
                     <label for="date_of_join" class="form-label">Date of Join <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_join" name="date_of_join" value="{{ $member->date_of_join->format('Y-m-d') }}" required>
+                    <input type="date" class="form-control" id="date_of_join" name="date_of_join" value="{{ $member->date_of_join ? $member->date_of_join->format('Y-m-d') : '' }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
                 
@@ -118,22 +137,17 @@
                     </select>
                     <div class="invalid-feedback"></div>
                 </div>
-                
                 <div class="col-md-4 mb-3">
-                    <label for="introducer_id" class="form-label">Introducer</label>
-                    <select class="form-select select2" id="introducer_id" name="introducer_id">
-                        <option value="">Select Introducer (Optional)</option>
-                        @foreach($members as $memberOption)
-                        <option value="{{ $memberOption->id }}" {{ $member->introducer_id == $memberOption->id ? 'selected' : '' }}>{{ $memberOption->name }} ({{ $memberOption->unique_id }})</option>
-                        @endforeach
-                    </select>
+                    <label for="employees_id" class="form-label">Employees ID <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="employees_id" name="employees_id" value="{{ $member->employees_id }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
+               
                 
                 <div class="col-md-4 mb-3">
                     <label class="form-label" for="member_unique_id">Member ID</label>
-                    <input readonly type="text" id="member_unique_id" class="form-control" name="member_unique_id"
-                        class="form-control" placeholder="M-0001" value="{{ $member->member_unique_id }}" />
+                    <input  type="text" id="member_unique_id" class="form-control" name="member_unique_id"
+                        class="form-control" placeholder="Member ID" value="{{ $member->member_unique_id }}" />
                   
                 </div>
                 
@@ -164,7 +178,21 @@
                     <input type="text" class="form-control" id="nominee_name" name="nominee_name" value="{{ $member->nominee_name }}">
                     <div class="invalid-feedback"></div>
                 </div>
-                
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_father_name" class="form-label">Nominee Father Name</label>
+                    <input type="text" class="form-control" id="nominee_father_name" name="nominee_father_name" value="{{ $member->nominee_father_name }}">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_mother_name" class="form-label">Nominee Mother Name</label>
+                    <input type="text" class="form-control" id="nominee_mother_name" name="nominee_mother_name" value="{{ $member->nominee_mother_name }}">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_spouse_name" class="form-label">Nominee Spouse Name</label>
+                    <input type="text" class="form-control" id="nominee_spouse_name" name="nominee_spouse_name" value="{{ $member->nominee_spouse_name }}">
+                    <div class="invalid-feedback"></div>
+                </div>
                 <div class="col-md-4 mb-3">
                     <label for="nominee_relation_id" class="form-label">Nominee Relation</label>
                     <select class="form-select select2" id="nominee_relation_id" name="nominee_relation_id">
@@ -175,32 +203,23 @@
                     </select>
                     <div class="invalid-feedback"></div>
                 </div>
-                
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_nid_number" class="form-label">Nominee NID Number</label>
+                    <input type="text" class="form-control" id="nominee_nid_number" name="nominee_nid_number" value="{{ $member->nominee_nid_number }}">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_present_address" class="form-label">Nominee Present Address</label>
+                    <textarea class="form-control" id="nominee_present_address" name="nominee_present_address" rows="3">{{ $member->nominee_present_address }}</textarea>
+                    <div class="invalid-feedback"></div>
+                </div>
                 <div class="col-md-4 mb-3">
                     <label for="nominee_phone" class="form-label">Nominee Phone</label>
                     <input type="text" class="form-control" id="nominee_phone" name="nominee_phone" value="{{ $member->nominee_phone }}">
                     <div class="invalid-feedback"></div>
                 </div>
                 
-                <!-- Account Information (Read Only) -->
-                <div class="col-12 mt-4">
-                    <h6 class="fw-semibold">Account Information</h6>
-                </div>
-                
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Unique ID</label>
-                    <input type="text" class="form-control" value="{{ $member->unique_id }}" readonly>
-                </div>
-                
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Temporary Username</label>
-                    <input type="text" class="form-control" value="{{ $member->temp_username }}" readonly>
-                </div>
-                
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Temporary Password</label>
-                    <input type="text" class="form-control" value="{{ $member->temp_password }}" readonly>
-                </div>
+               
             </div>
             
             <div class="row">

@@ -19,6 +19,7 @@ class Member extends Model
         'email',
         'nid_number',
         'picture',
+        'diposit_account_number',
         'designation_id',
         'date_of_join',
         'branch_id',
@@ -91,6 +92,15 @@ class Member extends Model
     public function memberUniqueId()
     {
         return $this->hasOne(MemberUniqueId::class);
+    }
+
+    /**
+     * Get the member_unique_id from the related member_unique_ids record (for display in forms).
+     */
+    public function getMemberUniqueIdAttribute()
+    {
+        $record = $this->memberUniqueId()->first();
+        return (is_object($record) && isset($record->member_unique_id)) ? $record->member_unique_id : null;
     }
 
     // Auto-generate unique ID

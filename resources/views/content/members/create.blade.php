@@ -77,6 +77,11 @@
 
                     </div>
                 </div>
+                <div class="col-md-4 mb-3">
+                    <label for="diposit_account_number" class="form-label">Diposit Account Number </label>
+                    <input type="text" class="form-control" id="diposit_account_number" placeholder="Diposit Account Number" name="diposit_account_number">
+                    <div class="invalid-feedback"></div>
+                </div>
 
                 <!-- Professional Information -->
                 <div class="col-12 mt-4">

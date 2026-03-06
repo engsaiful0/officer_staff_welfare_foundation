@@ -147,7 +147,7 @@
                             <td>
                                 <div class="d-flex flex-column">
                                     <h6 class="mb-0">{{ $member->name }}</h6>
-                                    <small class="text-muted">{{ $member->memberUniqueId ? $member->memberUniqueId->member_unique_id : 'N/A' }}</small>
+                                    <small class="text-muted">{{ $member->member_unique_id ?? 'N/A' }}</small>
                                 </div>
                             </td>
                             <td>
