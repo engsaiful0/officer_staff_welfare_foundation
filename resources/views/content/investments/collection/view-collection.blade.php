@@ -228,3 +228,4 @@ function printReceipt(id) {
 </script>
 @endsection
 
+
