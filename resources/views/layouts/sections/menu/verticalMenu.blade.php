@@ -84,11 +84,34 @@ function isMenuActive($slug, $currentRoute) {
           </a>
         </li>
         @endpermission
+       
+      </ul>
+    </li>
+    @endpermission
+    
+    <!-- Member -->
+    @permission('monthly-deposit-installment-settings-view')
+    <li class="menu-item {{ (str_contains($currentRouteName, 'members') && strpos($currentRouteName, 'members') === 0) ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-users"></i>
+        <div>Deposit Installment Settings</div>
+      </a>
+      <ul class="menu-sub">
+        @permission('monthly-deposit-installment-settings-add')
         <li class="menu-item {{ $currentRouteName === 'members.monthly-deposit-installment-settings.index' ? 'active' : '' }}">
           <a href="{{ url('/app/members/monthly-deposit-installment-settings') }}" class="menu-link">
-            <div>Monthly Deposit Installment Settings</div>
+            <div>Add Deposit Installment</div>
           </a>
         </li>
+        @endpermission
+        @permission('monthly-deposit-installment-settings-view')
+        <li class="menu-item {{ $currentRouteName === 'members.monthly-deposit-installment-settings.index' ? 'active' : '' }}">
+          <a href="{{ url('/app/members/monthly-deposit-installment-settings') }}" class="menu-link">
+            <div>View Deposit Installment</div>
+          </a>
+        </li>
+        @endpermission
+      
       </ul>
     </li>
     @endpermission
