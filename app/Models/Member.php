@@ -22,6 +22,7 @@ class Member extends Model
         'diposit_account_number',
         'designation_id',
         'date_of_join',
+        'account_opening_date',
         'branch_id',
         'present_address',
         'permanent_address',
@@ -37,8 +38,9 @@ class Member extends Model
         'nominee_phone',
         'nominee_present_address',
         'nominee_permanent_address',
-        'temp_username',
-        'temp_password',
+        'nominee_date_of_birth',
+        'nominee_picture',
+       
         'user_id'
     ];
 
