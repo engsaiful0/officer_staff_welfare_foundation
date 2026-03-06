@@ -69,12 +69,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
 // datatable (jquery)
 $(function () {
-  // Wait for URLs to be defined
-  if (typeof window.designationUrls === 'undefined') {
-    console.error('Designation URLs not defined');
-    return;
-  }
-  
+  var getDataUrl = (typeof window.designationUrls !== 'undefined' && window.designationUrls.getData)
+    ? window.designationUrls.getData
+    : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/get-designation') : '/app/settings/get-designation');
+
   var dt_basic_table = $('.datatables-basic'),
     dt_basic;
 
@@ -84,7 +82,7 @@ $(function () {
   if (dt_basic_table.length) {
     dt_basic = dt_basic_table.DataTable({
       ajax: {
-        url: window.designationUrls.getData,
+        url: getDataUrl,
         type: 'GET',
         dataSrc: 'data'
       },
@@ -173,7 +171,8 @@ $(function () {
     var id = $('#form-add-new-record').attr('data-id');
 
     if ($new_name != '') {
-      var url = window.designationUrls.store;
+      var baseUrl = (typeof window.designationUrls !== 'undefined' && window.designationUrls.store) ? window.designationUrls.store : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/designation') : '/app/settings/designation');
+      var url = baseUrl;
       var method = 'POST';
       var message = 'Designation added successfully.';
       var data = {
@@ -183,9 +182,9 @@ $(function () {
       };
 
       if (id) {
-        url = window.designationUrls.update + '/' + id;
+        url = (typeof window.designationUrls !== 'undefined' && window.designationUrls.update) ? window.designationUrls.update + '/' + id : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/designation/' + id) : '/app/settings/designation/' + id);
         method = 'PUT';
-        message = 'designation updated successfully.';
+        message = 'Designation updated successfully.';
       }
       $.ajax({
         url: url,
@@ -222,8 +221,9 @@ $(function () {
       buttonsStyling: false
     }).then(function (result) {
       if (result.value) {
+        var deleteUrl = (typeof window.designationUrls !== 'undefined' && window.designationUrls.destroy) ? window.designationUrls.destroy + '/' + data.id : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/designation/' + data.id) : '/app/settings/designation/' + data.id);
         $.ajax({
-          url: window.designationUrls.destroy + '/' + data.id,
+          url: deleteUrl,
           type: 'DELETE',
           data: {
             _token: $('meta[name="csrf-token"]').attr('content')

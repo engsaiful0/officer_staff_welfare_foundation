@@ -4,7 +4,7 @@ namespace App\Http\Controllers\settings;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\designation as designationModel;
+use App\Models\Designation as DesignationModel;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,9 +15,9 @@ class Designation extends Controller
     return view('content.settings.designation');
   }
 
-  public function getdesignation(Request $request)
+  public function getDesignation(Request $request)
   {
-    $designations = designationModel::all();
+    $designations = DesignationModel::all();
     return response()->json([
       'data' => $designations,
     ]);
@@ -32,7 +32,7 @@ class Designation extends Controller
     ]);
     $user = Auth::user();
     $userId = $user->id;
-    $designation = designationModel::create([
+    $designation = DesignationModel::create([
       'designation_name' => $request->designation_name,
       'designation_type' => $request->designation_type,
       'user_id' => $userId,
@@ -48,7 +48,7 @@ class Designation extends Controller
       'designation_type' => 'required|in:Member,Employee,Management',
     ]);
 
-    $designation = designationModel::findOrFail($id);
+    $designation = DesignationModel::findOrFail($id);
     $designation->update([
       'designation_name' => $request->designation_name,
       'designation_type' => $request->designation_type,
@@ -59,7 +59,7 @@ class Designation extends Controller
 
   public function destroy($id)
   {
-    $designation = designationModel::findOrFail($id);
+    $designation = DesignationModel::findOrFail($id);
     $designation->delete();
 
     return response()->json(null, Response::HTTP_NO_CONTENT);

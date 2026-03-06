@@ -28,6 +28,8 @@ class Branch extends Controller
         $request->validate([
             'branch_name' => 'required|string|max:255|unique:branches,branch_name',
             'branch_address' => 'required|string|max:1000',
+            'branch_code' => 'required|string|max:255|unique:branches,branch_code',
+            
         ]);
         
         $user = Auth::user();
@@ -36,6 +38,8 @@ class Branch extends Controller
         $branch = BranchModel::create([
             'branch_name' => $request->branch_name,
             'branch_address' => $request->branch_address,
+            'branch_code' => $request->branch_code,
+            'branch_phone' => $request->branch_phone,
             'user_id' => $userId,
         ]);
 
@@ -47,12 +51,16 @@ class Branch extends Controller
         $request->validate([
             'branch_name' => 'required|string|max:255|unique:branches,branch_name,' . $id,
             'branch_address' => 'required|string|max:1000',
+            'branch_code' => 'required|string|max:255|unique:branches,branch_code,' . $id,
+          
         ]);
 
         $branch = BranchModel::findOrFail($id);
         $branch->update([
             'branch_name' => $request->branch_name,
             'branch_address' => $request->branch_address,
+            'branch_code' => $request->branch_code,
+            'branch_phone' => $request->branch_phone,
         ]);
 
         return response()->json($branch);

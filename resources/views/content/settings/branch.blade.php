@@ -20,6 +20,8 @@
                         <th>Id</th>
                         <th>Branch Name</th>
                         <th>Branch Address</th>
+                        <th>Branch Code</th>
+                        <th>Branch Phone</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -35,15 +37,34 @@
         </div>
         <div class="offcanvas-body flex-grow-1">
             <form class="add-new-record pt-0 row g-2" id="form-add-new-record" onsubmit="return false">
-                <div class="col-sm-12">
-                    <label class="form-label" for="branch_name">Branch Name</label>
-                    <div class="input-group input-group-merge">
-                        <span id="branch_name2" class="input-group-text"><i class="ti ti-building"></i></span>
-                        <input type="text" id="branch_name" class="form-control dt-full-name"
-                            name="branch_name" placeholder="Enter branch name"
-                            aria-label="Enter branch name" aria-describedby="branch_name2" />
+                    <div class="col-sm-12">
+                        <label class="form-label" for="branch_name">Branch Name</label>
+                        <div class="input-group input-group-merge">
+                            <span id="branch_name2" class="input-group-text"><i class="ti ti-building"></i></span>
+                            <input type="text" id="branch_name" class="form-control dt-full-name"
+                                name="branch_name" placeholder="Enter branch name"
+                                aria-label="Enter branch name" aria-describedby="branch_name2" />
+                        </div>
                     </div>
-                </div>
+                    <div class="col-sm-12">
+                        <label class="form-label" for="branch_code">Branch Code</label>
+                        <div class="input-group input-group-merge">
+                            <span id="branch_code2" class="input-group-text"><i class="ti ti-code"></i></span>
+                            <input type="text" id="branch_code" class="form-control dt-full-name"
+                                name="branch_code" placeholder="Enter branch code"
+                                aria-label="Enter branch code" aria-describedby="branch_code2" />
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label" for="branch_phone">Branch Phone</label>
+                        <div class="input-group input-group-merge">
+                            <span id="branch_phone2" class="input-group-text"><i class="ti ti-phone"></i></span>
+                            <input type="text" id="branch_phone" class="form-control dt-full-name"
+                                name="branch_phone" placeholder="Enter branch phone"
+                                aria-label="Enter branch phone" aria-describedby="branch_phone2" />
+                        </div>
+                    </div>
+
                 <div class="col-sm-12">
                     <label class="form-label" for="branch_address">Branch Address</label>
                     <div class="input-group input-group-merge">

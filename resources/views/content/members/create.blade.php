@@ -32,31 +32,41 @@
 
                 <div class="col-md-4 mb-3">
                     <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    <input type="text" class="form-control" id="name" placeholder="Name" name="name" required>
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <label for="father_name" class="form-label">Father Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="father_name" name="father_name" required>
+                    <input type="text" class="form-control" id="father_name" placeholder="Father Name" name="father_name" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="mother_name" class="form-label">Mother Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="mother_name" placeholder="Mother Name" name="mother_name" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="spouse_name" class="form-label">Spouse Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="spouse_name" placeholder="Spouse Name" name="spouse_name" required>
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <label for="mobile" class="form-label">Mobile <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="mobile" name="mobile" required>
+                    <input type="text" class="form-control" id="mobile" placeholder="Mobile" name="mobile" required>
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <label for="email" class="form-label">Email </label>
+                    <input type="email" class="form-control" id="email" placeholder="Email" name="email">
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <label for="nid_number" class="form-label">NID Number <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="nid_number" name="nid_number" required>
+                    <label for="nid_number" class="form-label">NID Number </label>
+                    <input type="text" class="form-control" id="nid_number" placeholder="NID Number" name="nid_number">
                     <div class="invalid-feedback"></div>
                 </div>
 
@@ -75,7 +85,7 @@
 
                 <div class="col-md-4 mb-3">
                     <label for="designation_id" class="form-label">Designation <span class="text-danger">*</span></label>
-                    <select class="form-select select2" id="designation_id" name="designation_id" required>
+                    <select class="form-select select2" id="designation_id" placeholder="Select Designation" name="designation_id" required>
                         <option value="">Select Designation</option>
                         @foreach($designations as $designation)
                         <option value="{{ $designation->id }}">{{ $designation->designation_name }}</option>
@@ -83,16 +93,20 @@
                     </select>
                     <div class="invalid-feedback"></div>
                 </div>
-
+                <div class="col-md-4 mb-3">
+                    <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="date_of_birth" placeholder="Date of Birth" name="date_of_birth" required>
+                    <div class="invalid-feedback"></div>
+                </div>
                 <div class="col-md-4 mb-3">
                     <label for="date_of_join" class="form-label">Date of Join <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_join" name="date_of_join" required>
+                    <input type="date" class="form-control" id="date_of_join" placeholder="Date of Join" name="date_of_join" required>
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <label for="branch_id" class="form-label">Branch <span class="text-danger">*</span></label>
-                    <select class="form-select select2" id="branch_id" name="branch_id" required>
+                    <select class="form-select select2" id="branch_id" placeholder="Select Branch" name="branch_id" required>
                         <option value="">Select Branch</option>
                         @foreach($branches as $branch)
                         <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
@@ -103,7 +117,7 @@
 
                 <div class="col-md-4 mb-3">
                     <label for="religion_id" class="form-label">Religion <span class="text-danger">*</span></label>
-                    <select class="form-select select2" id="religion_id" name="religion_id" required>
+                    <select class="form-select select2" id="religion_id" placeholder="Select Religion" name="religion_id" required>
                         <option value="">Select Religion</option>
                         @foreach($religions as $religion)
                         <option value="{{ $religion->id }}">{{ $religion->religion_name }}</option>
@@ -112,21 +126,16 @@
                     <div class="invalid-feedback"></div>
                 </div>
 
+                
                 <div class="col-md-4 mb-3">
-                    <label for="introducer_id" class="form-label">Introducer</label>
-                    <select class="form-select select2" id="introducer_id" name="introducer_id">
-                        <option value="">Select Introducer (Optional)</option>
-                        @foreach($members as $member)
-                        <option value="{{ $member->id }}">{{ $member->name }} ({{ $member->unique_id }})</option>
-                        @endforeach
-                    </select>
-                    <div class="invalid-feedback"></div>
+                    <label class="form-label" for="employees_id">Employees ID <span class="text-danger">*</span></label>
+                    <input  type="text" id="employees_id" class="form-control" placeholder="Employees ID" name="employees_id" required
+                        class="form-control" placeholder="Employees ID"  />
                 </div>
-
                 <div class="col-md-4 mb-3">
                     <label class="form-label" for="member_unique_id">Member ID</label>
-                    <input readonly type="text" id="member_unique_id" class="form-control" name="member_unique_id"
-                        class="form-control" placeholder="M-0001" value="{{ $member_unique_id }}" />
+                    <input  type="text" id="member_unique_id" class="form-control" placeholder="Member ID" name="member_unique_id"
+                        class="form-control" placeholder="ID"  />
                     <input type="hidden" id="serial" name="serial" class="form-control"
                         value="{{ $nextSerial }}" />
                 </div>
@@ -138,13 +147,13 @@
 
                 <div class="col-md-6 mb-3">
                     <label for="present_address" class="form-label">Present Address <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="present_address" name="present_address" rows="3" required></textarea>
+                    <textarea class="form-control" id="present_address" name="present_address" rows="3" placeholder="Present Address" required></textarea>
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label for="permanent_address" class="form-label">Permanent Address <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" required></textarea>
+                    <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" placeholder="Permanent Address" required></textarea>
                     <div class="invalid-feedback"></div>
                 </div>
 
@@ -155,13 +164,28 @@
 
                 <div class="col-md-4 mb-3">
                     <label for="nominee_name" class="form-label">Nominee Name</label>
-                    <input type="text" class="form-control" id="nominee_name" name="nominee_name">
+                    <input type="text" class="form-control" id="nominee_name" placeholder="Nominee Name" name="nominee_name">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_father_name" class="form-label">Nominee Father Name</label>
+                    <input type="text" class="form-control" id="nominee_father_name" placeholder="Nominee Father Name" name="nominee_father_name">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_mother_name" class="form-label">Nominee Mother Name</label>
+                    <input type="text" class="form-control" id="nominee_mother_name" placeholder="Nominee Mother Name" name="nominee_mother_name">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_spouse_name" class="form-label">Nominee Spouse Name</label>
+                    <input type="text" class="form-control" id="nominee_spouse_name" placeholder="Nominee Spouse Name" name="nominee_spouse_name">
                     <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <label for="nominee_relation_id" class="form-label">Nominee Relation</label>
-                    <select class="form-select select2" id="nominee_relation_id" name="nominee_relation_id">
+                    <select class="form-select select2" id="nominee_relation_id" placeholder="Select Relation" name="nominee_relation_id">
                         <option value="">Select Relation (Optional)</option>
                         @foreach($relations as $relation)
                         <option value="{{ $relation->id }}">{{ $relation->relation_name }}</option>
@@ -172,7 +196,22 @@
 
                 <div class="col-md-4 mb-3">
                     <label for="nominee_phone" class="form-label">Nominee Phone</label>
-                    <input type="text" class="form-control" id="nominee_phone" name="nominee_phone">
+                    <input type="text" class="form-control" id="nominee_phone" placeholder="Nominee Phone" name="nominee_phone">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_nid_number" class="form-label">Nominee NID Number</label>
+                    <input type="text" class="form-control" id="nominee_nid_number" placeholder="Nominee NID Number" name="nominee_nid_number">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_present_address" class="form-label">Present Address</label>
+                    <textarea class="form-control" id="nominee_present_address" name="nominee_present_address" rows="3" placeholder="Present Address"></textarea>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nominee_permanent_address" class="form-label">Permanent Address</label>
+                    <textarea class="form-control" id="nominee_permanent_address" placeholder="Permanent Address" name="nominee_permanent_address" rows="3"></textarea>
                     <div class="invalid-feedback"></div>
                 </div>
             </div>

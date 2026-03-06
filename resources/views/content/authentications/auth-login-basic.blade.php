@@ -44,8 +44,10 @@
 
             <div class="mb-6 mt-3">
               <button class="btn btn-primary d-grid w-100" id="login-btn" type="button">
-                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                Sign in
+                <span class="d-flex align-items-center justify-content-center">
+                  Sign in
+                  <span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                </span>
               </button>
             </div>
           </form>

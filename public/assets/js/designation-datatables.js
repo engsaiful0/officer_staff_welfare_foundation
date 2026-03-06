@@ -82,9 +82,12 @@ $(function () {
   // --------------------------------------------------------------------
 
   if (dt_basic_table.length) {
+    var getDataUrl = (typeof window.designationUrls !== 'undefined' && window.designationUrls.getData)
+      ? window.designationUrls.getData
+      : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/get-designation') : '/app/settings/get-designation');
     dt_basic = dt_basic_table.DataTable({
       ajax: {
-        url: 'app/settings/get-designation',
+        url: getDataUrl,
         type: 'GET',
         dataSrc: 'data',
         beforeSend: function() {
@@ -177,7 +180,8 @@ $(function () {
     var id = $('#form-add-new-record').attr('data-id');
 
     if ($new_name != '') {
-      var url = '/app/settings/designation';
+      var baseUrl = (typeof window.designationUrls !== 'undefined' && window.designationUrls.store) ? window.designationUrls.store : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/designation') : '/app/settings/designation');
+      var url = baseUrl;
       var method = 'POST';
       var message = 'Designation added successfully.';
       var data = {
@@ -187,7 +191,7 @@ $(function () {
       };
 
       if (id) {
-        url = '/app/settings/designation/' + id;
+        url = (typeof window.designationUrls !== 'undefined' && window.designationUrls.update) ? window.designationUrls.update + '/' + id : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/designation/' + id) : '/app/settings/designation/' + id);
         method = 'PUT';
         message = 'Designation updated successfully.';
       }
@@ -246,8 +250,9 @@ $(function () {
         // Show spinner on delete button
         showDeleteSpinner(deleteBtn);
         
+        var deleteUrl = (typeof window.designationUrls !== 'undefined' && window.designationUrls.destroy) ? window.designationUrls.destroy + '/' + data.id : (window.AppUtils && window.AppUtils.buildUrl ? window.AppUtils.buildUrl('app/settings/designation/' + data.id) : '/app/settings/designation/' + data.id);
         $.ajax({
-          url: 'app/settings/designation/' + data.id,
+          url: deleteUrl,
           type: 'DELETE',
           data: {
             _token: $('meta[name="csrf-token"]').attr('content')
