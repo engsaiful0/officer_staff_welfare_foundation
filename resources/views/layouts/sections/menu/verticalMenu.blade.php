@@ -1,6 +1,29 @@
 @php
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 $configData = Helper::appClasses();
+$currentRouteName = Route::currentRouteName();
+
+// Helper function to check if menu item is active
+if (!function_exists('isMenuActive')) {
+function isMenuActive($slug, $currentRoute) {
+    if ($currentRoute === $slug) {
+        return 'active';
+    }
+    if (is_array($slug)) {
+        foreach($slug as $s) {
+            if (str_contains($currentRoute, $s) && strpos($currentRoute, $s) === 0) {
+                return 'active open';
+            }
+        }
+    } else {
+        if (str_contains($currentRoute, $slug) && strpos($currentRoute, $slug) === 0) {
+            return 'active open';
+        }
+    }
+    return '';
+    }
+}
 @endphp
 
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
@@ -8,8 +31,14 @@ $configData = Helper::appClasses();
   <!-- ! Hide app brand if navbar-full -->
   @if(!isset($navbarFull))
     <div class="app-brand demo">
-      <a href="{{url('/')}}" class="app-brand-link">
-        <span class="app-brand-logo demo">@include('_partials.macros',["height"=>20])</span>
+      <a href="{{ url('/layouts/vertical') }}" class="app-brand-link">
+        <span class="app-brand-logo demo">
+          @if(isset($appSettings) && $appSettings->logo)
+            <img src="{{ asset('public/assets/img/branding/' . $appSettings->logo) }}" alt="Logo" style="max-height: 50px; max-width: 150px; width: auto; height: auto; object-fit: contain;">
+          @else
+            @include('_partials.macros',["height"=>20])
+          @endif
+        </span>
         <span class="app-brand-text demo menu-text fw-bold">{{config('variables.templateName')}}</span>
       </a>
 
@@ -23,81 +52,344 @@ $configData = Helper::appClasses();
   <div class="menu-inner-shadow"></div>
 
   <ul class="menu-inner py-1">
-    @foreach ($menuData[0]->menu as $menu)
+    
+    <!-- Dashboards -->
+    <li class="menu-item {{ $currentRouteName === 'dashboard' ? 'active' : '' }}">
+      <a href="{{ url('/layouts/vertical') }}" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-smart-home"></i>
+        <div>Dashboards</div>
+      </a>
+    </li>
 
-      {{-- adding active and open class if child is active --}}
-
-      {{-- menu headers --}}
-      @if (isset($menu->menuHeader))
-        <li class="menu-header small">
-            <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
+    <!-- Member -->
+    @permission('member-add')
+    @permission('member-view')
+    <li class="menu-item {{ (str_contains($currentRouteName, 'members') && strpos($currentRouteName, 'members') === 0) ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-users"></i>
+        <div>Member</div>
+      </a>
+      <ul class="menu-sub">
+        @permission('member-add')
+        <li class="menu-item {{ $currentRouteName === 'members.add-member' ? 'active' : '' }}">
+          <a href="{{ url('/app/members/add-member') }}" class="menu-link">
+            <div>Add Member</div>
+          </a>
         </li>
-      @else
+        @endpermission
+        @permission('member-view')
+        <li class="menu-item {{ $currentRouteName === 'members.view-member' ? 'active' : '' }}">
+          <a href="{{ url('/app/members/view-member') }}" class="menu-link">
+            <div>View Member</div>
+          </a>
+        </li>
+        @endpermission
+      </ul>
+    </li>
+    @endpermission
+    @endpermission
 
-      {{-- active menu method --}}
-      @php
-      $activeClass = null;
-      $currentRouteName = Route::currentRouteName();
+    <!-- Employee -->
+    @permission('employee-add')
+    @permission('employee-view')
+    <li class="menu-item {{ (str_contains($currentRouteName, 'app-employee') || str_contains($currentRouteName, 'employee')) ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-users"></i>
+        <div>Employee</div>
+      </a>
+      <ul class="menu-sub">
+        @permission('employee-add')
+        <li class="menu-item {{ $currentRouteName === 'app-add-employee' ? 'active' : '' }}">
+          <a href="{{ url('app/employees/add-employee') }}" class="menu-link">
+            <div>Add Employee</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('employee-view')
+        <li class="menu-item {{ $currentRouteName === 'app-view-employee' ? 'active' : '' }}">
+          <a href="{{ url('app/employees/view-employee') }}" class="menu-link">
+            <div>View Employees</div>
+          </a>
+        </li>
+        @endpermission
+      </ul>
+    </li>
+    @endpermission
+    @endpermission
 
-      if ($currentRouteName === $menu->slug) {
-        $activeClass = 'active';
-      }
-      elseif (isset($menu->submenu)) {
-        if (gettype($menu->slug) === 'array') {
-          foreach($menu->slug as $slug){
-            if (str_contains($currentRouteName,$slug) and strpos($currentRouteName,$slug) === 0) {
-              $activeClass = 'active open';
-            }
-          }
-        }
-        else{
-          if (str_contains($currentRouteName,$menu->slug) and strpos($currentRouteName,$menu->slug) === 0) {
-            $activeClass = 'active open';
-          }
-        }
+    <!-- Expense -->
+    <li class="menu-item {{ (str_contains($currentRouteName, 'app-expense') || str_contains($currentRouteName, 'expenses')) ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+        <div>Expense</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {{ $currentRouteName === 'app-expenses' ? 'active' : '' }}">
+          <a href="{{ url('app/expenses') }}" class="menu-link">
+            <div>Expense Management</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Investment -->
+    @php
+    $hasInvestmentPermission = false;
+    if (Auth::check()) {
+        $user = Auth::user();
+        $hasInvestmentPermission = $user->hasPermissionTo('investment-add') || 
+                                   $user->hasPermissionTo('investment-view') || 
+                                   $user->hasPermissionTo('payment-investment') || 
+                                   $user->hasPermissionTo('investment-collection-add') || 
+                                   $user->hasPermissionTo('investment-collection-view') || 
+                                   $user->hasPermissionTo('investment-import') || 
+                                   $user->hasPermissionTo('investment-reports');
       }
       @endphp
-
-      {{-- main menu --}}
-      @if(isset($menu->permission))
-        @permission($menu->permission)
-          <li class="menu-item {{$activeClass}}">
-            <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0);' }}" class="{{ isset($menu->submenu) ? 'menu-link menu-toggle' : 'menu-link' }}" @if (isset($menu->target) and !empty($menu->target)) target="_blank" @endif>
-              @isset($menu->icon)
-                <i class="{{ $menu->icon }}"></i>
-              @endisset
-              <div>{{ isset($menu->name) ? __($menu->name) : '' }}</div>
-              @isset($menu->badge)
-                <div class="badge bg-{{ $menu->badge[0] }} rounded-pill ms-auto">{{ $menu->badge[1] }}</div>
-              @endisset
-            </a>
-
-            {{-- submenu --}}
-            @isset($menu->submenu)
-              @include('layouts.sections.menu.submenu',['menu' => $menu->submenu])
-            @endisset
+    @if($hasInvestmentPermission)
+    <li class="menu-item {{ (str_contains($currentRouteName, 'investment') || str_contains($currentRouteName, 'investments')) ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+        <div>Investment</div>
+      </a>
+      <ul class="menu-sub">
+        @permission('investment-add')
+        <li class="menu-item {{ $currentRouteName === 'investments.add-investment' ? 'active' : '' }}">
+          <a href="{{ url('/app/investments/add-investment') }}" class="menu-link">
+            <div>Add Investment</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('investment-view')
+        <li class="menu-item {{ $currentRouteName === 'investments.view-investments' ? 'active' : '' }}">
+          <a href="{{ url('/app/investments/view-investments') }}" class="menu-link">
+            <div>View Investments</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('payment-investment')
+        <li class="menu-item {{ $currentRouteName === 'investments.collection.index' ? 'active' : '' }}">
+          <a href="{{ url('/app/investments/collection') }}" class="menu-link">
+            <div>Payment Investment</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('investment-collection-add')
+        <li class="menu-item {{ $currentRouteName === 'investments.collection.index' ? 'active' : '' }}">
+          <a href="{{ url('/app/investments/collection') }}" class="menu-link">
+            <div>Investment Collection</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('investment-collection-view')
+        <li class="menu-item {{ $currentRouteName === 'investments.view-collection' ? 'active' : '' }}">
+          <a href="{{ url('/app/investments/view-collection') }}" class="menu-link">
+            <div>View Collection</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('investment-import')
+        <li class="menu-item {{ $currentRouteName === 'investments.import' ? 'active' : '' }}">
+          <a href="{{ url('/app/investments/import') }}" class="menu-link">
+            <div>Import Data</div>
+          </a>
           </li>
         @endpermission
-      @else
-        <li class="menu-item {{$activeClass}}">
-          <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0);' }}" class="{{ isset($menu->submenu) ? 'menu-link menu-toggle' : 'menu-link' }}" @if (isset($menu->target) and !empty($menu->target)) target="_blank" @endif>
-            @isset($menu->icon)
-              <i class="{{ $menu->icon }}"></i>
-            @endisset
-            <div>{{ isset($menu->name) ? __($menu->name) : '' }}</div>
-            @isset($menu->badge)
-              <div class="badge bg-{{ $menu->badge[0] }} rounded-pill ms-auto">{{ $menu->badge[1] }}</div>
-            @endisset
+        @permission('investment-reports')
+        <li class="menu-item {{ $currentRouteName === 'investments.reports' ? 'active' : '' }}">
+          <a href="{{ url('/app/investments/reports') }}" class="menu-link">
+            <div>Reports</div>
           </a>
-
-          {{-- submenu --}}
-          @isset($menu->submenu)
-            @include('layouts.sections.menu.submenu',['menu' => $menu->submenu])
-          @endisset
+        </li>
+        @endpermission
+      </ul>
         </li>
       @endif
-      @endif
-    @endforeach
+
+    <!-- Deposit -->
+    @php
+    $hasDepositPermission = false;
+    if (Auth::check()) {
+        $user = Auth::user();
+        $hasDepositPermission = $user->hasPermissionTo('deposit-add') || 
+                               $user->hasPermissionTo('deposit-view') || 
+                               $user->hasPermissionTo('deposit-import') || 
+                               $user->hasPermissionTo('deposit-reports');
+    }
+    @endphp
+    @if($hasDepositPermission)
+    <li class="menu-item {{ (str_contains($currentRouteName, 'deposit') || str_contains($currentRouteName, 'deposits')) ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+        <div>Deposit</div>
+      </a>
+      <ul class="menu-sub">
+        @permission('deposit-add')
+        <li class="menu-item {{ $currentRouteName === 'deposits.add-deposit' ? 'active' : '' }}">
+          <a href="{{ url('/app/deposits/add-deposit') }}" class="menu-link">
+            <div>Add Deposit</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('deposit-view')
+        <li class="menu-item {{ $currentRouteName === 'deposits.view-deposits' ? 'active' : '' }}">
+          <a href="{{ url('/app/deposits/view-deposits') }}" class="menu-link">
+            <div>View Deposits</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('deposit-import')
+        <li class="menu-item {{ $currentRouteName === 'deposits.import' ? 'active' : '' }}">
+          <a href="{{ url('/app/deposits/import') }}" class="menu-link">
+            <div>Import Data</div>
+          </a>
+        </li>
+        @endpermission
+        @permission('deposit-reports')
+        <li class="menu-item {{ $currentRouteName === 'deposits.reports' ? 'active' : '' }}">
+          <a href="{{ url('/app/deposits/reports') }}" class="menu-link">
+            <div>Reports</div>
+          </a>
+        </li>
+        @endpermission
+      </ul>
+    </li>
+    @endif
+
+    <!-- Report -->
+    <li class="menu-item {{ (str_contains($currentRouteName, 'report') || str_contains($currentRouteName, '-report')) ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-report"></i>
+        <div>Report</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {{ $currentRouteName === 'student-list-report' ? 'active' : '' }}">
+          <a href="{{ url('/app/student-list-report') }}" class="menu-link">
+            <div>Student List</div>
+          </a>
+        </li>
+        <li class="menu-item {{ $currentRouteName === 'fee-collection-report' ? 'active' : '' }}">
+          <a href="{{ url('app/fee-collection-report') }}" class="menu-link">
+            <div>Fee Collection Report</div>
+          </a>
+        </li>
+        <li class="menu-item {{ $currentRouteName === 'expense-report' ? 'active' : '' }}">
+          <a href="{{ url('app/expense-report') }}" class="menu-link">
+            <div>Expense Report</div>
+          </a>
+        </li>
+        <li class="menu-item {{ $currentRouteName === 'employee-list-report' ? 'active' : '' }}">
+          <a href="{{ url('app/employee-list-report') }}" class="menu-link">
+            <div>Employee List Report</div>
+          </a>
+        </li>
+        <li class="menu-item {{ $currentRouteName === 'teacher-list-report' ? 'active' : '' }}">
+          <a href="{{ url('app/teacher-list-report') }}" class="menu-link">
+            <div>Teacher List Report</div>
+          </a>
+        </li>
+        <li class="menu-item {{ $currentRouteName === 'head-wise-fee-report' ? 'active' : '' }}">
+          <a href="{{ url('app/head-wise-fee-report') }}" class="menu-link">
+            <div>Head Wise Fee Report</div>
+          </a>
+        </li>
+        @permission('fee-summary-view')
+        <li class="menu-item {{ $currentRouteName === 'fee-summary' ? 'active' : '' }}">
+          <a href="{{ url('app/fee-summary') }}" class="menu-link">
+            <div>Student Fee Summary</div>
+          </a>
+        </li>
+        @endpermission
+        <li class="menu-item {{ $currentRouteName === 'my-collection-report' ? 'active' : '' }}">
+          <a href="{{ url('app/my-collection-report') }}" class="menu-link">
+            <div>My Collection Report</div>
+          </a>
+        </li>
+        <li class="menu-item {{ $currentRouteName === 'monthly-fee-due-report' ? 'active' : '' }}">
+          <a href="{{ url('app/fee-management/monthly-report') }}" class="menu-link">
+            <div>Monthly Fee Due Report</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Settings -->
+    @permission('settings-view')
+    <li class="menu-item {{ (str_contains($currentRouteName, 'settings') || str_contains($currentRouteName, 'basic-settings')) ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-settings"></i>
+        <div>Settings</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {{ ($currentRouteName === 'app-settings.index' || $currentRouteName === 'app-setting') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/app-settings') }}" class="menu-link">
+            <div>App Setting</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-designation' || $currentRouteName === 'designation') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/designation') }}" class="menu-link">
+            <div>Designation</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-expense-head' || $currentRouteName === 'expense-head') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/expense-head') }}" class="menu-link">
+            <div>Expense Head</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-income-head' || $currentRouteName === 'income-head') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/income-head') }}" class="menu-link">
+            <div>Income Head</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-nationality' || $currentRouteName === 'nationality') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/nationality') }}" class="menu-link">
+            <div>Nationality</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-payment-method' || $currentRouteName === 'payment-method') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/payment-method') }}" class="menu-link">
+            <div>Payment Method</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'settings-religion' || $currentRouteName === 'religion') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/religion') }}" class="menu-link">
+            <div>Religion</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-access-rules.index' || $currentRouteName === 'app-access-rules') ? 'active' : '' }}">
+          <a href="{{ url('rules') }}" class="menu-link">
+            <div>Rules & Permissions</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-users' || $currentRouteName === 'users') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/users') }}" class="menu-link">
+            <div>Users</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-investment-type' || $currentRouteName === 'investment-type') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/investment-type') }}" class="menu-link">
+            <div>Investment Type</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-cache-clear' || $currentRouteName === 'cache-clear') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/cache-clear') }}" class="menu-link">
+            <div>Cache Clear</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-branch' || $currentRouteName === 'branch') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/branch') }}" class="menu-link">
+            <div>Branch</div>
+          </a>
+        </li>
+        <li class="menu-item {{ ($currentRouteName === 'app-settings-relation' || $currentRouteName === 'relation') ? 'active' : '' }}">
+          <a href="{{ url('app/settings/relation') }}" class="menu-link">
+            <div>Relation</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    @endpermission
+
   </ul>
 
 </aside>
