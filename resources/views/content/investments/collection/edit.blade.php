@@ -1,6 +1,6 @@
 @extends('layouts.contentNavbarLayout')
 
-@section('title', 'Investment Collection')
+@section('title', 'Edit Investment Collection')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -8,10 +8,13 @@
         <div class="col-lg-12 mb-4 order-0">
             <!-- Collection Header Card -->
             <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
-                    <h5 class="card-title mb-0 text-white">
-                        <i class="bx bx-collection me-2"></i>Investment Collection Form
+                <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="bx bx-edit-alt me-2"></i>Edit Investment Collection
                     </h5>
+                    <a href="{{ route('investments.collection.show', $installment) }}" class="btn btn-light btn-sm">
+                        <i class="bx bx-arrow-back me-1"></i> Back to View
+                    </a>
                 </div>
             </div>
 
@@ -21,7 +24,7 @@
                     <!-- Account Selection Card -->
                     <div class="card h-100">
                         <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="bx bx-search me-2"></i>Select Investment Account</h6>
+                            <h6 class="mb-0"><i class="bx bx-search me-2"></i>Investment Account</h6>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
@@ -34,37 +37,38 @@
                                         <option value="{{ $account->id }}" 
                                                 data-account-number="{{ $account->account_number ?? 'N/A' }}"
                                                 data-member-name="{{ $account->investment->member->name }}"
-                                                data-member-id="{{ $account->investment->member->unique_id ?? 'N/A' }}">
+                                                data-member-id="{{ $account->investment->member->unique_id ?? 'N/A' }}"
+                                                {{ $account->id == $installment->investment->account->id ? 'selected' : '' }}>
                                             {{ $account->account_number ?? 'Account #' . $account->id }} - 
                                             {{ $account->investment->member->name }} 
                                             ({{ $account->investment->member->unique_id ?? 'N/A' }})
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Select an investment account to view pending installments</small>
+                                <small class="text-muted">Select an investment account to view installments</small>
                             </div>
 
                             <!-- Account Information Display -->
-                            <div id="account_info" style="display: none;">
+                            <div id="account_info" style="display: block;">
                                 <div class="card bg-light mt-3">
                                     <div class="card-body">
                                         <h6 class="text-muted mb-3">Account Information</h6>
                                         <table class="table table-sm table-borderless mb-0">
                                             <tr>
                                                 <td class="text-muted" style="width: 40%;">Account #:</td>
-                                                <td><strong id="display_account_number">-</strong></td>
+                                                <td><strong id="display_account_number">{{ $installment->investment->account->account_number ?? 'N/A' }}</strong></td>
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Member:</td>
-                                                <td><strong id="display_member_name">-</strong></td>
+                                                <td><strong id="display_member_name">{{ $installment->investment->member->name }}</strong></td>
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Member ID:</td>
-                                                <td id="display_member_id">-</td>
+                                                <td id="display_member_id">{{ $installment->investment->member->unique_id ?? 'N/A' }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="text-muted">Current Balance:</td>
-                                                <td><strong class="text-primary" id="display_balance">-</strong></td>
+                                                <td><strong class="text-primary" id="display_balance">${{ number_format($installment->investment->account->current_balance ?? 0, 2) }}</strong></td>
                                             </tr>
                                         </table>
                                     </div>
@@ -72,43 +76,48 @@
                             </div>
 
                             <!-- Installment Selection -->
-                            <div id="installment_selection" style="display: none;" class="mt-3">
+                            <div id="installment_selection" style="display: block;" class="mt-3">
                                 <label for="installment_id" class="form-label">
                                     Select Installment (Month) <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select form-select-lg" id="installment_id" name="installment_id" required>
                                     <option value="">-- Select Installment --</option>
+                                    <option value="{{ $installment->id }}" selected>
+                                        #{{ $installment->installment_number }} - {{ $installment->schedule_date->format('F Y') }} (Due: {{ $installment->schedule_date->format('M d, Y') }})
+                                    </option>
                                 </select>
-                                <small class="text-muted">Select the month/installment to collect</small>
+                                <small class="text-muted">Select the month/installment to edit</small>
 
                                 <!-- Installment Details -->
-                                <div id="installment_details" class="card bg-warning text-dark mt-3" style="display: none;">
+                                <div id="installment_details" class="card bg-warning text-dark mt-3" style="display: block;">
                                     <div class="card-body">
                                         <h6 class="mb-3">Installment Details</h6>
                                         <table class="table table-sm table-borderless mb-0 text-dark">
                                             <tr>
                                                 <td style="width: 50%;">Installment #:</td>
-                                                <td><strong id="display_installment_number">-</strong></td>
+                                                <td><strong id="display_installment_number">#{{ $installment->installment_number }}</strong></td>
                                             </tr>
                                             <tr>
                                                 <td>Due Date:</td>
-                                                <td id="display_due_date">-</td>
+                                                <td id="display_due_date">{{ $installment->schedule_date->format('M d, Y') }}</td>
                                             </tr>
                                             <tr>
                                                 <td>Principal:</td>
-                                                <td><strong>$<span id="display_principal">0.00</span></strong></td>
+                                                <td><strong>$<span id="display_principal">{{ number_format($installment->principal_amount, 2) }}</span></strong></td>
                                             </tr>
                                             <tr>
                                                 <td>Interest (Rent):</td>
-                                                <td><strong>$<span id="display_rent">0.00</span></strong></td>
+                                                <td><strong>$<span id="display_rent">{{ number_format($installment->rent, 2) }}</span></strong></td>
                                             </tr>
+                                            @if($installment->fine_amount > 0)
                                             <tr>
-                                                <td>Fine (Estimated):</td>
-                                                <td><strong class="text-danger">$<span id="display_fine">0.00</span></strong></td>
+                                                <td>Fine Amount:</td>
+                                                <td><strong class="text-danger">$<span id="display_fine">{{ number_format($installment->fine_amount, 2) }}</span></strong></td>
                                             </tr>
+                                            @endif
                                             <tr class="border-top">
                                                 <td><strong>Total Due:</strong></td>
-                                                <td><strong class="text-primary fs-5">$<span id="display_total">0.00</span></strong></td>
+                                                <td><strong class="text-primary fs-5">$<span id="display_total">{{ number_format($installment->total_amount, 2) }}</span></strong></td>
                                             </tr>
                                         </table>
                                     </div>
@@ -125,10 +134,9 @@
                             <h6 class="mb-0"><i class="bx bx-money me-2"></i>Payment Transaction</h6>
                         </div>
                         <div class="card-body">
-                            <form id="collectionForm" action="{{ route('investments.collection.store') }}" method="POST">
+                            <form id="editForm" action="{{ route('investments.collection.update', $installment) }}" method="POST">
                                 @csrf
-                                <input type="hidden" id="form_account_id" name="account_id" value="">
-                                <input type="hidden" id="form_installment_id" name="installment_id" value="">
+                                @method('PUT')
 
                                 <!-- Payment Method Section -->
                                 <div class="mb-4">
@@ -146,7 +154,7 @@
                                                     required>
                                                 <option value="">-- Select Payment Method --</option>
                                                 @foreach($paymentMethods as $method)
-                                                    <option value="{{ $method->id }}" {{ old('payment_method_id') == $method->id ? 'selected' : '' }}>
+                                                    <option value="{{ $method->id }}" {{ old('payment_method_id', $installment->payment_method_id) == $method->id ? 'selected' : '' }}>
                                                         {{ $method->payment_method_name }}
                                                     </option>
                                                 @endforeach
@@ -159,15 +167,16 @@
                                     </div>
 
                                     <!-- Conditional Fields Based on Payment Method -->
-                                    <div id="payment_method_fields" class="mt-3" style="display: none;">
+                                    <div id="payment_method_fields" class="mt-3" style="display: {{ old('bank_name', $installment->bank_name) || old('check_number', $installment->check_number) ? 'block' : 'none' }};">
                                         <div class="row g-3">
-                                            <div class="col-md-6" id="bank_name_field" style="display: none;">
+                                            <!-- Bank Name (for Check/Bank Transfer) -->
+                                            <div class="col-md-6" id="bank_name_field" style="display: {{ old('bank_name', $installment->bank_name) ? 'block' : 'none' }};">
                                                 <label for="bank_name" class="form-label">Bank Name</label>
                                                 <input type="text" 
                                                        class="form-control @error('bank_name') is-invalid @enderror" 
                                                        id="bank_name" 
                                                        name="bank_name" 
-                                                       value="{{ old('bank_name') }}" 
+                                                       value="{{ old('bank_name', $installment->bank_name) }}" 
                                                        placeholder="Enter bank name">
                                                 <div class="invalid-feedback"></div>
                                                 @error('bank_name')
@@ -175,13 +184,14 @@
                                                 @enderror
                                             </div>
 
-                                            <div class="col-md-6" id="check_number_field" style="display: none;">
+                                            <!-- Check Number (for Check payments) -->
+                                            <div class="col-md-6" id="check_number_field" style="display: {{ old('check_number', $installment->check_number) ? 'block' : 'none' }};">
                                                 <label for="check_number" class="form-label">Check Number</label>
                                                 <input type="text" 
                                                        class="form-control @error('check_number') is-invalid @enderror" 
                                                        id="check_number" 
                                                        name="check_number" 
-                                                       value="{{ old('check_number') }}" 
+                                                       value="{{ old('check_number', $installment->check_number) }}" 
                                                        placeholder="Enter check number">
                                                 <div class="invalid-feedback"></div>
                                                 @error('check_number')
@@ -198,6 +208,7 @@
                                         <i class="bx bx-receipt me-2"></i>Transaction Details
                                     </h6>
                                     <div class="row g-3">
+                                        <!-- Payment Date -->
                                         <div class="col-md-6">
                                             <label for="paid_date" class="form-label">
                                                 Payment Date <span class="text-danger">*</span>
@@ -206,7 +217,7 @@
                                                    class="form-control @error('paid_date') is-invalid @enderror" 
                                                    id="paid_date" 
                                                    name="paid_date" 
-                                                   value="{{ old('paid_date', date('Y-m-d')) }}" 
+                                                   value="{{ old('paid_date', $installment->paid_date->format('Y-m-d')) }}" 
                                                    required>
                                             <div class="invalid-feedback"></div>
                                             @error('paid_date')
@@ -214,6 +225,7 @@
                                             @enderror
                                         </div>
 
+                                        <!-- Transaction Reference -->
                                         <div class="col-md-6">
                                             <label for="transaction_reference" class="form-label">
                                                 Transaction Reference
@@ -222,7 +234,7 @@
                                                    class="form-control @error('transaction_reference') is-invalid @enderror" 
                                                    id="transaction_reference" 
                                                    name="transaction_reference" 
-                                                   value="{{ old('transaction_reference') }}" 
+                                                   value="{{ old('transaction_reference', $installment->transaction_reference) }}" 
                                                    placeholder="e.g., TXN-123456789">
                                             <small class="text-muted">Optional: Bank transaction ID, reference number, etc.</small>
                                             <div class="invalid-feedback"></div>
@@ -239,6 +251,7 @@
                                         <i class="bx bx-calculator me-2"></i>Payment Amount
                                     </h6>
                                     <div class="row g-3">
+                                        <!-- Base Amount (Read-only) -->
                                         <div class="col-md-6">
                                             <label class="form-label">Base Amount</label>
                                             <div class="input-group">
@@ -246,14 +259,17 @@
                                                 <input type="text" 
                                                        class="form-control bg-light" 
                                                        id="base_amount_display" 
-                                                       value="0.00" 
+                                                       value="{{ number_format($installment->total_amount, 2) }}" 
                                                        readonly>
                                             </div>
                                             <small class="text-muted">
-                                                Principal + Rent + Fine
+                                                Principal: ${{ number_format($installment->principal_amount, 2) }} + 
+                                                Rent: ${{ number_format($installment->rent, 2) }} + 
+                                                Fine: ${{ number_format($installment->fine_amount ?? 0, 2) }}
                                             </small>
                                         </div>
 
+                                        <!-- Discount Amount -->
                                         <div class="col-md-6">
                                             <label for="discount_amount" class="form-label">Discount Amount</label>
                                             <div class="input-group">
@@ -262,9 +278,10 @@
                                                        class="form-control @error('discount_amount') is-invalid @enderror" 
                                                        id="discount_amount" 
                                                        name="discount_amount" 
-                                                       value="{{ old('discount_amount', 0) }}" 
+                                                       value="{{ old('discount_amount', $installment->discount_amount ?? 0) }}" 
                                                        step="0.01" 
                                                        min="0" 
+                                                       max="{{ $installment->total_amount }}"
                                                        placeholder="0.00">
                                             </div>
                                             <div class="invalid-feedback"></div>
@@ -273,6 +290,7 @@
                                             @enderror
                                         </div>
 
+                                        <!-- Net Paid Amount (Auto-calculated) -->
                                         <div class="col-md-12">
                                             <label for="paid_amount" class="form-label">
                                                 Net Payment Amount <span class="text-danger">*</span>
@@ -283,7 +301,7 @@
                                                        class="form-control @error('paid_amount') is-invalid @enderror" 
                                                        id="paid_amount" 
                                                        name="paid_amount" 
-                                                       value="0.00" 
+                                                       value="{{ old('paid_amount', number_format($installment->total_amount - ($installment->discount_amount ?? 0), 2)) }}" 
                                                        step="0.01" 
                                                        min="0" 
                                                        required
@@ -306,8 +324,8 @@
                                     <div class="alert alert-info d-flex align-items-center">
                                         <i class="bx bx-info-circle me-2 fs-4"></i>
                                         <div>
-                                            <strong>Receipt Number:</strong> Will be auto-generated upon payment confirmation
-                                            <br><small>Format: RCP-YYYYMMDD-XXXXXX</small>
+                                            <strong>Receipt Number:</strong> {{ $installment->receipt_number }}
+                                            <br><small>This receipt number cannot be changed</small>
                                         </div>
                                     </div>
                                 </div>
@@ -321,7 +339,7 @@
                                               id="notes" 
                                               name="notes" 
                                               rows="3" 
-                                              placeholder="Enter any additional notes or remarks about this payment...">{{ old('notes') }}</textarea>
+                                              placeholder="Enter any additional notes or remarks about this payment...">{{ old('notes', $installment->notes) }}</textarea>
                                     <div class="invalid-feedback"></div>
                                     @error('notes')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -330,10 +348,13 @@
 
                                 <!-- Form Actions -->
                                 <div class="d-flex justify-content-end pt-3 border-top">
-                                    <button type="submit" id="submitBtn" class="btn btn-primary btn-lg" disabled>
+                                    <a href="{{ route('investments.collection.show', $installment) }}" class="btn btn-outline-secondary me-2">
+                                        <i class="bx bx-x me-1"></i> Cancel
+                                    </a>
+                                    <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">
                                         <span class="spinner-border spinner-border-sm d-none me-2" id="submitSpinner" role="status" aria-hidden="true"></span>
                                         <i class="bx bx-check-circle me-1" id="submitIcon"></i> 
-                                        <span id="submitText">Process Collection</span>
+                                        <span id="submitText">Update Collection</span>
                                     </button>
                                 </div>
                             </form>
@@ -362,16 +383,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentMethodFields = document.getElementById('payment_method_fields');
     const bankNameField = document.getElementById('bank_name_field');
     const checkNumberField = document.getElementById('check_number_field');
-    const form = document.getElementById('collectionForm');
+    const form = document.getElementById('editForm');
 
     let currentInstallments = [];
     let currentInstallment = null;
+    const currentInstallmentId = {{ $installment->id }};
+    const currentAccountId = {{ $installment->investment->account->id }};
 
     // Account selection change
     accountSelect.addEventListener('change', function() {
         const accountId = this.value;
-        const formAccountId = document.getElementById('form_account_id');
-        formAccountId.value = accountId;
 
         if (accountId) {
             const selectedOption = this.options[this.selectedIndex];
@@ -387,7 +408,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('installment_selection').style.display = 'none';
             document.getElementById('installment_details').style.display = 'none';
             installmentSelect.innerHTML = '<option value="">-- Select Installment --</option>';
-            submitBtn.disabled = true;
         }
     });
 
@@ -399,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $.ajax({
             url: '{{ route("investments.collection.get-installments") }}',
             type: 'GET',
-            data: { account_id: accountId },
+            data: { account_id: accountId, include_paid: true },
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
@@ -408,19 +428,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentInstallments = response.data.installments;
                     installmentSelect.innerHTML = '<option value="">-- Select Installment --</option>';
                     
+                    // Add all paid installments for this account
                     currentInstallments.forEach(function(inst) {
                         const option = document.createElement('option');
                         option.value = inst.id;
                         option.textContent = `#${inst.installment_number} - ${inst.month_name} (Due: ${inst.schedule_date_formatted})`;
                         option.dataset.installment = JSON.stringify(inst);
+                        if (inst.id == currentInstallmentId) {
+                            option.selected = true;
+                        }
                         installmentSelect.appendChild(option);
                     });
+
+                    // Also add the current installment if it's not in the list (already paid)
+                    const currentInstExists = currentInstallments.some(inst => inst.id == currentInstallmentId);
+                    if (!currentInstExists) {
+                        const option = document.createElement('option');
+                        option.value = currentInstallmentId;
+                        option.textContent = `#{{ $installment->installment_number }} - {{ $installment->schedule_date->format('F Y') }} (Due: {{ $installment->schedule_date->format('M d, Y') }})`;
+                        option.selected = true;
+                        installmentSelect.appendChild(option);
+                    }
 
                     // Update account balance display
                     document.getElementById('display_balance').textContent = '$' + parseFloat(response.data.account.current_balance).toFixed(2);
                     
                     document.getElementById('installment_selection').style.display = 'block';
                     installmentSelect.disabled = false;
+
+                    // Trigger installment change if current one is selected
+                    setTimeout(function() {
+                        if (installmentSelect.value == currentInstallmentId) {
+                            installmentSelect.dispatchEvent(new Event('change'));
+                        }
+                    }, 100);
                 }
             },
             error: function(xhr) {
@@ -434,21 +475,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Installment selection change
     installmentSelect.addEventListener('change', function() {
         const installmentId = this.value;
-        const formInstallmentId = document.getElementById('form_installment_id');
-        formInstallmentId.value = installmentId;
 
         if (installmentId) {
-            const selectedOption = this.options[this.selectedIndex];
-            currentInstallment = JSON.parse(selectedOption.dataset.installment);
-            updateInstallmentDetails(currentInstallment);
-            calculateFine();
-            submitBtn.disabled = false;
+            if (installmentId == currentInstallmentId) {
+                // Current installment - use existing data and load payment details
+                updateInstallmentDetailsFromCurrent();
+                loadCurrentInstallmentPaymentDetails();
+            } else {
+                // Different installment - load from AJAX data
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption.dataset.installment) {
+                    currentInstallment = JSON.parse(selectedOption.dataset.installment);
+                    updateInstallmentDetails(currentInstallment);
+                    // Load payment details for this installment via AJAX
+                    loadInstallmentPaymentDetails(installmentId);
+                }
+            }
+            document.getElementById('installment_details').style.display = 'block';
         } else {
             document.getElementById('installment_details').style.display = 'none';
             resetAmounts();
-            submitBtn.disabled = true;
         }
     });
+
+    // When different installment is selected, update form to reflect that installment
+    // Note: Payment details (method, reference, etc.) will need to be updated manually
+    // or we can redirect to edit that installment instead
+
+    // Update installment details from current installment
+    function updateInstallmentDetailsFromCurrent() {
+        document.getElementById('display_installment_number').textContent = '#{{ $installment->installment_number }}';
+        document.getElementById('display_due_date').textContent = '{{ $installment->schedule_date->format("M d, Y") }}';
+        document.getElementById('display_principal').textContent = parseFloat({{ $installment->principal_amount }}).toFixed(2);
+        document.getElementById('display_rent').textContent = parseFloat({{ $installment->rent }}).toFixed(2);
+        document.getElementById('display_fine').textContent = parseFloat({{ $installment->fine_amount ?? 0 }}).toFixed(2);
+        document.getElementById('display_total').textContent = parseFloat({{ $installment->total_amount }}).toFixed(2);
+        baseAmountDisplay.value = parseFloat({{ $installment->total_amount }}).toFixed(2);
+        calculateNetPaidAmount();
+    }
 
     // Update installment details display
     function updateInstallmentDetails(installment) {
@@ -458,15 +522,45 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('display_rent').textContent = parseFloat(installment.rent).toFixed(2);
         document.getElementById('display_fine').textContent = parseFloat(installment.fine_amount).toFixed(2);
         document.getElementById('display_total').textContent = parseFloat(installment.total_amount).toFixed(2);
-        document.getElementById('installment_details').style.display = 'block';
+        baseAmountDisplay.value = parseFloat(installment.total_amount).toFixed(2);
+        calculateNetPaidAmount();
     }
 
     // Calculate fine when paid date changes
     paidDateInput.addEventListener('change', function() {
-        if (currentInstallment) {
+        if (currentInstallment && installmentSelect.value != currentInstallmentId) {
             calculateFine();
         }
     });
+
+    // Payment method change handler
+    paymentMethodSelect.addEventListener('change', function() {
+        const selectedMethod = this.options[this.selectedIndex].text.toLowerCase();
+        paymentMethodFields.style.display = 'block';
+        
+        // Show/hide fields based on payment method
+        if (selectedMethod.includes('check') || selectedMethod.includes('cheque')) {
+            bankNameField.style.display = 'block';
+            checkNumberField.style.display = 'block';
+            document.getElementById('bank_name').required = true;
+            document.getElementById('check_number').required = true;
+        } else if (selectedMethod.includes('bank') || selectedMethod.includes('transfer')) {
+            bankNameField.style.display = 'block';
+            checkNumberField.style.display = 'none';
+            document.getElementById('bank_name').required = true;
+            document.getElementById('check_number').required = false;
+        } else {
+            bankNameField.style.display = 'none';
+            checkNumberField.style.display = 'none';
+            document.getElementById('bank_name').required = false;
+            document.getElementById('check_number').required = false;
+        }
+    });
+
+    // Trigger on page load if payment method is already selected
+    if (paymentMethodSelect.value) {
+        paymentMethodSelect.dispatchEvent(new Event('change'));
+    }
 
     // Calculate net paid amount when discount changes
     discountAmountInput.addEventListener('input', function() {
@@ -506,7 +600,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Calculate net paid amount
     function calculateNetPaidAmount() {
-        const baseAmount = parseFloat(baseAmountDisplay.value) || 0;
+        const baseAmount = parseFloat(baseAmountDisplay.value.replace(/,/g, '')) || 0;
         const discount = parseFloat(discountAmountInput.value) || 0;
         const netPaid = Math.max(0, baseAmount - discount);
         
@@ -523,24 +617,15 @@ document.addEventListener('DOMContentLoaded', function() {
         netAmountCalculation.textContent = 'Base Amount - Discount = Net Payment';
     }
 
-    // Payment method change handler
-    paymentMethodSelect.addEventListener('change', function() {
-        const selectedMethod = this.options[this.selectedIndex].text.toLowerCase();
-        paymentMethodFields.style.display = 'block';
-        
-        if (selectedMethod.includes('check') || selectedMethod.includes('cheque')) {
-            bankNameField.style.display = 'block';
-            checkNumberField.style.display = 'block';
-        } else if (selectedMethod.includes('bank') || selectedMethod.includes('transfer')) {
-            bankNameField.style.display = 'block';
-            checkNumberField.style.display = 'none';
-        } else {
-            bankNameField.style.display = 'none';
-            checkNumberField.style.display = 'none';
-        }
-    });
+    // Initialize on page load - load installments for current account
+    if (accountSelect.value) {
+        accountSelect.dispatchEvent(new Event('change'));
+    } else {
+        updateInstallmentDetailsFromCurrent();
+        calculateNetPaidAmount();
+    }
 
-    // Form submission
+    // Form submission with AJAX
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -555,13 +640,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show spinner and disable form
         submitSpinner.classList.remove('d-none');
         submitIcon.classList.add('d-none');
-        submitText.textContent = 'Processing...';
+        submitText.textContent = 'Updating...';
         submitBtn.disabled = true;
-       // form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
-           // field.disabled = true;
-        //});
+        form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
+            field.disabled = true;
+        });
 
+        // Get selected installment ID
+        const selectedInstallmentId = installmentSelect.value || currentInstallmentId;
+        
+        // Add installment_id to form data if different from current
         const formData = new FormData(form);
+        if (selectedInstallmentId != currentInstallmentId) {
+            formData.append('installment_id', selectedInstallmentId);
+        }
 
         $.ajax({
             url: form.action,
@@ -574,47 +666,33 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             success: function(response) {
                 if (response.success) {
-                    // Show success toast
-                    const receiptNumber = response.data.receipt_number || 'N/A';
-                    const message = response.message || 'Collection processed successfully! Receipt: ' + receiptNumber;
-                    
-                    // Show toast with proper configuration
-                    if (typeof toastr !== 'undefined') {
-                        // Configure toastr options
-                        toastr.options = {
-                            closeButton: true,
+                    toastr.success(
+                        response.message || 'Collection updated successfully!', 
+                        'Success', 
+                        {
+                            timeOut: 2000,
                             progressBar: true,
-                            timeOut: 3000,
-                            extendedTimeOut: 1000,
                             positionClass: 'toast-top-right'
-                        };
-                        toastr.success(message);
-                    } else {
-                        // Fallback to alert if toastr is not available
-                        alert(message);
-                    }
-                    
-                    // Redirect to view page after 2.5 seconds to ensure toast is visible
-                    setTimeout(function() {
-                        const installmentId = response.data.installment_id || response.data.installment?.id;
-                        if (installmentId) {
-                            window.location.href = '{{ url("/app/investments/collection") }}/' + installmentId;
-                        } else {
-                            // Fallback to collections list if no ID
-                            window.location.href = '{{ route("investments.view-collection") }}';
                         }
-                    }, 2500);
+                    );
+                    
+                    // Redirect to show page after 1.5 seconds
+                    // If installment changed, redirect to new installment show page
+                    const redirectUrl = selectedInstallmentId != currentInstallmentId 
+                        ? '{{ url("/app/investments/collection") }}/' + selectedInstallmentId
+                        : '{{ route("investments.collection.show", $installment) }}';
+                    
+                    setTimeout(function() {
+                        window.location.href = redirectUrl;
+                    }, 1500);
                 } else {
-                    if (typeof toastr !== 'undefined') {
-                        toastr.error(response.message || 'Failed to process collection');
-                    } else {
-                        alert('Error: ' + (response.message || 'Failed to process collection'));
-                    }
+                    toastr.error(response.message || 'Failed to update collection');
                     resetForm();
                 }
             },
             error: function(xhr) {
                 if (xhr.status === 422) {
+                    // Validation errors
                     const errors = xhr.responseJSON.errors;
                     $.each(errors, function(field, messages) {
                         const input = document.getElementById(field);
@@ -629,7 +707,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     toastr.error('Please fix the validation errors and try again.');
                 } else {
-                    const errorMessage = xhr.responseJSON?.message || 'An error occurred while processing the collection';
+                    const errorMessage = xhr.responseJSON?.message || 'An error occurred while updating the collection';
                     toastr.error(errorMessage);
                 }
                 resetForm();
@@ -640,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetForm() {
         submitSpinner.classList.add('d-none');
         submitIcon.classList.remove('d-none');
-        submitText.textContent = 'Process Collection';
+        submitText.textContent = 'Update Collection';
         submitBtn.disabled = false;
         form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
             field.disabled = false;
@@ -649,5 +727,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
-
-

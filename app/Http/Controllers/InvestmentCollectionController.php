@@ -85,6 +85,22 @@ class InvestmentCollectionController extends Controller
     {
         $type = $request->type; // pdf, excel, print
         
+        // If single installment ID is provided, export single receipt
+        if ($request->filled('installment_id')) {
+            $installment = InvestmentInstallment::with(['investment.member', 'paymentMethod', 'investment.account'])
+                ->where('status', 'paid')
+                ->findOrFail($request->installment_id);
+            
+            if ($type === 'pdf') {
+                $pdf = Pdf::loadView('content.investments.collection.receipt-pdf', compact('installment'));
+                return $pdf->download('receipt-' . $installment->receipt_number . '.pdf');
+            }
+            
+            if ($type === 'print') {
+                return view('content.investments.collection.receipt-print', compact('installment'));
+            }
+        }
+        
         $query = InvestmentInstallment::with(['investment.member', 'paymentMethod', 'investment.account'])
             ->where('status', 'paid');
 
@@ -183,14 +199,20 @@ class InvestmentCollectionController extends Controller
             ], 422);
         }
 
-        $account = InvestmentAccount::with(['investment.member', 'investment.installments' => function($q) {
-            $q->where('status', 'pending')->orderBy('installment_number');
+        // Include paid installments if requested (for edit form)
+        $includePaid = $request->boolean('include_paid', false);
+        $statuses = $includePaid ? ['pending', 'paid'] : ['pending'];
+        
+        $account = InvestmentAccount::with(['investment.member', 'investment.installments' => function($q) use ($statuses) {
+            $q->whereIn('status', $statuses)->orderBy('installment_number');
         }])->findOrFail($request->account_id);
 
         $installments = $account->investment->installments->map(function($installment) {
             $daysLate = $installment->getDaysLate();
-            $fine = $installment->calculateFine();
-            $totalAmount = $installment->principal_amount + $installment->rent + $fine;
+            $fine = $installment->status === 'paid' ? ($installment->fine_amount ?? 0) : $installment->calculateFine();
+            $totalAmount = $installment->status === 'paid' 
+                ? $installment->total_amount 
+                : ($installment->principal_amount + $installment->rent + $fine);
 
             return [
                 'id' => $installment->id,
@@ -203,7 +225,8 @@ class InvestmentCollectionController extends Controller
                 'total_amount' => (float)$totalAmount,
                 'days_late' => $daysLate,
                 'is_overdue' => $installment->isOverdue(),
-                'month_name' => $installment->schedule_date->format('F Y')
+                'month_name' => $installment->schedule_date->format('F Y'),
+                'status' => $installment->status
             ];
         });
 
@@ -363,9 +386,10 @@ class InvestmentCollectionController extends Controller
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Investment collection processed successfully',
+                    'message' => 'Investment collection processed successfully! Receipt: ' . $receiptNumber,
                     'data' => [
                         'installment' => $installment->fresh()->load('paymentMethod'),
+                        'installment_id' => $installment->id,
                         'receipt_number' => $receiptNumber,
                         'fine' => $fine,
                         'days_late' => $daysLate
@@ -427,6 +451,277 @@ class InvestmentCollectionController extends Controller
                 'original_total' => $installment->total_amount
             ]
         ]);
+    }
+
+    /**
+     * Display the specified collection
+     */
+    public function show(InvestmentInstallment $installment)
+    {
+        $installment->load([
+            'investment.member',
+            'investment.account',
+            'paymentMethod'
+        ]);
+
+        return view('content.investments.collection.show', compact('installment'));
+    }
+
+    /**
+     * Show the form for editing the specified collection
+     */
+    public function edit(InvestmentInstallment $installment)
+    {
+        // Only allow editing paid installments
+        if ($installment->status !== 'paid') {
+            return redirect()->back()->with('error', 'Only paid installments can be edited.');
+        }
+
+        $installment->load([
+            'investment.member',
+            'investment.account',
+            'paymentMethod'
+        ]);
+
+        // Get all active investment accounts for dropdown
+        $accounts = InvestmentAccount::with(['investment.member'])
+            ->where('account_status', 'active')
+            ->orderBy('account_number')
+            ->get();
+
+        $paymentMethods = PaymentMethod::orderBy('payment_method_name')->get();
+
+        return view('content.investments.collection.edit', compact('installment', 'paymentMethods', 'accounts'));
+    }
+
+    /**
+     * Update the specified collection
+     */
+    public function update(Request $request, InvestmentInstallment $installment)
+    {
+        // Only allow updating paid installments
+        if ($installment->status !== 'paid') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only paid installments can be updated.'
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Only paid installments can be updated.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'account_id' => 'nullable|exists:investment_accounts,id',
+            'installment_id' => 'nullable|exists:investment_installments,id',
+            'paid_date' => 'required|date',
+            'discount_amount' => 'nullable|numeric|min:0',
+            'payment_method_id' => 'required|exists:payment_methods,id',
+            'transaction_reference' => 'nullable|string|max:255',
+            'bank_name' => 'nullable|string|max:255',
+            'check_number' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000'
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // If a different installment is selected, use that one
+            $targetInstallment = $installment;
+            if ($request->filled('installment_id') && $request->installment_id != $installment->id) {
+                $targetInstallment = InvestmentInstallment::findOrFail($request->installment_id);
+                
+                // Verify it's a paid installment
+                if ($targetInstallment->status !== 'paid') {
+                    if ($request->expectsJson() || $request->ajax()) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Selected installment is not paid and cannot be edited.'
+                        ], 422);
+                    }
+                    return redirect()->back()->with('error', 'Selected installment is not paid.');
+                }
+            }
+
+            $paidDate = Carbon::parse($request->paid_date);
+            $discountAmount = (float)($request->discount_amount ?? 0);
+            
+            // Calculate net paid amount
+            $baseTotal = (float)$targetInstallment->principal_amount + (float)$targetInstallment->rent + (float)$targetInstallment->fine_amount;
+            $netPaidAmount = max(0, $baseTotal - $discountAmount);
+
+            // Update installment
+            $targetInstallment->update([
+                'paid_date' => $paidDate,
+                'discount_amount' => $discountAmount,
+                'total_amount' => $baseTotal,
+                'payment_method_id' => $request->payment_method_id,
+                'transaction_reference' => $request->transaction_reference,
+                'bank_name' => $request->bank_name,
+                'check_number' => $request->check_number,
+                'notes' => $request->notes,
+                'updated_by' => auth()->id()
+            ]);
+
+            // Update related ledger entry if exists
+            $ledgerEntry = LedgerEntry::where('entity_type', 'investment')
+                ->where('entity_id', $targetInstallment->investment_id)
+                ->where('description', 'like', "%installment #{$targetInstallment->installment_number}%")
+                ->where('type', 'payment')
+                ->orderBy('entry_date', 'desc')
+                ->first();
+
+            if ($ledgerEntry) {
+                $ledgerEntry->update([
+                    'entry_date' => $paidDate,
+                    'amount' => $netPaidAmount,
+                    'description' => "Payment for installment #{$targetInstallment->installment_number}" . 
+                        ($targetInstallment->fine_amount > 0 ? " (Fine: $" . number_format($targetInstallment->fine_amount, 2) . ")" : "") .
+                        ($discountAmount > 0 ? " (Discount: $" . number_format($discountAmount, 2) . ", Net: $" . number_format($netPaidAmount, 2) . ")" : "")
+                ]);
+            }
+
+            DB::commit();
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Collection updated successfully',
+                    'data' => $targetInstallment->fresh()->load('paymentMethod'),
+                    'installment_id' => $targetInstallment->id
+                ]);
+            }
+
+            return redirect()->route('investments.collection.show', $targetInstallment)
+                ->with('success', 'Collection updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update collection: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Failed to update collection: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Remove the specified collection (reverse payment)
+     */
+    public function destroy(Request $request, InvestmentInstallment $installment)
+    {
+        // Only allow deleting paid installments
+        if ($installment->status !== 'paid') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only paid installments can be deleted.'
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Only paid installments can be deleted.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $investment = $installment->investment;
+            $account = $investment->account;
+
+            // Reverse ledger entry
+            $ledgerEntry = LedgerEntry::where('entity_type', 'investment')
+                ->where('entity_id', $investment->id)
+                ->where('description', 'like', "%installment #{$installment->installment_number}%")
+                ->where('type', 'payment')
+                ->orderBy('entry_date', 'desc')
+                ->first();
+
+            if ($ledgerEntry) {
+                // Recalculate balance after reversal
+                $previousBalance = $ledgerEntry->balance_after;
+                $newBalance = $previousBalance + (float)$installment->principal_amount;
+
+                // Update subsequent ledger entries
+                LedgerEntry::where('entity_type', 'investment')
+                    ->where('entity_id', $investment->id)
+                    ->where('entry_date', '>=', $ledgerEntry->entry_date)
+                    ->where('id', '!=', $ledgerEntry->id)
+                    ->get()
+                    ->each(function($entry) use ($installment) {
+                        $entry->balance_after = (float)$entry->balance_after + (float)$installment->principal_amount;
+                        $entry->save();
+                    });
+
+                $ledgerEntry->delete();
+            }
+
+            // Update account balances
+            $netPaidAmount = (float)$installment->total_amount - (float)($installment->discount_amount ?? 0);
+            $account->total_principal_paid = max(0, (float)$account->total_principal_paid - (float)$installment->principal_amount);
+            $account->total_rent_received = max(0, (float)$account->total_rent_received - (float)$installment->rent);
+            $account->total_payments_made = max(0, (float)$account->total_payments_made - (float)$netPaidAmount);
+            $account->total_installments_paid = max(0, (int)$account->total_installments_paid - 1);
+            $account->installments_paid_count = max(0, (int)$account->installments_paid_count - 1);
+            $account->installments_pending_count = (int)$account->installments_pending_count + 1;
+            $account->current_balance = (float)$newBalance;
+            $account->save();
+
+            // Reset installment to pending
+            $installment->update([
+                'status' => 'pending',
+                'paid_date' => null,
+                'fine_amount' => 0,
+                'discount_amount' => 0,
+                'paid_by' => null,
+                'payment_method_id' => null,
+                'transaction_reference' => null,
+                'receipt_number' => null,
+                'bank_name' => null,
+                'check_number' => null,
+                'notes' => null,
+                'updated_by' => auth()->id()
+            ]);
+
+            DB::commit();
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Collection payment reversed successfully'
+                ]);
+            }
+
+            return redirect()->route('investments.view-collection')
+                ->with('success', 'Collection payment reversed successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to delete collection: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Failed to delete collection: ' . $e->getMessage());
+        }
     }
 
     /**

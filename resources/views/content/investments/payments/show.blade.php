@@ -52,7 +52,7 @@
                             @if($investment->account)
                             <div class="mb-0">
                                 <small class="text-muted d-block">Current Balance</small>
-                                <strong class="text-primary fs-5">${{ number_format($investment->account->current_balance, 2) }}</strong>
+                                <strong class="text-primary fs-5">৳{{ number_format($investment->account->current_balance, 2) }}</strong>
                             </div>
                             @endif
                         </div>
@@ -80,21 +80,21 @@
                                 </tr>
                                 <tr>
                                     <td class="text-muted">Principal</td>
-                                    <td class="text-end"><strong>${{ number_format($installment->principal_amount, 2) }}</strong></td>
+                                    <td class="text-end"><strong>৳{{ number_format($installment->principal_amount, 2) }}</strong></td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">Interest (Rent)</td>
-                                    <td class="text-end"><strong>${{ number_format($installment->rent, 2) }}</strong></td>
+                                    <td class="text-end"><strong>৳{{ number_format($installment->rent, 2) }}</strong></td>
                                 </tr>
                                 @if($fine > 0)
                                 <tr>
                                     <td class="text-muted">Late Fee</td>
-                                    <td class="text-end"><strong class="text-danger">$<span id="fine_display">{{ number_format($fine, 2) }}</span></strong></td>
+                                    <td class="text-end"><strong class="text-danger">৳<span id="fine_display">{{ number_format($fine, 2) }}</span></strong></td>
                                 </tr>
                                 @endif
                                 <tr class="border-top">
                                     <td class="text-muted"><strong>Total Due</strong></td>
-                                    <td class="text-end"><strong class="text-primary fs-5">$<span id="total_due_display">{{ number_format($installment->principal_amount + $installment->rent + $fine, 2) }}</span></strong></td>
+                                    <td class="text-end"><strong class="text-primary fs-5">৳<span id="total_due_display">{{ number_format($installment->principal_amount + $installment->rent + $fine, 2) }}</span></strong></td>
                                 </tr>
                             </table>
                         </div>
@@ -228,7 +228,7 @@
                                         <div class="col-md-6">
                                             <label class="form-label">Base Amount</label>
                                             <div class="input-group">
-                                                <span class="input-group-text">$</span>
+                                                <span class="input-group-text">৳</span>
                                                 <input type="text" 
                                                        class="form-control bg-light" 
                                                        id="base_amount_display" 
@@ -236,9 +236,9 @@
                                                        readonly>
                                             </div>
                                             <small class="text-muted">
-                                                Principal: ${{ number_format($installment->principal_amount, 2) }} + 
-                                                Rent: ${{ number_format($installment->rent, 2) }} + 
-                                                Fine: $<span id="fine_in_base">{{ number_format($fine, 2) }}</span>
+                                                Principal: ৳{{ number_format($installment->principal_amount, 2) }} + 
+                                                Rent: ৳{{ number_format($installment->rent, 2) }} + 
+                                                Fine: ৳<span id="fine_in_base">{{ number_format($fine, 2) }}</span>
                                             </small>
                                         </div>
 
@@ -246,7 +246,7 @@
                                         <div class="col-md-6">
                                             <label for="discount_amount" class="form-label">Discount Amount</label>
                                             <div class="input-group">
-                                                <span class="input-group-text">$</span>
+                                                <span class="input-group-text">৳</span>
                                                 <input type="number" 
                                                        class="form-control @error('discount_amount') is-invalid @enderror" 
                                                        id="discount_amount" 
@@ -263,24 +263,24 @@
                                         </div>
 
                                         <!-- Net Paid Amount (Auto-calculated) -->
-                                        <div class="col-md-12">
+                                        <div class="col-md-12 mt-3">
                                             <label for="paid_amount" class="form-label">
-                                                Net Payment Amount <span class="text-danger">*</span>
+                                                <strong>Net Payment Amount <span class="text-danger">*</span></strong>
                                             </label>
                                             <div class="input-group input-group-lg">
-                                                <span class="input-group-text bg-primary text-white">$</span>
+                                                <span class="input-group-text bg-primary text-white">৳</span>
                                                 <input type="number" 
                                                        class="form-control @error('paid_amount') is-invalid @enderror" 
                                                        id="paid_amount" 
                                                        name="paid_amount" 
-                                                       value="{{ old('paid_amount', number_format($installment->principal_amount + $installment->rent + $fine, 2)) }}" 
+                                                       value="{{ old('paid_amount', $installment->principal_amount + $installment->rent + $fine) }}" 
                                                        step="0.01" 
                                                        min="0" 
                                                        required
                                                        readonly
                                                        style="background-color: #e7f3ff; font-size: 1.25rem; font-weight: bold;">
                                             </div>
-                                            <small class="text-muted">
+                                            <small class="text-muted d-block mt-2">
                                                 <span id="net_amount_calculation">Base Amount - Discount = Net Payment</span>
                                             </small>
                                             <div class="invalid-feedback"></div>
@@ -405,8 +405,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         paidAmountInput.value = netPaid.toFixed(2);
         netAmountCalculation.textContent = 
-            `$${baseAmount.toFixed(2)} - $${discount.toFixed(2)} = $${netPaid.toFixed(2)}`;
+            `৳${baseAmount.toFixed(2)} - ৳${discount.toFixed(2)} = ৳${netPaid.toFixed(2)}`;
     }
+
+    // Initialize calculation on page load
+    calculateNetPaidAmount();
 
     // Calculate fine based on paid date
     function calculateFine() {
@@ -469,9 +472,7 @@ document.addEventListener('DOMContentLoaded', function() {
         submitIcon.classList.add('d-none');
         submitText.textContent = 'Processing Payment...';
         submitBtn.disabled = true;
-        form.querySelectorAll('input, select, textarea, button').forEach(function(field) {
-            field.disabled = true;
-        });
+      
 
         const formData = new FormData(form);
 

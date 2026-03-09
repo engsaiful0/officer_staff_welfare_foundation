@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Deposit;
+use App\Models\DepositType;
 use App\Models\Member;
 use App\Models\LedgerEntry;
 use App\Models\Import;
@@ -112,7 +113,7 @@ class DepositImportService
                 'start_date' => $startDate,
                 'maturity_date' => $maturityDate,
                 'rate' => $rate,
-                'deposit_type' => $depositType,
+                'deposit_type_id' => $this->getDepositTypeId($depositType),
                 'status' => 'active'
             ]);
 

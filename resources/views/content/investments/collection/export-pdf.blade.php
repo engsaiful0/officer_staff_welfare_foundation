@@ -18,7 +18,7 @@
         <p>Generated on: {{ date('M d, Y H:i A') }}</p>
     </div>
 
-    <table>
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Date</th>
@@ -43,7 +43,7 @@
                     <td>{{ $item->investment->account->account_number ?? 'N/A' }}</td>
                     <td>{{ $item->investment->member->name }}</td>
                     <td>#{{ $item->installment_number }}</td>
-                    <td>${{ number_format($net, 2) }}</td>
+                    <td>৳{{ number_format($net, 2) }}</td>
                     <td>{{ $item->paymentMethod->payment_method_name ?? 'N/A' }}</td>
                 </tr>
             @endforeach
@@ -51,7 +51,7 @@
     </table>
 
     <div class="summary">
-        <h3>Total Collected: ${{ number_format($total, 2) }}</h3>
+        <h3>Total Collected: ৳{{ number_format($total, 2) }}</h3>
     </div>
 
     <div class="footer">

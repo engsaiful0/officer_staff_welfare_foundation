@@ -106,6 +106,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Base URL for collection routes
+    const baseUrl = '{{ url("/app/investments/collection") }}';
+    
     const filterForm = document.getElementById('filterForm');
     const collectionBody = document.getElementById('collectionBody');
     const paginationLinks = document.getElementById('paginationLinks');
@@ -203,28 +206,108 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${item.payment_method?.payment_method_name || 'N/A'}</td>
                     <td><span class="badge bg-success">Paid</span></td>
                     <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                <i class="bx bx-dots-vertical-rounded"></i>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="${baseUrl}/${item.id}" 
+                               class="btn btn-sm btn-outline-info" 
+                               title="View">
+                                <i class="bx bx-show me-1"></i>View
+                            </a>
+                            <a href="${baseUrl}/${item.id}/edit" 
+                               class="btn btn-sm btn-outline-primary" 
+                               title="Edit">
+                                <i class="bx bx-edit-alt me-1"></i>Edit
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-collection" 
+                                data-id="${item.id}" 
+                                data-receipt="${item.receipt_number}"
+                                title="Delete">
+                                <i class="bx bx-trash me-1"></i>Delete
                             </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="javascript:void(0);" onclick="printReceipt('${item.id}')">
-                                    <i class="bx bx-printer me-1"></i> Print Receipt
-                                </a>
-                            </div>
                         </div>
                     </td>
                 </tr>
             `;
         });
         collectionBody.innerHTML = html;
+
+        // Attach delete event listeners
+        document.querySelectorAll('.delete-collection').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const receipt = this.dataset.receipt;
+                const url = baseUrl + '/' + id;
+                const $btn = $(this);
+
+                Swal.fire({
+                    title: 'Reverse Payment?',
+                    html: `<p>Are you sure you want to reverse this payment?</p>
+                           <p><strong>Receipt:</strong> ${receipt}</p>
+                           <p class="text-danger">This action will mark the installment as pending again and reverse all related transactions.</p>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, reverse it!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        confirmButton: 'btn btn-danger me-3',
+                        cancelButton: 'btn btn-label-secondary'
+                    },
+                    buttonsStyling: false,
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        // Show spinner on button
+                        const originalHtml = $btn.html();
+                        $btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+                        $btn.prop('disabled', true);
+
+                        return fetch(url, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error(data.message || 'Failed to reverse payment');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            // Reset button
+                            $btn.html(originalHtml);
+                            $btn.prop('disabled', false);
+                            Swal.showValidationMessage(error.message || 'An error occurred while reversing the payment');
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Reversed!',
+                            text: result.value.message || 'Payment has been reversed successfully.',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            timer: 2000,
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Reload the collections table
+                            fetchCollections();
+                        });
+                    }
+                });
+            });
+        });
     }
 });
-
-function printReceipt(id) {
-    // Implement receipt printing if needed, or redirect to a show page
-    toastr.info('Receipt printing feature coming soon.');
-}
 </script>
 @endsection
 

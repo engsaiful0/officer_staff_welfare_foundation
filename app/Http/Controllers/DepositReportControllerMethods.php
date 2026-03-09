@@ -19,7 +19,7 @@ trait DepositReportControllerMethods
      */
     public function exportPdf(Request $request)
     {
-        $query = Deposit::with(['member', 'ledgerEntries' => function($q) {
+        $query = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
             $q->orderBy('entry_date', 'desc')->limit(1);
         }]);
 
@@ -66,7 +66,7 @@ trait DepositReportControllerMethods
      */
     public function exportExcel(Request $request)
     {
-        $query = Deposit::with(['member', 'ledgerEntries' => function($q) {
+        $query = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
             $q->orderBy('entry_date', 'desc')->limit(1);
         }]);
 
@@ -140,7 +140,7 @@ trait DepositReportControllerMethods
             $sheet->setCellValue('B' . $row, $deposit->member->name);
             $sheet->setCellValue('C' . $row, $deposit->member->member_unique_id);
             $sheet->setCellValue('D' . $row, $deposit->product_name);
-            $sheet->setCellValue('E' . $row, ucfirst($deposit->deposit_type));
+            $sheet->setCellValue('E' . $row, $deposit->depositType ? $deposit->depositType->deposit_type_name : 'N/A');
             $sheet->setCellValue('F' . $row, $deposit->start_date->format('Y-m-d'));
             $sheet->setCellValue('G' . $row, $deposit->maturity_date ? $deposit->maturity_date->format('Y-m-d') : '');
             $sheet->setCellValue('H' . $row, $deposit->deposit_amount);

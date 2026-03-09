@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('deposits', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('member_id');
-            $table->decimal('deposit_amount', 15, 2);
-            $table->string('product_name')->nullable();
+            $table->string('deposit_account_number')->unique();
+            $table->decimal('monthly_deposit_amount', 15, 2);
+            $table->integer('deposit_day_of_month')->default(1);
             $table->date('start_date');
             $table->date('maturity_date')->nullable();
             $table->decimal('rate', 8, 4)->nullable(); // e.g., 0.08 for 8%

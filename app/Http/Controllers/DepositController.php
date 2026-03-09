@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Deposit;
+use App\Models\DepositType;
 use App\Models\Member;
 use App\Models\LedgerEntry;
+use App\Models\DepositAccountNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -17,7 +19,7 @@ class DepositController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Deposit::with(['member', 'ledgerEntries' => function($q) {
+        $query = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
             $q->orderBy('entry_date', 'desc')->limit(1);
         }]);
 
@@ -30,8 +32,8 @@ class DepositController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('deposit_type')) {
-            $query->where('deposit_type', $request->deposit_type);
+        if ($request->filled('deposit_type_id')) {
+            $query->where('deposit_type_id', $request->deposit_type_id);
         }
 
         if ($request->filled('date_from')) {
@@ -52,8 +54,9 @@ class DepositController extends Controller
         }
 
         $members = Member::select('id', 'name', 'unique_id')->get();
+        $depositTypes = DepositType::all();
         
-        return view('content.deposits.index', compact('deposits', 'members'));
+        return view('content.deposits.index', compact('deposits', 'members', 'depositTypes'));
     }
 
     /**
@@ -61,11 +64,14 @@ class DepositController extends Controller
      */
     public function create(Request $request)
     {
+        $latest = DepositAccountNumber::latest('serial')->first();
+        $nextAccountNumber = 'D' . Carbon::now()->year . str_pad($latest ? $latest->serial + 1 : 1, 6, '0', STR_PAD_LEFT);
         $memberId = $request->get('member_id');
         $member = $memberId ? Member::find($memberId) : null;
         $members = Member::select('id', 'name', 'unique_id')->get();
+        $depositTypes = DepositType::all();
         
-        return view('content.deposits.create', compact('member', 'members'));
+        return view('content.deposits.create', compact('member', 'members', 'nextAccountNumber', 'depositTypes'));
     }
 
     /**
@@ -75,12 +81,13 @@ class DepositController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'member_id' => 'required|exists:members,id',
-            'deposit_amount' => 'required|numeric|min:0',
-            'product_name' => 'nullable|string|max:255',
+            'monthly_deposit_amount' => 'nullable|numeric|min:0',
+            'deposit_day_of_month' => 'nullable|integer|min:1|max:31',
+            'deposit_account_number' => 'required|string|max:255|unique:deposits,deposit_account_number',
             'start_date' => 'required|date',
             'maturity_date' => 'nullable|date|after:start_date',
-            'rate' => 'nullable|numeric|min:0|max:1',
-            'deposit_type' => 'required|in:savings,fixed,recurring',
+            'rate' => 'nullable|numeric|min:0|max:100',
+            'deposit_type_id' => 'required|exists:deposit_types,id',
             'notes' => 'nullable|string'
         ]);
 
@@ -97,27 +104,37 @@ class DepositController extends Controller
         try {
             DB::beginTransaction();
 
+            // Convert rate from percentage to decimal (e.g., 8% -> 0.08)
+            $rate = $request->rate ? $request->rate / 100 : null;
+            
             $deposit = Deposit::create([
                 'member_id' => $request->member_id,
-                'deposit_amount' => $request->deposit_amount,
-                'product_name' => $request->product_name,
+                'monthly_deposit_amount' => $request->monthly_deposit_amount ?? null,
+                'deposit_day_of_month' => $request->deposit_day_of_month ?? 1,
+                'deposit_account_number' => $request->deposit_account_number,
                 'start_date' => $request->start_date,
                 'maturity_date' => $request->maturity_date,
-                'rate' => $request->rate,
-                'deposit_type' => $request->deposit_type,
+                'rate' => $rate,
+                'deposit_type_id' => $request->deposit_type_id,
                 'status' => 'active',
                 'notes' => $request->notes
             ]);
 
+            // Note: Account number is already provided from the form, so generateAccountNumber() is not needed
+            // If you need to track it in deposit_account_numbers table, you can add that logic here
+
             // Create initial ledger entry for deposit
+            // Use monthly_deposit_amount if provided, otherwise 0 for account opening
+            $initialAmount = $request->monthly_deposit_amount ?? 0;
+            
             LedgerEntry::create([
                 'entity_type' => 'deposit',
                 'entity_id' => $deposit->id,
                 'entry_date' => $request->start_date,
                 'type' => 'deposit',
-                'amount' => $request->deposit_amount,
-                'balance_after' => $request->deposit_amount,
-                'description' => 'Initial deposit',
+                'amount' => $initialAmount,
+                'balance_after' => $initialAmount,
+                'description' => $initialAmount > 0 ? 'Initial deposit / Account opening' : 'Account opening',
                 'created_by' => auth()->id()
             ]);
 
@@ -155,7 +172,7 @@ class DepositController extends Controller
      */
     public function show(Deposit $deposit)
     {
-        $deposit->load(['member', 'ledgerEntries.createdBy']);
+        $deposit->load(['member', 'depositType', 'ledgerEntries.createdBy']);
         $ledgerEntries = $deposit->ledgerEntries()->orderBy('entry_date', 'desc')->paginate(10);
 
         if (request()->expectsJson()) {
@@ -177,7 +194,8 @@ class DepositController extends Controller
     public function edit(Deposit $deposit)
     {
         $members = Member::select('id', 'name', 'unique_id')->get();
-        return view('content.deposits.edit', compact('deposit', 'members'));
+        $depositTypes = DepositType::all();
+        return view('content.deposits.edit', compact('deposit', 'members', 'depositTypes'));
     }
 
     /**
@@ -187,12 +205,12 @@ class DepositController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'member_id' => 'required|exists:members,id',
-            'deposit_amount' => 'required|numeric|min:0',
-            'product_name' => 'nullable|string|max:255',
+            'monthly_deposit_amount' => 'nullable|numeric|min:0',
+            'deposit_day_of_month' => 'nullable|integer|min:1|max:31',
             'start_date' => 'required|date',
             'maturity_date' => 'nullable|date|after:start_date',
-            'rate' => 'nullable|numeric|min:0|max:1',
-            'deposit_type' => 'required|in:savings,fixed,recurring',
+            'rate' => 'nullable|numeric|min:0|max:100',
+            'deposit_type_id' => 'required|exists:deposit_types,id',
             'status' => 'required|in:active,matured,closed',
             'notes' => 'nullable|string'
         ]);
@@ -210,14 +228,17 @@ class DepositController extends Controller
         try {
             DB::beginTransaction();
 
+            // Convert rate from percentage to decimal (e.g., 8% -> 0.08)
+            $rate = $request->rate ? $request->rate / 100 : null;
+
             $deposit->update([
                 'member_id' => $request->member_id,
-                'deposit_amount' => $request->deposit_amount,
-                'product_name' => $request->product_name,
+                'monthly_deposit_amount' => $request->monthly_deposit_amount ?? null,
+                'deposit_day_of_month' => $request->deposit_day_of_month ?? 1,
                 'start_date' => $request->start_date,
                 'maturity_date' => $request->maturity_date,
-                'rate' => $request->rate,
-                'deposit_type' => $request->deposit_type,
+                'rate' => $rate,
+                'deposit_type_id' => $request->deposit_type_id,
                 'status' => $request->status,
                 'notes' => $request->notes
             ]);
@@ -277,7 +298,7 @@ class DepositController extends Controller
                 ]);
             }
 
-            return redirect()->route('deposits.index')
+            return redirect()->route('deposits.view-deposits')
                 ->with('success', 'Deposit deleted successfully.');
 
         } catch (\Exception $e) {
@@ -327,7 +348,7 @@ class DepositController extends Controller
      */
     public function getByMember($memberId)
     {
-        $deposits = Deposit::with(['member', 'ledgerEntries' => function($q) {
+        $deposits = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
             $q->orderBy('entry_date', 'desc')->limit(1);
         }])
         ->where('member_id', $memberId)
