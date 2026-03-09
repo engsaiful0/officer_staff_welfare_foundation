@@ -346,6 +346,8 @@ Route::get('/app/members/monthly-deposit-installment-settings/get-members', [Dep
 Route::get('/app/members/monthly-deposit-installment-settings/get-data', [DepositInstallmentAmountController::class, 'getData'])->name('members.monthly-deposit-installment-settings.get-data');
 Route::get('/app/members/monthly-deposit-installment-settings/last-amount/{memberId}', [DepositInstallmentAmountController::class, 'getLastAmount'])->name('members.monthly-deposit-installment-settings.last-amount');
 Route::post('/app/members/monthly-deposit-installment-settings', [DepositInstallmentAmountController::class, 'store'])->name('members.monthly-deposit-installment-settings.store');
+Route::get('/app/members/monthly-deposit-installment-settings/{id}', [DepositInstallmentAmountController::class, 'show'])->name('members.monthly-deposit-installment-settings.show');
+Route::put('/app/members/monthly-deposit-installment-settings/{id}', [DepositInstallmentAmountController::class, 'update'])->name('members.monthly-deposit-installment-settings.update');
 Route::delete('/app/members/monthly-deposit-installment-settings/{id}', [DepositInstallmentAmountController::class, 'destroy'])->name('members.monthly-deposit-installment-settings.destroy');
 
 // Investment Module Routes
