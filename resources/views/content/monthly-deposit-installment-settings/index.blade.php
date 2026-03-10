@@ -6,88 +6,83 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
     window.monthlyDepositInstallmentSettingsUrls = {
-        getData: '{{ url("app/members/monthly-deposit-installment-settings/get-data") }}',
-        lastAmount: '{{ url("app/members/monthly-deposit-installment-settings/last-amount") }}',
-        store: '{{ url("app/members/monthly-deposit-installment-settings") }}',
         show: '{{ url("app/members/monthly-deposit-installment-settings") }}',
         update: '{{ url("app/members/monthly-deposit-installment-settings") }}',
-        destroy: '{{ url("app/members/monthly-deposit-installment-settings") }}',
-        getMembers: '{{ route("members.monthly-deposit-installment-settings.get-members") }}'
+        destroy: '{{ url("app/members/monthly-deposit-installment-settings") }}'
     };
-    window.membersFromServer = @json($membersJson ?? []);
 </script>
 <script src="{{ asset('assets/js/monthly-deposit-installment-settings.js') }}?v={{ time() }}"></script>
 @endsection
 
 @section('content')
+@php
+    $months = [1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec'];
+@endphp
 <div class="card">
-    <div class="card-datatable table-responsive pt-0">
-        <table class="datatables-basic table">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Member</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Month</th>
-                    <th>Year</th>
-                    <th>User</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-        </table>
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="card-title mb-0">Deposit Installment Setup</h5>
+        <a href="{{ route('members.monthly-deposit-installment-settings.create') }}" class="btn btn-primary">
+            <i class="ti ti-plus me-1"></i>Create
+        </a>
     </div>
-</div>
-
-<!-- Offcanvas: Create -->
-<div class="offcanvas offcanvas-end" id="add-new-record">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title">Create Deposit Installment</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body flex-grow-1">
-        <form id="form-create-installment" class="pt-0 row g-2">
-            <div class="col-sm-12">
-                <label class="form-label" for="member_id">Member <span class="text-danger">*</span></label>
-                <select class="form-select select2" id="member_id" name="member_id" required>
-                    <option value="">Select Member</option>
-                    @if(isset($members) && count($members) > 0)
+    <div class="card-body">
+        <form method="GET" action="{{ route('members.monthly-deposit-installment-settings.index') }}" class="row g-2 mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Member</label>
+                <select class="form-select" name="member_id">
+                    <option value="">All Members</option>
                     @foreach($members as $m)
-                    <option value="{{ $m->id }}">{{ $m->name }} ({{ $m->unique_id ?? '' }})</option>
-                    @endforeach
-                    @endif
-                </select>
-                <div id="member_id_loading" class="form-text text-muted d-none">Loading members...</div>
-            </div>
-            <div class="col-sm-12">
-                <label class="form-label" for="installment_amount">Amount <span class="text-danger">*</span></label>
-                <input type="number" step="0.01" min="0" id="installment_amount" name="installment_amount" class="form-control" placeholder="0.00" required>
-            </div>
-            <div class="col-sm-12">
-                <label class="form-label" for="date">Date <span class="text-danger">*</span></label>
-                <input type="date" id="date" name="date" class="form-control" required>
-            </div>
-            <div class="col-sm-6">
-                <label class="form-label" for="month">Month</label>
-                <select class="form-select" id="month" name="month">
-                    <option value="">—</option>
-                    @foreach([1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec'] as $num => $label)
-                    <option value="{{ $num }}">{{ $label }}</option>
+                    <option value="{{ $m->id }}" {{ request('member_id') == $m->id ? 'selected' : '' }}>{{ $m->name }} ({{ $m->unique_id ?? '' }})</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-sm-6">
-                <label class="form-label" for="year">Year</label>
-                <input type="number" id="year" name="year" class="form-control" placeholder="e.g. 2026" min="2000" max="2100">
-            </div>
-            <div class="col-sm-12">
-                <button type="submit" class="btn btn-primary" id="create-submit-btn">
-                    <span class="spinner-border spinner-border-sm me-2 d-none" id="create-spinner" role="status"></span>
-                    <span id="create-submit-text">Create</span>
-                </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Filter</button>
             </div>
         </form>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Member</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>User</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($installments as $row)
+                    <tr>
+                        <td>{{ $row->id }}</td>
+                        <td>{{ $row->member ? $row->member->name : '—' }} <span class="text-muted">({{ $row->member ? $row->member->unique_id : '—' }})</span></td>
+                        <td>{{ number_format((float)$row->installment_amount, 2) }}</td>
+                        <td>{{ $row->date ? (is_object($row->date) && method_exists($row->date, 'format') ? $row->date->format('M d, Y') : $row->date) : '—' }}</td>
+                        <td>{{ $row->month && isset($months[$row->month]) ? $months[$row->month] : '—' }}</td>
+                        <td>{{ $row->year ?? '—' }}</td>
+                        <td>{{ $row->user ? $row->user->name : '—' }}</td>
+                        <td>
+                            <a href="javascript:;" class="btn btn-sm btn-icon view-record" data-id="{{ $row->id }}" title="View"><i class="ti ti-eye"></i></a>
+                            <a href="javascript:;" class="btn btn-sm btn-icon edit-record" data-id="{{ $row->id }}" title="Edit"><i class="ti ti-pencil"></i></a>
+                            <a href="javascript:;" class="btn btn-sm btn-icon text-danger delete-record" data-id="{{ $row->id }}" title="Delete"><i class="ti ti-trash"></i></a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No deposit installments found.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @if($installments->hasPages())
+        <div class="d-flex justify-content-center mt-3">
+            {{ $installments->links() }}
+        </div>
+        @endif
     </div>
 </div>
 
@@ -127,11 +122,9 @@
                 <label class="form-label" for="edit_member_id">Member <span class="text-danger">*</span></label>
                 <select class="form-select select2" id="edit_member_id" name="member_id" required>
                     <option value="">Select Member</option>
-                    @if(isset($members) && count($members) > 0)
                     @foreach($members as $m)
                     <option value="{{ $m->id }}">{{ $m->name }} ({{ $m->unique_id ?? '' }})</option>
                     @endforeach
-                    @endif
                 </select>
             </div>
             <div class="col-sm-12">

@@ -349,6 +349,7 @@ Route::get('/members/export/pdf', [MemberController::class, 'exportPdf'])->name(
 
 // Monthly Deposit Installment Settings (under Member)
 Route::get('/app/members/monthly-deposit-installment-settings', [DepositInstallmentAmountController::class, 'index'])->name('members.monthly-deposit-installment-settings.index');
+Route::get('/app/members/monthly-deposit-installment-settings/create', [DepositInstallmentAmountController::class, 'create'])->name('members.monthly-deposit-installment-settings.create');
 Route::get('/app/members/monthly-deposit-installment-settings/get-members', [DepositInstallmentAmountController::class, 'getMembers'])->name('members.monthly-deposit-installment-settings.get-members');
 Route::get('/app/members/monthly-deposit-installment-settings/get-data', [DepositInstallmentAmountController::class, 'getData'])->name('members.monthly-deposit-installment-settings.get-data');
 Route::get('/app/members/monthly-deposit-installment-settings/last-amount/{memberId}', [DepositInstallmentAmountController::class, 'getLastAmount'])->name('members.monthly-deposit-installment-settings.last-amount');

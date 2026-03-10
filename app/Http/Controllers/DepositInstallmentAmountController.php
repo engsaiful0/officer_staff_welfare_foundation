@@ -11,15 +11,37 @@ use Illuminate\Support\Facades\Auth;
 class DepositInstallmentAmountController extends Controller
 {
     /**
-     * Display the deposit installment amounts list.
+     * Display the deposit installment amounts list (Laravel pagination).
      */
-    public function index()
+    public function index(Request $request)
+    {
+        $query = DepositInstallmentAmount::with(['member:id,name,unique_id', 'user:id,name'])
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc');
+
+        if ($request->filled('member_id')) {
+            $query->where('member_id', $request->member_id);
+        }
+
+        $installments = $query->paginate(15)->withQueryString();
+        $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
+        $membersJson = $members->map(function ($m) {
+            return ['id' => $m->id, 'name' => $m->name, 'unique_id' => $m->unique_id ?? ''];
+        })->values();
+
+        return view('content.monthly-deposit-installment-settings.index', compact('installments', 'members', 'membersJson'));
+    }
+
+    /**
+     * Show the form for creating a new deposit installment.
+     */
+    public function create()
     {
         $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
         $membersJson = $members->map(function ($m) {
             return ['id' => $m->id, 'name' => $m->name, 'unique_id' => $m->unique_id ?? ''];
         })->values();
-        return view('content.monthly-deposit-installment-settings.index', compact('members', 'membersJson'));
+        return view('content.monthly-deposit-installment-settings.create', compact('members', 'membersJson'));
     }
 
     /**
