@@ -48,7 +48,7 @@
               @error('monthly_deposit_amount')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
-              <div class="form-text">Fixed amount to deposit every month (leave empty if not applicable)</div>
+              <div class="form-text">Fixed amount to deposit every month. When you select a member, the last installment amount from their monthly deposit settings is filled automatically so they can pay that amount.</div>
             </div>
 
 
@@ -106,6 +106,10 @@
 
 @section('page-script')
 <script>
+// URL template to fetch last installment amount (replace __ID__ with member_id)
+window.lastInstallmentAmountUrl = @json(route('members.monthly-deposit-installment-settings.last-amount', ['memberId' => '__ID__']));
+</script>
+<script>
 // Ensure jQuery is loaded
 if (typeof jQuery === 'undefined') {
   console.error('jQuery is not loaded!');
@@ -118,6 +122,42 @@ jQuery(document).ready(function($) {
   const monthlyDepositInput = $('#monthly_deposit_amount');
   const depositDayContainer = $('#deposit_day_container');
   const depositDayInput = $('#deposit_day_of_month');
+  const memberSelect = $('#member_id');
+
+  // On member change: fetch last installment amount and populate Monthly Deposit Amount
+  memberSelect.on('change', function() {
+    const memberId = $(this).val();
+    if (!memberId) {
+      monthlyDepositInput.val('');
+      return;
+    }
+    const url = window.lastInstallmentAmountUrl.replace('__ID__', memberId);
+    $.ajax({
+      url: url,
+      type: 'GET',
+      dataType: 'json',
+      headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      success: function(data) {
+        if (data.installment_amount != null && data.installment_amount !== '') {
+          monthlyDepositInput.val(parseFloat(data.installment_amount));
+          if (depositDayContainer.length && parseFloat(data.installment_amount) > 0) {
+            depositDayContainer.show();
+            depositDayInput.attr('required', 'required');
+          }
+        } else {
+          monthlyDepositInput.val('');
+        }
+      },
+      error: function() {
+        monthlyDepositInput.val('');
+      }
+    });
+  });
+
+  // On load, if a member is already selected, fetch last installment amount
+  if (memberSelect.val()) {
+    memberSelect.trigger('change');
+  }
 
   // Show/hide deposit day field based on monthly deposit amount
   monthlyDepositInput.on('input', function() {
