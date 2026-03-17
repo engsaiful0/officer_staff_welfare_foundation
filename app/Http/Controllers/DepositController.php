@@ -64,14 +64,12 @@ class DepositController extends Controller
      */
     public function create(Request $request)
     {
-        $latest = DepositAccountNumber::latest('serial')->first();
-        $nextAccountNumber = 'D' . Carbon::now()->year . str_pad($latest ? $latest->serial + 1 : 1, 6, '0', STR_PAD_LEFT);
-        $memberId = $request->get('member_id');
+       $memberId = $request->get('member_id');
         $member = $memberId ? Member::find($memberId) : null;
         $members = Member::select('id', 'name', 'unique_id')->get();
-        $depositTypes = DepositType::all();
         
-        return view('content.deposits.create', compact('member', 'members', 'nextAccountNumber', 'depositTypes'));
+        
+        return view('content.deposits.create', compact('member', 'members'));
     }
 
     /**

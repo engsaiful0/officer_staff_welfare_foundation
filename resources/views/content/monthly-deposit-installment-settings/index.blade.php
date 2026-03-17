@@ -146,7 +146,12 @@
             </div>
             <div class="col-sm-6">
                 <label class="form-label" for="edit_year">Year</label>
-                <input type="number" id="edit_year" name="year" class="form-control" min="2000" max="2100">
+                <select class="form-select" id="edit_year" name="year">
+                    <option value="">—</option>
+                    @for($y = 2015; $y <= 2030; $y++)
+                    <option value="{{ $y }}">{{ $y }}</option>
+                    @endfor
+                </select>
             </div>
             <div class="col-sm-12">
                 <button type="submit" class="btn btn-primary" id="edit-submit-btn">

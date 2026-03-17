@@ -19,9 +19,9 @@
           
           <div class="row">
             <!-- Member Selection -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
               <label for="member_id" class="form-label">Member <span class="text-danger">*</span></label>
-              <select class="form-select @error('member_id') is-invalid @enderror" id="member_id" name="member_id" required>
+              <select class="select2 form-select @error('member_id') is-invalid @enderror" id="member_id" name="member_id" required>
                 <option value="">Select Member</option>
                 @foreach($members as $member)
                   <option value="{{ $member->id }}" {{ (old('member_id') == $member->id || ($member && $member->id == $member->id)) ? 'selected' : '' }}>
@@ -35,13 +35,9 @@
             </div>
 
             <!-- Product Name -->
-            <div class="col-md-6 mb-3">
-              <label for="deposit_account_number" class="form-label">Account Number</label>
-              <input type="text" value="{{ $nextAccountNumber }}" class="form-control @error('deposit_account_number') is-invalid @enderror" 
-                     id="deposit_account_number" name="deposit_account_number" readonly required>
-            </div>
+   
             <!-- Monthly Deposit Amount -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
               <label for="monthly_deposit_amount" class="form-label">Monthly Deposit Amount</label>
               <div class="input-group">
                 <span class="input-group-text">৳</span>
@@ -55,67 +51,21 @@
               <div class="form-text">Fixed amount to deposit every month (leave empty if not applicable)</div>
             </div>
 
-            <!-- Deposit Day of Month -->
-            <div class="col-md-6 mb-3" id="deposit_day_container" style="display: none;">
-              <label for="deposit_day_of_month" class="form-label">Deposit Day of Month</label>
-              <input type="number" class="form-control @error('deposit_day_of_month') is-invalid @enderror" 
-                     id="deposit_day_of_month" name="deposit_day_of_month" value="{{ old('deposit_day_of_month', 1) }}" 
-                     min="1" max="31">
-              @error('deposit_day_of_month')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-              <div class="form-text">Day of month when monthly deposit should be processed (1-31)</div>
-            </div>
 
-            <!-- Deposit Type -->
-            <div class="col-md-6 mb-3">
-              <label for="deposit_type_id" class="form-label">Deposit Type <span class="text-danger">*</span></label>
-              <select class="form-select @error('deposit_type_id') is-invalid @enderror" id="deposit_type_id" name="deposit_type_id" required>
-                <option value="">Select Type</option>
-                @foreach($depositTypes as $type)
-                  <option value="{{ $type->id }}" {{ old('deposit_type_id') == $type->id ? 'selected' : '' }}>{{ $type->deposit_type_name }}</option>
-                @endforeach
-              </select>
-              @error('deposit_type_id')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+    
 
             <!-- Start Date -->
-            <div class="col-md-6 mb-3">
-              <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+            <div class="col-md-12 mb-3">
+              <label for="deposit_date" class="form-label">Deposit Date <span class="text-danger">*</span></label>
               <input type="date" class="form-control @error('start_date') is-invalid @enderror" 
-                     id="start_date" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required>
-              @error('start_date')
+                     id="deposit_date" name="deposit_date" value="{{ old('deposit_date', date('Y-m-d')) }}" required>
+              @error('deposit_date')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
 
-            <!-- Maturity Date -->
-            <div class="col-md-6 mb-3">
-              <label for="maturity_date" class="form-label">Maturity Date</label>
-              <input type="date" class="form-control @error('maturity_date') is-invalid @enderror" 
-                     id="maturity_date" name="maturity_date" value="{{ old('maturity_date') }}">
-              @error('maturity_date')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-              <div class="form-text">Leave empty for savings accounts</div>
-            </div>
+       
 
-            <!-- Interest Rate -->
-            <div class="col-md-6 mb-3">
-              <label for="rate" class="form-label">Interest Rate (%)</label>
-              <div class="input-group">
-                <input type="number" class="form-control @error('rate') is-invalid @enderror" 
-                       id="rate" name="rate" value="{{ old('rate') }}" 
-                       step="0.01" min="0" max="100" placeholder="0.00">
-                <span class="input-group-text">%</span>
-              </div>
-              @error('rate')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-              <div class="form-text">Enter as percentage (e.g., 8 for 8%)</div>
-            </div>
 
             <!-- Notes -->
             <div class="col-12 mb-3">
@@ -132,15 +82,17 @@
           <!-- Form Actions -->
           <div class="row">
             <div class="col-12">
-              <div class="d-flex justify-content-end gap-2">
-                <a href="{{ route('deposits.view-deposits') }}" class="btn btn-outline-secondary">
-                  Cancel
-                </a>
+              <div class="d-flex gap-2">
+             
                 <button type="button" class="btn btn-primary" id="submitBtn">
                   <span class="spinner-border spinner-border-sm me-2 d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
                   <i class="bx bx-save me-1" id="submitIcon"></i> 
                   <span id="submitText">Create Deposit</span>
                 </button>
+
+                <a href="{{ route('deposits.view-deposits') }}" class="btn btn-outline-secondary">
+                  Cancel
+                </a>
               </div>
             </div>
           </div>

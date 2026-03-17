@@ -55,8 +55,8 @@
                     <div class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ is_object($member->date_of_birth) && method_exists($member->date_of_birth, 'format') ? $member->date_of_birth->format('Y-m-d') : ($member->date_of_birth ?? '') }}" required>
+                    <label for="date_of_birth" class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ is_object($member->date_of_birth) && method_exists($member->date_of_birth, 'format') ? $member->date_of_birth->format('Y-m-d') : ($member->date_of_birth ?? '') }}">
                     <div class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -66,14 +66,15 @@
                 </div>
                 
                 <div class="col-md-4 mb-3">
-                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ $member->email }}" required>
+                    <label for="email" class="form-label">Email </label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ $member->email }}" 
+            >
                     <div class="invalid-feedback"></div>
                 </div>
                 
                 <div class="col-md-4 mb-3">
-                    <label for="nid_number" class="form-label">NID Number <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="nid_number" name="nid_number" value="{{ $member->nid_number }}" required>
+                    <label for="nid_number" class="form-label">NID Number</label>
+                    <input type="text" class="form-control" id="nid_number" name="nid_number" value="{{ $member->nid_number }}" >
                     <div class="invalid-feedback"></div>
                 </div>
                 

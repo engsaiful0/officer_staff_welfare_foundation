@@ -11,25 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('deposit_account_numbers', function (Blueprint $table) {
+        Schema::create('member_unique_ids', function (Blueprint $table) {
             $table->id();
-            $table->string('account_number')->unique();
+            $table->string('member_unique_id')->unique();
             $table->integer('serial');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('deposit_id')->nullable();
-            $table->year('year')->nullable();
+            $table->foreignId('member_id')->constrained("members")->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
-            
             // Foreign key constraints
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('deposit_id')->references('id')->on('deposits')->onDelete('set null');
-            
             // Indexes
             $table->index('account_number');
             $table->index('serial');
-            $table->index(['year', 'serial']);
             $table->index('user_id');
-            $table->index('deposit_id');
         });
     }
 
@@ -38,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('deposit_account_numbers');
+        Schema::dropIfExists('member_unique_ids');
     }
 };

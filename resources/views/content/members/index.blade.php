@@ -119,7 +119,8 @@
                             <th>#</th>
                             <th>Photo</th>
                             <th>Name</th>
-                            <th>Unique ID</th>
+                            <th>IBBL Employee ID</th>
+                            <th>Member ID</th>
                             <th>Designation</th>
                             <th>Branch</th>
                             <th>Email</th>
@@ -147,11 +148,14 @@
                             <td>
                                 <div class="d-flex flex-column">
                                     <h6 class="mb-0">{{ $member->name }}</h6>
-                                    <small class="text-muted">{{ $member->member_unique_id ?? 'N/A' }}</small>
+                                    
                                 </div>
                             </td>
                             <td>
-                                <span class="badge bg-label-info">{{ $member->unique_id }}</span>
+                            {{ $member->employees_id }}
+                            </td>
+                            <td>
+                               {{ $member->member_unique_id }}
                             </td>
                             <td>{{ $member->designation ? $member->designation->designation_name : 'N/A' }}</td>
                             <td>{{ $member->branch ? $member->branch->branch_name : 'N/A' }}</td>

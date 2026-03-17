@@ -94,9 +94,9 @@ class MemberController extends Controller
     {
         // Custom validation messages
         $messages = [
-            'email.unique' => 'This email is already taken.',
+            
             'mobile.unique' => 'This mobile number is already registered.',
-            'nid_number.unique' => 'This NID number is already registered.',
+            
         ];
 
         // Validation rules
@@ -240,10 +240,17 @@ class MemberController extends Controller
                     'max:15',
                     Rule::unique('members', 'mobile')->ignore($member->id),
                 ],
+                'email' => [
+                    'nullable',
+                    'string',
+                    'email',
+                    'max:255',
+                    Rule::unique('members', 'email')->ignore($member->id),
+                ],
                 'diposit_account_number' => 'nullable|string|max:50',
                 'designation_id' => 'required|exists:designations,id',
-                'date_of_join' => 'required|date',
-                'date_of_birth' => 'required|date',
+                'date_of_join' => 'nullable|date',
+                'date_of_birth' => 'nullable|date',
                 'branch_id' => 'required|exists:branches,id',
                 'religion_id' => 'required|exists:religions,id',
                 'employees_id' => 'nullable|string|max:50',
@@ -285,6 +292,12 @@ class MemberController extends Controller
 
             // Update member record (exclude member_unique_id - it belongs to member_unique_ids table)
             $memberData = collect($validatedData)->except('member_unique_id', 'serial')->all();
+            // members.email is NOT NULL — do not overwrite with empty value
+            if (array_key_exists('email', $memberData) && trim((string) ($memberData['email'] ?? '')) === '') {
+                $memberData['email'] = $member->getOriginal('email')
+                    ?: $member->user?->email
+                    ?: 'member' . $member->id . '@placeholder.local';
+            }
             $member->update($memberData);
 
             // Handle MemberUniqueId: only update when value changed and is unique
@@ -316,11 +329,14 @@ class MemberController extends Controller
                 }
             }
 
-            // Update linked user account
+            // Update linked user account (users.email is NOT NULL — keep existing if member email is empty)
             if ($member->user) {
+                $userEmail = $member->email && trim($member->email) !== ''
+                    ? $member->email
+                    : $member->user->email;
                 $member->user->update([
                     'name' => $member->name,
-                    'email' => $member->email,
+                    'email' => $userEmail,
                 ]);
             }
 
