@@ -116,15 +116,12 @@
                         <td>{{ $deposit->deposit_date->format('M d, Y') }}</td>
                         <td>
                           <div class="d-inline-block">
-                            <button type="button" class="btn btn-sm btn-text-secondary rounded-pill btn-icon edit-deposit" 
-                                    data-id="{{ $deposit->id }}" 
-                                    data-deposit-amount="{{ $deposit->deposit_amount }}"
-                                    data-deposit-date="{{ $deposit->deposit_date }}">
-                              <i class="ti ti-pencil ti-md"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-text-secondary rounded-pill btn-icon delete-deposit" 
-                                    data-id="{{ $deposit->id }}" data-url="{{ route('deposits.destroy', $deposit->id) }}">
-                              <i class="ti ti-trash ti-md"></i>
+                            <a href="{{ route('deposits.edit', $deposit) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                              <i class="bx bx-edit-alt"></i>Edit
+                          </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger delete-deposit" 
+                                    data-id="{{ $deposit->id }}" data-url="{{ route('deposits.destroy', $deposit->id) }}" title="Delete">
+                              <i class="bx bx-trash"></i>Delete
                             </button>
                           </div>
 

@@ -152,7 +152,8 @@ class DepositController extends Controller
      */
     public function edit(Deposit $deposit)
     {
-        return view('content.deposits.edit', compact('deposit'));
+        $members = Member::select('id', 'name', 'unique_id')->get();
+        return view('content.deposits.edit', compact('deposit', 'members'));
     }
 
     /**
@@ -200,7 +201,7 @@ class DepositController extends Controller
                 ]);
             }
 
-            return redirect()->route('deposits.show', $deposit)
+            return redirect()->route('deposits.index')
                 ->with('success', 'Deposit updated successfully.');
 
         } catch (\Exception $e) {
