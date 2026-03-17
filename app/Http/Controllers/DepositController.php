@@ -19,9 +19,7 @@ class DepositController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
-            $q->orderBy('entry_date', 'desc')->limit(1);
-        }]);
+        $query = Deposit::with(['member']);
 
         // Apply filters
         if ($request->filled('member_id')) {
@@ -36,7 +34,7 @@ class DepositController extends Controller
             $query->where('deposit_date', '<=', $request->date_to);
         }
 
-        $deposits = $query->orderBy('created_at', 'desc')->paginate(15);
+        $deposits = $query->orderBy('created_at', 'desc')->paginate(50);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -46,9 +44,9 @@ class DepositController extends Controller
         }
 
         $members = Member::select('id', 'name', 'unique_id')->get();
-        $depositTypes = DepositType::all();
+      
         
-        return view('content.deposits.index', compact('deposits', 'members', 'depositTypes'));
+        return view('content.deposits.index', compact('deposits', 'members'));
     }
 
     /**
@@ -109,7 +107,7 @@ class DepositController extends Controller
                 ], 201);
             }
 
-            return redirect()->route('deposits.show', $deposit)
+            return redirect()->route('deposits.index')
                 ->with('success', 'Deposit created successfully.');
 
         } catch (\Exception $e) {
