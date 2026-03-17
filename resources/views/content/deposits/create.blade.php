@@ -38,17 +38,17 @@
    
             <!-- Monthly Deposit Amount -->
             <div class="col-md-12 mb-3">
-              <label for="monthly_deposit_amount" class="form-label">Monthly Deposit Amount</label>
+              <label for="deposit_amount" class="form-label">Monthly Deposit Amount</label>
               <div class="input-group">
                 <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('monthly_deposit_amount') is-invalid @enderror" 
-                       id="monthly_deposit_amount" name="monthly_deposit_amount" value="{{ old('monthly_deposit_amount') }}" 
+                <input type="number" class="form-control @error('deposit_amount') is-invalid @enderror" 
+                       id="deposit_amount" name="deposit_amount" value="{{ old('deposit_amount') }}" 
                        step="0.01" min="0" placeholder="0.00">
               </div>
-              @error('monthly_deposit_amount')
+              @error('deposit_amount')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
-              <div class="form-text">Fixed amount to deposit every month. When you select a member, the last installment amount from their monthly deposit settings is filled automatically so they can pay that amount.</div>
+              <div class="form-text">Amount to deposit.</div>
             </div>
 
 
@@ -119,16 +119,14 @@ if (typeof jQuery === 'undefined') {
 
 jQuery(document).ready(function($) {
   console.log('Document ready - initializing deposit form handlers');
-  const monthlyDepositInput = $('#monthly_deposit_amount');
-  const depositDayContainer = $('#deposit_day_container');
-  const depositDayInput = $('#deposit_day_of_month');
+  const depositAmountInput = $('#deposit_amount');
   const memberSelect = $('#member_id');
 
   // On member change: fetch last installment amount and populate Monthly Deposit Amount
   memberSelect.on('change', function() {
     const memberId = $(this).val();
     if (!memberId) {
-      monthlyDepositInput.val('');
+      depositAmountInput.val('');
       return;
     }
     const url = window.lastInstallmentAmountUrl.replace('__ID__', memberId);
@@ -139,17 +137,13 @@ jQuery(document).ready(function($) {
       headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
       success: function(data) {
         if (data.installment_amount != null && data.installment_amount !== '') {
-          monthlyDepositInput.val(parseFloat(data.installment_amount));
-          if (depositDayContainer.length && parseFloat(data.installment_amount) > 0) {
-            depositDayContainer.show();
-            depositDayInput.attr('required', 'required');
-          }
+          depositAmountInput.val(parseFloat(data.installment_amount));
         } else {
-          monthlyDepositInput.val('');
+          depositAmountInput.val('');
         }
       },
       error: function() {
-        monthlyDepositInput.val('');
+        depositAmountInput.val('');
       }
     });
   });
@@ -160,88 +154,64 @@ jQuery(document).ready(function($) {
   }
 
   // Show/hide deposit day field based on monthly deposit amount
-  monthlyDepositInput.on('input', function() {
+  depositAmountInput.on('input', function() {
     if (this.value && parseFloat(this.value) > 0) {
-      depositDayContainer.show();
-      depositDayInput.attr('required', 'required');
+      depositAmountInput.attr('required', 'required');
     } else {
-      depositDayContainer.hide();
-      depositDayInput.removeAttr('required');
-      depositDayInput.val('1');
+      depositAmountInput.removeAttr('required');
     }
   });
 
   // Initialize on page load
-  if (monthlyDepositInput.val() && parseFloat(monthlyDepositInput.val()) > 0) {
-    depositDayContainer.show();
-    depositDayInput.attr('required', 'required');
+  if (depositAmountInput.val() && parseFloat(depositAmountInput.val()) > 0) {
+    depositAmountInput.attr('required', 'required');
   }
 
   // Auto-calculate maturity date based on deposit type
   // Note: This logic may need to be adjusted based on your deposit type names
-  $('#deposit_type_id, #start_date').on('change', function() {
-    const depositTypeId = $('#deposit_type_id').val();
-    const depositTypeName = $('#deposit_type_id option:selected').text().toLowerCase();
-    const startDate = $('#start_date').val();
-    
-    if (depositTypeId && startDate) {
-      const start = new Date(startDate);
-      let maturityDate = new Date(start);
-      
-      // Check deposit type name (case-insensitive)
-      if (depositTypeName.includes('savings')) {
-        // No maturity date for savings
-        $('#maturity_date').val('');
-      } else if (depositTypeName.includes('fixed')) {
-        // 1 year for fixed deposits
-        maturityDate.setFullYear(maturityDate.getFullYear() + 1);
-        $('#maturity_date').val(maturityDate.toISOString().split('T')[0]);
-      } else if (depositTypeName.includes('recurring')) {
-        // 2 years for recurring deposits
-        maturityDate.setFullYear(maturityDate.getFullYear() + 2);
-        $('#maturity_date').val(maturityDate.toISOString().split('T')[0]);
-      } else {
-        // Default: 1 year for other types
-        maturityDate.setFullYear(maturityDate.getFullYear() + 1);
-        $('#maturity_date').val(maturityDate.toISOString().split('T')[0]);
-      }
-    }
-  });
+
+  // Reset submit button to ready state (used after error)
+  function resetSubmitButton() {
+    $('#submitBtn').prop('disabled', false);
+    $('#submitSpinner').addClass('d-none');
+    $('#submitIcon').removeClass('d-none');
+    $('#submitText').text('Create Deposit');
+  }
 
   // Function to handle form submission via AJAX
   function submitFormViaAjax() {
-    console.log('submitFormViaAjax called');
     const form = $('#depositForm');
     const submitBtn = $('#submitBtn');
     const submitSpinner = $('#submitSpinner');
     const submitIcon = $('#submitIcon');
-    
+    const submitText = $('#submitText');
+
     // Basic validation
     if (!form[0].checkValidity()) {
       form[0].reportValidity();
       return false;
     }
-    
-    // Disable button and show spinner
+
+    // Prevent double submit
+    if (submitBtn.prop('disabled')) {
+      return false;
+    }
+
+    // Disable button, show spinner, change text
     submitBtn.prop('disabled', true);
     submitSpinner.removeClass('d-none');
     submitIcon.addClass('d-none');
-    
+    submitText.text('Saving…');
+
     // Clear previous error messages
     $('.is-invalid').removeClass('is-invalid');
     $('.invalid-feedback').remove();
     $('.alert').remove();
-    
-    // Get form data including CSRF token
-    const formData = form.serialize();
-    console.log('Form data:', formData);
-    console.log('Form action:', form.attr('action'));
-    
-    // Make AJAX request
+
     $.ajax({
       url: form.attr('action'),
       type: 'POST',
-      data: formData,
+      data: form.serialize(),
       dataType: 'json',
       headers: {
         'Accept': 'application/json',
@@ -249,85 +219,57 @@ jQuery(document).ready(function($) {
       },
       success: function(response) {
         if (response.success) {
-          // Show success message
           if (typeof toastr !== 'undefined') {
             toastr.success(response.message || 'Deposit created successfully');
           } else {
             alert(response.message || 'Deposit created successfully');
           }
-          
-          // Redirect to show page or index
+          // Keep spinner visible until redirect
           setTimeout(function() {
             if (response.data && response.data.id) {
               window.location.href = '{{ url("/app/deposits") }}/' + response.data.id;
             } else {
               window.location.href = '{{ route("deposits.view-deposits") }}';
             }
-          }, 1000);
+          }, 800);
         } else {
-          // Show error message
           if (typeof toastr !== 'undefined') {
             toastr.error(response.message || 'Failed to create deposit');
           } else {
             alert(response.message || 'Failed to create deposit');
           }
-          
-          // Re-enable button
-          submitBtn.prop('disabled', false);
-          submitSpinner.addClass('d-none');
-          submitIcon.removeClass('d-none');
+          resetSubmitButton();
         }
       },
       error: function(xhr, status, error) {
-        // Re-enable button
-        submitBtn.prop('disabled', false);
-        submitSpinner.addClass('d-none');
-        submitIcon.removeClass('d-none');
-        
-        // Check if response is JSON
-        let responseJSON = null;
+        resetSubmitButton();
+
+        var responseJSON = null;
         try {
           responseJSON = xhr.responseJSON;
-        } catch (e) {
-          // Response is not JSON
-        }
-        
+        } catch (e) {}
+
         if (xhr.status === 422 && responseJSON && responseJSON.errors) {
-          // Validation errors
-          const errors = responseJSON.errors;
-          let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+          var errors = responseJSON.errors;
+          var errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
           errorHtml += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
           errorHtml += '<strong>Please fix the following errors:</strong><ul class="mb-0 mt-2">';
-          
-          // Display validation errors
+
           $.each(errors, function(field, messages) {
-            const fieldElement = $('[name="' + field + '"]');
+            var fieldElement = $('[name="' + field + '"]');
             fieldElement.addClass('is-invalid');
-            
-            let errorMessage = '';
-            $.each(messages, function(index, message) {
-              errorMessage += message + ' ';
-            });
-            
-            // Remove existing invalid feedback for this field
+            var msg = Array.isArray(messages) ? messages.join(' ') : messages;
             fieldElement.siblings('.invalid-feedback').remove();
-            fieldElement.after('<div class="invalid-feedback">' + errorMessage.trim() + '</div>');
-            errorHtml += '<li>' + errorMessage.trim() + '</li>';
+            fieldElement.after('<div class="invalid-feedback">' + msg.trim() + '</div>');
+            errorHtml += '<li>' + msg.trim() + '</li>';
           });
-          
           errorHtml += '</ul></div>';
           form.prepend(errorHtml);
-          
-          // Scroll to top to show errors
-          $('html, body').animate({
-            scrollTop: 0
-          }, 500);
+          $('html, body').animate({ scrollTop: 0 }, 500);
         } else {
-          // Other errors
-          const errorMessage = (responseJSON && responseJSON.message) 
-            ? responseJSON.message 
+          var errorMessage = (responseJSON && responseJSON.message)
+            ? responseJSON.message
             : 'An error occurred while creating the deposit. Please try again.';
-          
           if (typeof toastr !== 'undefined') {
             toastr.error(errorMessage);
           } else {

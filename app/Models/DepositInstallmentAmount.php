@@ -13,8 +13,6 @@ class DepositInstallmentAmount extends Model
         'member_id',
         'installment_amount',
         'date',
-        'month',
-        'year',
         'user_id',
     ];
 

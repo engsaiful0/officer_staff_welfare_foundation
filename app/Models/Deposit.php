@@ -12,29 +12,14 @@ class Deposit extends Model
 
     protected $fillable = [
         'member_id',
-        'account_number',
-        'deposit_account_number',
         'deposit_amount',
-        'monthly_deposit_amount',
-        'deposit_day_of_month',
-        'last_deposit_date',
-        'product_name',
-        'start_date',
-        'maturity_date',
-        'rate',
-        'deposit_type_id',
-        'status',
+        'deposit_date',
         'notes'
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'maturity_date' => 'date',
-        'last_deposit_date' => 'date',
+        'deposit_date' => 'date',
         'deposit_amount' => 'decimal:2',
-        'monthly_deposit_amount' => 'decimal:2',
-        'rate' => 'decimal:4',
-        'deposit_day_of_month' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

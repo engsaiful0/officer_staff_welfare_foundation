@@ -28,20 +28,12 @@ class DepositController extends Controller
             $query->where('member_id', $request->member_id);
         }
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('deposit_type_id')) {
-            $query->where('deposit_type_id', $request->deposit_type_id);
-        }
-
         if ($request->filled('date_from')) {
-            $query->where('start_date', '>=', $request->date_from);
+            $query->where('deposit_date', '>=', $request->date_from);
         }
 
         if ($request->filled('date_to')) {
-            $query->where('start_date', '<=', $request->date_to);
+            $query->where('deposit_date', '<=', $request->date_to);
         }
 
         $deposits = $query->orderBy('created_at', 'desc')->paginate(15);
@@ -79,13 +71,8 @@ class DepositController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'member_id' => 'required|exists:members,id',
-            'monthly_deposit_amount' => 'nullable|numeric|min:0',
-            'deposit_day_of_month' => 'nullable|integer|min:1|max:31',
-            'deposit_account_number' => 'required|string|max:255|unique:deposits,deposit_account_number',
-            'start_date' => 'required|date',
-            'maturity_date' => 'nullable|date|after:start_date',
-            'rate' => 'nullable|numeric|min:0|max:100',
-            'deposit_type_id' => 'required|exists:deposit_types,id',
+            'deposit_amount' => 'required|numeric|min:0',
+            'deposit_date' => 'required|date',
             'notes' => 'nullable|string'
         ]);
 
@@ -107,33 +94,9 @@ class DepositController extends Controller
             
             $deposit = Deposit::create([
                 'member_id' => $request->member_id,
-                'monthly_deposit_amount' => $request->monthly_deposit_amount ?? null,
-                'deposit_day_of_month' => $request->deposit_day_of_month ?? 1,
-                'deposit_account_number' => $request->deposit_account_number,
-                'start_date' => $request->start_date,
-                'maturity_date' => $request->maturity_date,
-                'rate' => $rate,
-                'deposit_type_id' => $request->deposit_type_id,
-                'status' => 'active',
+                'deposit_amount' => $request->deposit_amount,
+                'deposit_date' => $request->deposit_date,
                 'notes' => $request->notes
-            ]);
-
-            // Note: Account number is already provided from the form, so generateAccountNumber() is not needed
-            // If you need to track it in deposit_account_numbers table, you can add that logic here
-
-            // Create initial ledger entry for deposit
-            // Use monthly_deposit_amount if provided, otherwise 0 for account opening
-            $initialAmount = $request->monthly_deposit_amount ?? 0;
-            
-            LedgerEntry::create([
-                'entity_type' => 'deposit',
-                'entity_id' => $deposit->id,
-                'entry_date' => $request->start_date,
-                'type' => 'deposit',
-                'amount' => $initialAmount,
-                'balance_after' => $initialAmount,
-                'description' => $initialAmount > 0 ? 'Initial deposit / Account opening' : 'Account opening',
-                'created_by' => auth()->id()
             ]);
 
             DB::commit();
@@ -170,7 +133,7 @@ class DepositController extends Controller
      */
     public function show(Deposit $deposit)
     {
-        $deposit->load(['member', 'depositType', 'ledgerEntries.createdBy']);
+        $deposit->load(['member', 'ledgerEntries.createdBy']);
         $ledgerEntries = $deposit->ledgerEntries()->orderBy('entry_date', 'desc')->paginate(10);
 
         if (request()->expectsJson()) {
@@ -191,9 +154,7 @@ class DepositController extends Controller
      */
     public function edit(Deposit $deposit)
     {
-        $members = Member::select('id', 'name', 'unique_id')->get();
-        $depositTypes = DepositType::all();
-        return view('content.deposits.edit', compact('deposit', 'members', 'depositTypes'));
+        return view('content.deposits.edit', compact('deposit'));
     }
 
     /**
@@ -203,13 +164,8 @@ class DepositController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'member_id' => 'required|exists:members,id',
-            'monthly_deposit_amount' => 'nullable|numeric|min:0',
-            'deposit_day_of_month' => 'nullable|integer|min:1|max:31',
-            'start_date' => 'required|date',
-            'maturity_date' => 'nullable|date|after:start_date',
-            'rate' => 'nullable|numeric|min:0|max:100',
-            'deposit_type_id' => 'required|exists:deposit_types,id',
-            'status' => 'required|in:active,matured,closed',
+            'deposit_amount' => 'required|numeric|min:0',
+            'deposit_date' => 'required|date',
             'notes' => 'nullable|string'
         ]);
 
@@ -231,13 +187,8 @@ class DepositController extends Controller
 
             $deposit->update([
                 'member_id' => $request->member_id,
-                'monthly_deposit_amount' => $request->monthly_deposit_amount ?? null,
-                'deposit_day_of_month' => $request->deposit_day_of_month ?? 1,
-                'start_date' => $request->start_date,
-                'maturity_date' => $request->maturity_date,
-                'rate' => $rate,
-                'deposit_type_id' => $request->deposit_type_id,
-                'status' => $request->status,
+                'deposit_amount' => $request->deposit_amount,
+                'deposit_date' => $request->deposit_date,
                 'notes' => $request->notes
             ]);
 
@@ -276,17 +227,7 @@ class DepositController extends Controller
     public function destroy(Deposit $deposit)
     {
         try {
-            // Check if deposit has ledger entries
-            if ($deposit->ledgerEntries()->count() > 1) { // More than just the initial deposit entry
-                if (request()->expectsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Cannot delete deposit with existing transactions'
-                    ], 422);
-                }
-                return redirect()->back()->with('error', 'Cannot delete deposit with existing transactions.');
-            }
-
+           
             $deposit->delete();
 
             if (request()->expectsJson()) {
@@ -346,7 +287,7 @@ class DepositController extends Controller
      */
     public function getByMember($memberId)
     {
-        $deposits = Deposit::with(['member', 'depositType', 'ledgerEntries' => function($q) {
+        $deposits = Deposit::with(['member', 'ledgerEntries' => function($q) {
             $q->orderBy('entry_date', 'desc')->limit(1);
         }])
         ->where('member_id', $memberId)

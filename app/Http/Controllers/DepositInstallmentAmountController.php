@@ -99,9 +99,7 @@ class DepositInstallmentAmountController extends Controller
         $request->validate([
             'member_id' => 'required|exists:members,id',
             'installment_amount' => 'required|numeric|min:0',
-            'date' => 'required|date',
-            'month' => 'nullable|integer|min:1|max:12',
-            'year' => 'nullable|integer|min:2000|max:2100',
+            'date' => 'required|date'
         ]);
 
         $user = Auth::user();
@@ -144,9 +142,7 @@ class DepositInstallmentAmountController extends Controller
         $request->validate([
             'member_id' => 'required|exists:members,id',
             'installment_amount' => 'required|numeric|min:0',
-            'date' => 'required|date',
-            'month' => 'nullable|integer|min:1|max:12',
-            'year' => 'nullable|integer|min:2000|max:2100',
+            'date' => 'required|date'
         ]);
 
         $record->update([
@@ -180,8 +176,7 @@ class DepositInstallmentAmountController extends Controller
             'date' => $dateObj ? $dateObj->format('Y-m-d') : '',
             'date_formatted' => $dateObj ? $dateObj->format('M d, Y') : '—',
             'month' => $row->month,
-            'month_name' => $month && isset($months[$month]) ? $months[$month] : '—',
-            'year' => $row->year,
+ 
             'user_id' => $row->user_id,
             'user_name' => $row->user ? $row->user->name : '—',
             'created_at' => $row->created_at?->format('Y-m-d H:i'),

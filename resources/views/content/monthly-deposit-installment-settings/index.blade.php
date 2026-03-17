@@ -46,10 +46,9 @@
                     <tr>
                         <th>Id</th>
                         <th>Member</th>
-                        <th>Amount</th>
+                        <th>Installment Amount</th>
                         <th>Date</th>
-                        <th>Month</th>
-                        <th>Year</th>
+                     
                         <th>User</th>
                         <th>Action</th>
                     </tr>
@@ -60,9 +59,8 @@
                         <td>{{ $row->id }}</td>
                         <td>{{ $row->member ? $row->member->name : '—' }} <span class="text-muted">({{ $row->member ? $row->member->unique_id : '—' }})</span></td>
                         <td>{{ number_format((float)$row->installment_amount, 2) }}</td>
+                       
                         <td>{{ $row->date ? (is_object($row->date) && method_exists($row->date, 'format') ? $row->date->format('M d, Y') : $row->date) : '—' }}</td>
-                        <td>{{ $row->month && isset($months[$row->month]) ? $months[$row->month] : '—' }}</td>
-                        <td>{{ $row->year ?? '—' }}</td>
                         <td>{{ $row->user ? $row->user->name : '—' }}</td>
                         <td>
                             <a href="javascript:;" class="btn btn-sm btn-icon view-record" data-id="{{ $row->id }}" title="View"><i class="ti ti-eye"></i></a>
@@ -128,31 +126,14 @@
                 </select>
             </div>
             <div class="col-sm-12">
-                <label class="form-label" for="edit_installment_amount">Amount <span class="text-danger">*</span></label>
+                <label class="form-label" for="edit_installment_amount">Installment Amount <span class="text-danger">*</span></label>
                 <input type="number" step="0.01" min="0" id="edit_installment_amount" name="installment_amount" class="form-control" required>
             </div>
             <div class="col-sm-12">
                 <label class="form-label" for="edit_date">Date <span class="text-danger">*</span></label>
                 <input type="date" id="edit_date" name="date" class="form-control" required>
             </div>
-            <div class="col-sm-6">
-                <label class="form-label" for="edit_month">Month</label>
-                <select class="form-select" id="edit_month" name="month">
-                    <option value="">—</option>
-                    @foreach([1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'May',6=>'Jun',7=>'Jul',8=>'Aug',9=>'Sep',10=>'Oct',11=>'Nov',12=>'Dec'] as $num => $label)
-                    <option value="{{ $num }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-sm-6">
-                <label class="form-label" for="edit_year">Year</label>
-                <select class="form-select" id="edit_year" name="year">
-                    <option value="">—</option>
-                    @for($y = 2015; $y <= 2030; $y++)
-                    <option value="{{ $y }}">{{ $y }}</option>
-                    @endfor
-                </select>
-            </div>
+            
             <div class="col-sm-12">
                 <button type="submit" class="btn btn-primary" id="edit-submit-btn">
                     <span class="spinner-border spinner-border-sm me-2 d-none" id="edit-spinner" role="status"></span>
