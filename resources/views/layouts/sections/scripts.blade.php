@@ -31,6 +31,7 @@
 <!-- END: Pricing Modal JS-->
 <!-- BEGIN: Page JS-->
 @yield('page-script')
+@stack('scripts')
 <!-- END: Page JS-->
 <script>
   $(function() {

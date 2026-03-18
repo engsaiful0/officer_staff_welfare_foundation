@@ -80,10 +80,11 @@
                 <label for="date_to" class="form-label">To Date</label>
                 <input type="date" class="form-control" id="date_to">
             </div>
-            <div class="col-md-1 d-flex align-items-end">
-                <button type="button" class="btn btn-outline-secondary" id="clear_filters">
-                    <i class="bx bx-x"></i>
-                </button>
+            <div class="col-md-5 d-flex align-items-end">
+                <div class="col-md-12">
+                  
+                    <a href="{{ route('deposits.view-deposits') }}" class="btn btn-secondary">Clear Filters</a>
+                  </div>
             </div>
         </div>
 
@@ -117,16 +118,17 @@
                         <td>
                           <div class="d-inline-block">
                             <a href="{{ route('deposits.edit', $deposit) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                              <i class="bx bx-edit-alt"></i>Edit
-                          </a>
-                            <button type="button" class="btn btn-sm btn-outline-danger delete-deposit" 
-                                    data-id="{{ $deposit->id }}" data-url="{{ route('deposits.destroy', $deposit->id) }}" title="Delete">
-                              <i class="bx bx-trash"></i>Delete
+                              <i class="bx bx-edit-alt"></i> Edit
+                            </a>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger delete-deposit"
+                                    data-id="{{ $deposit->id }}"
+                                    data-url="{{ route('deposits.destroy', $deposit->id) }}"
+                                    title="Delete">
+                              <span class="delete-text"><i class="bx bx-trash"></i> Delete</span>
+                              <span class="spinner-border spinner-border-sm d-none delete-spinner" role="status" aria-hidden="true"></span>
                             </button>
                           </div>
-
-
-
                         </td>
                     </tr>
                     @endforeach
@@ -210,7 +212,7 @@
                     }
                 }
                 , error: function(xhr) {
-                    const errorMessage = xhr.responseJSON ? .message || 'Error closing deposit';
+                    const errorMessage = (xhr.responseJSON && xhr.responseJSON.message) || 'Error closing deposit';
                     if (typeof toastr !== 'undefined') {
                         toastr.error(errorMessage);
                     } else {
@@ -221,29 +223,40 @@
         });
     }
 
-    function deleteDeposit(depositId, accountNumber, deleteUrl) {
-        $('#deleteAccountNumber').text(accountNumber || 'N/A');
-        $('#deleteDepositModal').modal('show');
+    // Delete deposit with SweetAlert confirm + spinner
+    $(document).on('click', '.delete-deposit', function(e) {
+        e.preventDefault();
+        const btn = $(this);
+        const depositId = btn.data('id');
+        const deleteUrl = btn.data('url') || '{{ url("/app/deposits") }}/' + depositId;
+        const spinner = btn.find('.delete-spinner');
+        const textSpan = btn.find('.delete-text');
 
-        $('#confirmDelete').off('click').on('click', function() {
-            const btn = $(this);
-            const originalText = btn.html();
-            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Deleting...');
+        if (typeof Swal === 'undefined') {
+            if (!confirm('Are you sure you want to delete this deposit? This action cannot be undone.')) {
+                return;
+            }
+        }
+
+        const proceedDelete = function() {
+            if (btn.prop('disabled')) return;
+            btn.prop('disabled', true);
+            textSpan.addClass('d-none');
+            spinner.removeClass('d-none');
 
             $.ajax({
-                url: deleteUrl || ('{{ url("/app/deposits") }}/' + depositId)
-                , type: 'POST'
-                , data: {
-                    _method: 'DELETE'
-                    , _token: $('meta[name="csrf-token"]').attr('content')
-                }
-                , headers: {
-                    'Accept': 'application/json'
-                    , 'X-Requested-With': 'XMLHttpRequest'
-                }
-                , success: function(response) {
+                url: deleteUrl,
+                type: 'POST',
+                data: {
+                    _method: 'DELETE',
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
                     if (response.success) {
-                        $('#deleteDepositModal').modal('hide');
                         if (typeof toastr !== 'undefined') {
                             toastr.success(response.message || 'Deposit deleted successfully');
                         } else {
@@ -251,9 +264,11 @@
                         }
                         setTimeout(function() {
                             location.reload();
-                        }, 1000);
+                        }, 800);
                     } else {
-                        btn.prop('disabled', false).html(originalText);
+                        btn.prop('disabled', false);
+                        spinner.addClass('d-none');
+                        textSpan.removeClass('d-none');
                         const errorMessage = response.message || 'Failed to delete deposit';
                         if (typeof toastr !== 'undefined') {
                             toastr.error(errorMessage);
@@ -261,44 +276,52 @@
                             alert(errorMessage);
                         }
                     }
-                }
-                , error: function(xhr) {
-                    btn.prop('disabled', false).html(originalText);
-                    const errorMessage = xhr.responseJSON ? .message || 'Error deleting deposit';
+                },
+                error: function(xhr) {
+                    btn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                    textSpan.removeClass('d-none');
+                    const msg = (xhr.responseJSON && xhr.responseJSON.message)
+                        ? xhr.responseJSON.message
+                        : 'Error deleting deposit';
                     if (typeof toastr !== 'undefined') {
-                        toastr.error(errorMessage);
+                        toastr.error(msg);
                     } else {
-                        alert(errorMessage);
+                        alert(msg);
                     }
                 }
             });
-        });
-    }
+        };
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This deposit will be permanently deleted.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    proceedDelete();
+                }
+            });
+        } else {
+            proceedDelete();
+        }
+    });
 
     $(document).ready(function() {
         // Initialize DataTable
-        $('#depositsTable').DataTable({
-            responsive: true
-            , pageLength: 25
-            , order: [
-                [0, 'desc']
-            ]
-        });
+       
 
         // Close deposit button handler
         $(document).on('click', '.close-deposit-btn', function(e) {
             e.preventDefault();
             const depositId = $(this).data('deposit-id');
             closeDeposit(depositId);
-        });
-
-        // Delete deposit button handler
-        $(document).on('click', '.delete-deposit-btn', function(e) {
-            e.preventDefault();
-            const depositId = $(this).data('deposit-id');
-            const accountNumber = $(this).data('account-number');
-            const deleteUrl = $(this).data('delete-url');
-            deleteDeposit(depositId, accountNumber, deleteUrl);
         });
 
         // Filter functionality

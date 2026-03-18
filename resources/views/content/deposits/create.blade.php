@@ -227,7 +227,7 @@ jQuery(document).ready(function($) {
           // Keep spinner visible until redirect
           setTimeout(function() {
             if (response.data && response.data.id) {
-              window.location.href = '{{ url("/app/deposits") }}/' + response.data.id;
+              window.location.href = '{{ route("deposits.view-deposits") }}';
             } else {
               window.location.href = '{{ route("deposits.view-deposits") }}';
             }
