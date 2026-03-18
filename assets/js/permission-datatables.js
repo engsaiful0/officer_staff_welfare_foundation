@@ -29,6 +29,7 @@ $(function () {
       ajax: {
         url: window.permissionUrls.getData,
         type: 'GET',
+        dataSrc: 'data',
         headers: ajaxHeaders()
       },
       columns: [
@@ -51,7 +52,22 @@ $(function () {
           }
         }
       ],
-      order: [[0, 'desc']]
+      order: [[0, 'desc']],
+      dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end mt-n6 mt-md-0"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+      displayLength: 7,
+      lengthMenu: [7, 10, 25, 50, 75, 100],
+      language: {
+        paginate: {
+          next: '<i class="ti ti-chevron-right ti-sm"></i>',
+          previous: '<i class="ti ti-chevron-left ti-sm"></i>'
+        }
+      },
+      buttons: [
+        {
+          text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Create Permission</span>',
+          className: 'create-new btn btn-primary waves-effect waves-light'
+        }
+      ]
     });
   }
 
@@ -176,6 +192,6 @@ $(function () {
   });
 
   // Set table head label
-  $('div.head-label').html('<h5 class="card-title mb-0">Permission Name</h5>');
+  $('div.head-label').html('<h5 class="card-title mb-0">Permissions</h5>');
 });
 
