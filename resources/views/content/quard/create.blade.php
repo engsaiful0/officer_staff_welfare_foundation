@@ -80,6 +80,16 @@
               @enderror
             </div>
             <div class="col-md-4 mb-3">
+              <label for="total_payable_amount" class="form-label">Total Payable Amount</label>
+              <div class="input-group">
+                <span class="input-group-text">৳</span>
+                <input type="number" class="form-control @error('total_payable_amount') is-invalid @enderror" id="total_payable_amount" name="total_payable_amount" value="{{ old('total_payable_amount', 0) }}" step="0.01" min="0" readonly>
+              </div>
+              @error('total_payable_amount')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+            <div class="col-md-4 mb-3">
               <label for="period_in_years" class="form-label">Period (Years) <span class="text-danger">*</span></label>
               <select class="form-select @error('period_in_years') is-invalid @enderror" id="period_in_years" name="period_in_years" required>
                 @for($y = 1; $y <= 10; $y++)
@@ -111,16 +121,7 @@
               @enderror
             </div>
 
-            <div class="col-md-4 mb-3">
-              <label for="total_installment_amount" class="form-label">Total Installment Amount</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('total_payable_amount') is-invalid @enderror" id="total_payable_amount" name="total_payable_amount" value="{{ old('total_payable_amount', 0) }}" step="0.01" min="0" readonly>
-              </div>
-              @error('total_installment_amount')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+           
         
 
             <div class="col-md-4 mb-3">
