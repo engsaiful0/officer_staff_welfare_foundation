@@ -433,6 +433,7 @@ use App\Http\Controllers\DepositController;
 use App\Http\Controllers\DepositLedgerController;
 use App\Http\Controllers\DepositImportController;
 use App\Http\Controllers\DepositReportController;
+use App\Http\Controllers\QuardController;
 
 // Deposit Routes
 Route::resource('deposits', DepositController::class);
@@ -490,3 +491,9 @@ Route::get('/app/deposits/reports/interest', [DepositReportController::class, 'i
 Route::get('/app/deposits/reports/maturity', [DepositReportController::class, 'maturityReport'])->name('deposits.reports.maturity');
 Route::get('/app/deposits/reports/export-pdf', [DepositReportController::class, 'exportPdf'])->name('deposits.reports.export-pdf');
 Route::get('/app/deposits/reports/export-excel', [DepositReportController::class, 'exportExcel'])->name('deposits.reports.export-excel');
+
+// Quard Module Routes
+Route::resource('quards', QuardController::class);
+Route::get('/app/quards/view-quards', [QuardController::class, 'index'])->name('quards.view-quards');
+Route::get('/app/quards/add-quard', [QuardController::class, 'create'])->name('quards.add-quard');
+Route::get('/app/quards/member-total-deposits/{memberId}', [QuardController::class, 'getMemberTotalDeposits'])->name('quards.member-total-deposits');
