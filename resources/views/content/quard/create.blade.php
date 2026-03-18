@@ -258,7 +258,12 @@ jQuery(document).ready(function($) {
   installmentNumberInput.on('input', calc);
   chargePercentInput.on('input', calc);
   startDateInput.on('change', calcMaturity);
-  periodSelect.on('change', function() { calcMaturity(); calc(); });
+  periodSelect.on('change', function() {
+    const years = Math.max(1, parseInt(periodSelect.val() || '1', 10));
+    installmentNumberInput.val(years * 12);
+    calcMaturity();
+    calc();
+  });
 
   if (memberSelect.val()) memberSelect.trigger('change');
   calcMaturity();
