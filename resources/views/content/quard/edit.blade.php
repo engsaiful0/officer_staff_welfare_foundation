@@ -112,6 +112,25 @@
             </div>
 
             <div class="col-md-6 mb-3">
+              <label for="total_installment_amount" class="form-label">Total Installment Amount</label>
+              <div class="input-group">
+                <span class="input-group-text">৳</span>
+                <input type="number" class="form-control @error('total_installment_amount') is-invalid @enderror" id="total_installment_amount" name="total_installment_amount" value="{{ old('total_installment_amount', $quard->total_installment_amount ?? 0) }}" step="0.01" min="0" readonly required>
+              </div>
+              @error('total_installment_amount')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="total_payable_amount" class="form-label">Total Payable (Incl. Charge)</label>
+              <div class="input-group">
+                <span class="input-group-text">৳</span>
+                <input type="number" class="form-control" id="total_payable_amount" value="0" step="0.01" min="0" readonly>
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
               <label for="start_date" class="form-label">Start Date</label>
               <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date" name="start_date" value="{{ old('start_date', optional($quard->start_date)->format('Y-m-d')) }}">
               @error('start_date')
@@ -182,6 +201,8 @@ jQuery(document).ready(function($) {
   const installmentAmountInput = $('#installment_amount');
   const chargePercentInput = $('#charge_percentage');
   const chargeAmountInput = $('#charge_amount');
+  const totalInstallmentAmountInput = $('#total_installment_amount');
+  const totalPayableAmountInput = $('#total_payable_amount');
   const startDateInput = $('#start_date');
   const maturityDateInput = $('#maturity_date');
 
@@ -199,9 +220,15 @@ jQuery(document).ready(function($) {
     const instAmount = instN > 0 ? quardAmount / instN : 0;
     installmentAmountInput.val(format2(instAmount));
 
+    // Total installment amount (without charge) = total payable via installments
+    totalInstallmentAmountInput.val(format2(quardAmount));
+
     const chPercent = toNumber(chargePercentInput.val());
     const chAmount = (quardAmount * chPercent) / 100;
     chargeAmountInput.val(format2(chAmount));
+
+    // Total payable including charge
+    totalPayableAmountInput.val(format2(quardAmount + chAmount));
   }
 
   function calcMaturity() {

@@ -62,6 +62,24 @@
             </div>
 
             <div class="col-md-4 mb-3">
+              <label for="charge_percentage" class="form-label">Charge Percentage (%)</label>
+              <input type="number" class="form-control @error('charge_percentage') is-invalid @enderror" id="charge_percentage" name="charge_percentage" value="{{ old('charge_percentage', 0) }}" step="0.01" min="0" max="100">
+              @error('charge_percentage')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label for="charge_amount" class="form-label">Charge Amount</label>
+              <div class="input-group">
+                <span class="input-group-text">৳</span>
+                <input type="number" class="form-control @error('charge_amount') is-invalid @enderror" id="charge_amount" name="charge_amount" value="{{ old('charge_amount', 0) }}" step="0.01" min="0" readonly>
+              </div>
+              @error('charge_amount')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+            <div class="col-md-4 mb-3">
               <label for="period_in_years" class="form-label">Period (Years) <span class="text-danger">*</span></label>
               <select class="form-select @error('period_in_years') is-invalid @enderror" id="period_in_years" name="period_in_years" required>
                 @for($y = 1; $y <= 10; $y++)
@@ -94,33 +112,16 @@
             </div>
 
             <div class="col-md-4 mb-3">
-              <label for="charge_percentage" class="form-label">Charge Percentage (%)</label>
-              <input type="number" class="form-control @error('charge_percentage') is-invalid @enderror" id="charge_percentage" name="charge_percentage" value="{{ old('charge_percentage', 0) }}" step="0.01" min="0" max="100">
-              @error('charge_percentage')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
-
-            <div class="col-md-4 mb-3">
-              <label for="charge_amount" class="form-label">Charge Amount</label>
+              <label for="total_installment_amount" class="form-label">Total Installment Amount</label>
               <div class="input-group">
                 <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('charge_amount') is-invalid @enderror" id="charge_amount" name="charge_amount" value="{{ old('charge_amount', 0) }}" step="0.01" min="0" readonly>
-              </div>
-              @error('charge_amount')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="charge_amount" class="form-label">Total Installment Amount</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('total_installment_amount') is-invalid @enderror" id="total_installment_amount" name="total_installment_amount" value="{{ old('total_installment_amount', 0) }}" step="0.01" min="0" readonly>
+                <input type="number" class="form-control @error('total_payable_amount') is-invalid @enderror" id="total_payable_amount" name="total_payable_amount" value="{{ old('total_payable_amount', 0) }}" step="0.01" min="0" readonly>
               </div>
               @error('total_installment_amount')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
+        
 
             <div class="col-md-4 mb-3">
               <label for="start_date" class="form-label">Start Date</label>
@@ -193,6 +194,8 @@ jQuery(document).ready(function($) {
   const installmentAmountInput = $('#installment_amount');
   const chargePercentInput = $('#charge_percentage');
   const chargeAmountInput = $('#charge_amount');
+  const totalPayableAmountInput = $('#total_payable_amount');
+  
   const startDateInput = $('#start_date');
   const maturityDateInput = $('#maturity_date');
 
@@ -216,9 +219,15 @@ jQuery(document).ready(function($) {
     const instAmount = instN > 0 ? quardAmount / instN : 0;
     installmentAmountInput.val(format2(instAmount));
 
+    // Total installment amount (without charge) = total payable via installments
+    totalPayableAmountInput.val(format2(quardAmount));
+
     const chPercent = toNumber(chargePercentInput.val());
     const chAmount = (quardAmount * chPercent) / 100;
     chargeAmountInput.val(format2(chAmount));
+
+    // Total payable including charge
+    totalPayableAmountInput.val(format2(quardAmount + chAmount));
   }
 
   function calcMaturity() {
