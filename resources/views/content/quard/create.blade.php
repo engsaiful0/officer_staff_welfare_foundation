@@ -217,8 +217,7 @@ jQuery(document).ready(function($) {
 
     const instN = Math.max(1, parseInt(installmentNumberInput.val() || '1', 10));
     installmentNumberInput.val(instN);
-    const instAmount = instN > 0 ? quardAmount / instN : 0;
-    installmentAmountInput.val(format2(instAmount));
+    
 
     // Total installment amount (without charge) = total payable via installments
     totalPayableAmountInput.val(format2(quardAmount));
@@ -229,6 +228,9 @@ jQuery(document).ready(function($) {
 
     // Total payable including charge
     totalPayableAmountInput.val(format2(quardAmount + chAmount));
+
+    const instAmount = instN > 0 ? toNumber(totalPayableAmountInput.val()) / instN : 0;
+    installmentAmountInput.val(format2(instAmount));
   }
 
   function calcMaturity() {
