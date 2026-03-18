@@ -19,7 +19,7 @@
           @method('PUT')
 
           <div class="row">
-            <div class="col-md-12 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="member_id" class="form-label">Member <span class="text-danger">*</span></label>
               <select class="select2 form-select @error('member_id') is-invalid @enderror" id="member_id" name="member_id" required>
                 <option value="">Select Member</option>
@@ -34,7 +34,7 @@
               @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="total_deposit_amount" class="form-label">Total Deposit Amount</label>
               <div class="input-group">
                 <span class="input-group-text">৳</span>
@@ -42,7 +42,7 @@
               </div>
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="percentage_of_deposit" class="form-label">Percentage of Deposit (%) <span class="text-danger">*</span></label>
               <input type="number" class="form-control @error('percentage_of_deposit') is-invalid @enderror" id="percentage_of_deposit" name="percentage_of_deposit" value="{{ old('percentage_of_deposit', $quard->percentage_of_deposit) }}" step="0.01" min="0" max="100" required>
               @error('percentage_of_deposit')
@@ -50,7 +50,7 @@
               @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="quard_amount" class="form-label">Quard Amount</label>
               <div class="input-group">
                 <span class="input-group-text">৳</span>
@@ -60,8 +60,37 @@
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
+            <div class="col-md-4 mb-3">
+              <label for="charge_percentage" class="form-label">Charge Percentage (%)</label>
+              <input type="number" class="form-control @error('charge_percentage') is-invalid @enderror" id="charge_percentage" name="charge_percentage" value="{{ old('charge_percentage', $quard->charge_percentage) }}" step="0.01" min="0" max="100">
+              @error('charge_percentage')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
+              <label for="charge_amount" class="form-label">Charge Amount</label>
+              <div class="input-group">
+                <span class="input-group-text">৳</span>
+                <input type="number" class="form-control @error('charge_amount') is-invalid @enderror" id="charge_amount" name="charge_amount" value="{{ old('charge_amount', $quard->charge_amount) }}" step="0.01" min="0" readonly>
+              </div>
+              @error('charge_amount')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label for="total_payable_amount" class="form-label">Total Payable Amount</label>
+              <div class="input-group">
+                <span class="input-group-text">৳</span>
+                <input type="number" class="form-control @error('total_payable_amount') is-invalid @enderror" id="total_payable_amount" name="total_payable_amount" value="{{ old('total_payable_amount', $quard->total_payable_amount ?? 0) }}" step="0.01" min="0" readonly required>
+              </div>
+              @error('total_payable_amount')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+
+            <div class="col-md-4 mb-3">
               <label for="period_in_years" class="form-label">Period (Years) <span class="text-danger">*</span></label>
               <select class="form-select @error('period_in_years') is-invalid @enderror" id="period_in_years" name="period_in_years" required>
                 @for($y = 1; $y <= 10; $y++)
@@ -73,7 +102,7 @@
               @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="installment_number" class="form-label">Installment Number <span class="text-danger">*</span></label>
               <input type="number" class="form-control @error('installment_number') is-invalid @enderror" id="installment_number" name="installment_number" value="{{ old('installment_number', $quard->installment_number) }}" min="1" required>
               @error('installment_number')
@@ -81,7 +110,7 @@
               @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="installment_amount" class="form-label">Installment Amount</label>
               <div class="input-group">
                 <span class="input-group-text">৳</span>
@@ -92,45 +121,11 @@
               @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
-              <label for="charge_percentage" class="form-label">Charge Percentage (%)</label>
-              <input type="number" class="form-control @error('charge_percentage') is-invalid @enderror" id="charge_percentage" name="charge_percentage" value="{{ old('charge_percentage', $quard->charge_percentage) }}" step="0.01" min="0" max="100">
-              @error('charge_percentage')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+        
 
-            <div class="col-md-6 mb-3">
-              <label for="charge_amount" class="form-label">Charge Amount</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('charge_amount') is-invalid @enderror" id="charge_amount" name="charge_amount" value="{{ old('charge_amount', $quard->charge_amount) }}" step="0.01" min="0" readonly>
-              </div>
-              @error('charge_amount')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+          
 
-            <div class="col-md-6 mb-3">
-              <label for="total_installment_amount" class="form-label">Total Installment Amount</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('total_installment_amount') is-invalid @enderror" id="total_installment_amount" name="total_installment_amount" value="{{ old('total_installment_amount', $quard->total_installment_amount ?? 0) }}" step="0.01" min="0" readonly required>
-              </div>
-              @error('total_installment_amount')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <label for="total_payable_amount" class="form-label">Total Payable (Incl. Charge)</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control" id="total_payable_amount" value="0" step="0.01" min="0" readonly>
-              </div>
-            </div>
-
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="start_date" class="form-label">Start Date</label>
               <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date" name="start_date" value="{{ old('start_date', optional($quard->start_date)->format('Y-m-d')) }}">
               @error('start_date')
@@ -138,7 +133,7 @@
               @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="maturity_date" class="form-label">Maturity Date</label>
               <input type="date" class="form-control @error('maturity_date') is-invalid @enderror" id="maturity_date" name="maturity_date" value="{{ old('maturity_date', optional($quard->maturity_date)->format('Y-m-d')) }}">
               @error('maturity_date')
@@ -146,7 +141,7 @@
               @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
               <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
                 <option value="active" {{ old('status', $quard->status) === 'active' ? 'selected' : '' }}>Active</option>
@@ -158,7 +153,7 @@
               @enderror
             </div>
 
-            <div class="col-12 mb-3">
+            <div class="col-4 mb-3">
               <label for="notes" class="form-label">Notes</label>
               <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="3">{{ old('notes', $quard->notes) }}</textarea>
               @error('notes')
@@ -168,7 +163,7 @@
           </div>
 
           <div class="row">
-            <div class="col-12">
+            <div class="col-4">
               <div class="d-flex gap-2">
                 <button type="button" class="btn btn-primary" id="submitBtn">
                   <span class="spinner-border spinner-border-sm me-2 d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
@@ -201,7 +196,7 @@ jQuery(document).ready(function($) {
   const installmentAmountInput = $('#installment_amount');
   const chargePercentInput = $('#charge_percentage');
   const chargeAmountInput = $('#charge_amount');
-  const totalInstallmentAmountInput = $('#total_installment_amount');
+  
   const totalPayableAmountInput = $('#total_payable_amount');
   const startDateInput = $('#start_date');
   const maturityDateInput = $('#maturity_date');
@@ -217,11 +212,10 @@ jQuery(document).ready(function($) {
 
     const instN = Math.max(1, parseInt(installmentNumberInput.val() || '1', 10));
     installmentNumberInput.val(instN);
-    const instAmount = instN > 0 ? quardAmount / instN : 0;
-    installmentAmountInput.val(format2(instAmount));
+    
 
     // Total installment amount (without charge) = total payable via installments
-    totalInstallmentAmountInput.val(format2(quardAmount));
+    totalPayableAmountInput.val(format2(quardAmount));
 
     const chPercent = toNumber(chargePercentInput.val());
     const chAmount = (quardAmount * chPercent) / 100;
@@ -229,6 +223,9 @@ jQuery(document).ready(function($) {
 
     // Total payable including charge
     totalPayableAmountInput.val(format2(quardAmount + chAmount));
+
+    const instAmount = instN > 0 ? toNumber(totalPayableAmountInput.val()) / instN : 0;
+    installmentAmountInput.val(format2(instAmount));
   }
 
   function calcMaturity() {

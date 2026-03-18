@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('installment_amount', 15, 2)->default(0);
             $table->decimal('charge_percentage', 8, 2)->default(0);
             $table->decimal('charge_amount', 15, 2)->default(0);
+            $table->decimal('total_payable_amount', 15, 2)->default(0);
             $table->date('start_date')->nullable();
             $table->date('maturity_date')->nullable();
             $table->string('status')->default('active');
