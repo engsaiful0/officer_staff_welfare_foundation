@@ -62,6 +62,7 @@ use App\Http\Controllers\settings\Religion;
 use App\Http\Controllers\settings\AppSettings;
 use App\Http\Controllers\settings\PaymentMethod;
 use App\Http\Controllers\settings\Nationality;
+use App\Http\Controllers\settings\Permission as PermissionSettings;
 
 use App\Http\Controllers\settings\Month;
 
@@ -136,6 +137,13 @@ Route::get('/app/settings/get-nationality', [Nationality::class, 'getNationaliti
 Route::post('/app/settings/nationality', [Nationality::class, 'store'])->name('app-settings-nationality.store');
 Route::put('/app/settings/nationality/{id}', [Nationality::class, 'update'])->name('app-settings-nationality.update');
 Route::delete('/app/settings/nationality/{id}', [Nationality::class, 'destroy'])->name('app-settings-nationality.destroy');
+
+// Permission Settings (mirrors Nationality CRUD style)
+Route::get('/app/settings/permission', [PermissionSettings::class, 'index'])->name('app-settings-permission');
+Route::get('/app/settings/get-permission', [PermissionSettings::class, 'getPermissions'])->name('app-settings-get-permission');
+Route::post('/app/settings/permission', [PermissionSettings::class, 'store'])->name('app-settings-permission.store');
+Route::put('/app/settings/permission/{id}', [PermissionSettings::class, 'update'])->name('app-settings-permission.update');
+Route::delete('/app/settings/permission/{id}', [PermissionSettings::class, 'destroy'])->name('app-settings-permission.destroy');
 
 
 Route::get('/app/settings/payment-method', [PaymentMethod::class, 'index'])->name('app-settings-payment-method');

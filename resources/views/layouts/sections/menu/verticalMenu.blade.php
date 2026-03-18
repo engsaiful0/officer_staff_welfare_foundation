@@ -381,11 +381,11 @@ return '';
                         <div>Assign Permissions</div>
                     </a>
                 </li>
-                <li class="menu-item {{ ($currentRouteName === 'app-access-rules.index' || $currentRouteName === 'app-access-rules') ? 'active' : '' }}">
-                  <a href="{{ url('permissions') }}" class="menu-link">
+                <li class="menu-item {{ ($currentRouteName === 'app-settings-permission' || $currentRouteName === 'permissions') ? 'active' : '' }}">
+                  <a href="{{ url('app/settings/permission') }}" class="menu-link">
                       <div>Permissions</div>
                   </a>
-              </li>
+                </li>
                 <li class="menu-item {{ ($currentRouteName === 'app-settings-users' || $currentRouteName === 'users') ? 'active' : '' }}">
                     <a href="{{ url('app/settings/users') }}" class="menu-link">
                         <div>Users</div>
