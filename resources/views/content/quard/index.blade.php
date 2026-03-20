@@ -42,14 +42,14 @@
           <tr>
             <th>#</th>
             <th>Member</th>
-            <th>Total Deposits</th>
-            <th>% of Deposit</th>
+          
             <th>Quard Amount</th>
             <th>Period (Years)</th>
             <th>Installment Number</th>
-            <th>Charge (%)</th>
+    
             <th>Charge Amount</th>
             <th>Total Payable Amount</th>
+            <th>Installment Amount</th>
             <th>Start Date</th>
             <th>Maturity Date</th>
             <th>Status</th>
@@ -61,19 +61,21 @@
             <tr>
               <td>{{ $quards->firstItem() + $loop->index }}</td>
               <td>{{ $q->member?->name }} ({{ $q->member?->unique_id }})</td>
-              <td>{{ number_format((float) $q->total_deposit_amount, 2) }}</td>
-              <td>{{ number_format((float) $q->percentage_of_deposit, 2) }}</td>
+              
               <td>{{ number_format((float) $q->quard_amount, 2) }}</td>
               <td>{{ $q->period_in_years }}</td>
               <td>{{ $q->installment_number }}</td>
-              <td>{{ number_format((float) $q->charge_percentage, 2) }}</td>
+              
               <td>{{ number_format((float) $q->charge_amount, 2) }}</td>
               <td>{{ number_format((float) $q->total_payable_amount, 2) }}</td>
-              
+              <td>{{ number_format((float) $q->installment_amount, 2) }}</td>
               <td>{{ $q->start_date ? $q->start_date->format('Y-m-d') : '' }}</td>
               <td>{{ $q->maturity_date ? $q->maturity_date->format('Y-m-d') : '' }}</td>
               <td>{{ ucfirst($q->status) }}</td>
               <td>
+                <a href="{{ route('quards.show', $q) }}" class="btn btn-sm btn-outline-primary">
+                  <i class="bx bx-show"></i> View
+                </a>
                 <a href="{{ route('quards.edit', $q) }}" class="btn btn-sm btn-outline-primary">
                   <i class="bx bx-edit-alt"></i> Edit
                 </a>

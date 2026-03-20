@@ -434,6 +434,7 @@ use App\Http\Controllers\DepositLedgerController;
 use App\Http\Controllers\DepositImportController;
 use App\Http\Controllers\DepositReportController;
 use App\Http\Controllers\QuardController;
+use App\Http\Controllers\QuardPaymentController;
 
 // Deposit Routes
 Route::resource('deposits', DepositController::class);
@@ -497,3 +498,15 @@ Route::resource('quards', QuardController::class);
 Route::get('/app/quards/view-quards', [QuardController::class, 'index'])->name('quards.view-quards');
 Route::get('/app/quards/add-quard', [QuardController::class, 'create'])->name('quards.add-quard');
 Route::get('/app/quards/member-total-deposits/{memberId}', [QuardController::class, 'getMemberTotalDeposits'])->name('quards.member-total-deposits');
+
+// Quard Payment Module Routes
+Route::get('/app/quard-payment/add-quard-payment', [QuardPaymentController::class, 'create'])
+    ->name('quard-payment.add-quard-payment');
+Route::get('/app/quard-payment/view-quard-payment', [QuardPaymentController::class, 'index'])
+    ->name('quard-payment.view-quard-payment');
+Route::get('/app/quard-payment/quard-amount/{memberId}', [QuardPaymentController::class, 'getQuardAmountForMember'])
+    ->name('quard-payment.get-quard-amount');
+Route::post('/app/quard-payment', [QuardPaymentController::class, 'store'])
+    ->name('quard-payment.store');
+Route::delete('/app/quard-payment/{quardPayment}', [QuardPaymentController::class, 'destroy'])
+    ->name('quard-payment.destroy');

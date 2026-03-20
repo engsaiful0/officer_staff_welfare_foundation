@@ -285,22 +285,59 @@ return '';
         }
         @endphp
         @if($hasDepositPermission)
-        <li class="menu-item {{ (str_contains($currentRouteName, 'deposit') || str_contains($currentRouteName, 'deposits')) ? 'active open' : '' }}">
+        <li class="menu-item {{ (str_contains($currentRouteName, 'quard') || str_contains($currentRouteName, 'deposits')) ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-file-dollar"></i>
                 <div>Quard</div>
             </a>
             <ul class="menu-sub">
-                @permission('deposit-add')
+                @permission('quard-add')
                 <li class="menu-item {{ $currentRouteName === 'quards.add-quard' ? 'active' : '' }}">
                     <a href="{{ url('/app/quards/add-quard') }}" class="menu-link">
                         <div>Add</div>
                     </a>
                 </li>
                 @endpermission
-                @permission('deposit-view')
+                @permission('quard-view')
                 <li class="menu-item {{ $currentRouteName === 'quards.view-quards' ? 'active' : '' }}">
                     <a href="{{ url('/app/quards/view-quards') }}" class="menu-link">
+                        <div>View</div>
+                    </a>
+                </li>
+                @endpermission
+
+            </ul>
+        </li>
+        @endif
+
+          <!-- Deposit -->
+        @php
+        $hasDepositPermission = false;
+        if (Auth::check()) {
+        $user = Auth::user();
+        $hasDepositPermission = $user->hasPermissionTo('quard-payment-add') ||
+        $user->hasPermissionTo('quard-payment-view') ||
+        $user->hasPermissionTo('quard-payment-edit') ||
+        $user->hasPermissionTo('quard-payment-delete');
+        }
+        @endphp
+        @if($hasDepositPermission)
+        <li class="menu-item {{ (str_contains($currentRouteName, 'quard-payment') || str_contains($currentRouteName, 'deposits')) ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+                <div>Quard Payment</div>
+            </a>
+            <ul class="menu-sub">
+                @permission('quard-payment-add')
+                <li class="menu-item {{ $currentRouteName === 'quard-payment.add-quard-payment' ? 'active' : '' }}">
+                    <a href="{{ url('/app/quard-payment/add-quard-payment') }}" class="menu-link">
+                        <div>Add</div>
+                    </a>
+                </li>
+                @endpermission
+                @permission('quard-payment-view')
+                <li class="menu-item {{ $currentRouteName === 'quard-payment.view-quard-payment' ? 'active' : '' }}">
+                    <a href="{{ url('/app/quard-payment/view-quard-payment') }}" class="menu-link">
                         <div>View</div>
                     </a>
                 </li>
