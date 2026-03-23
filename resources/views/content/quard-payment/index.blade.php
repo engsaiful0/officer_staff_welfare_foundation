@@ -50,6 +50,7 @@
               <td>{{ $p->payment_date ? $p->payment_date->format('Y-m-d') : '' }}</td>
               <td>{{ $p->notes }}</td>
               <td>
+                <a href="{{ route('quard-payment.edit', $p->id) }}" class="btn btn-sm btn-outline-primary"><i class="bx bx-edit"></i> Edit</a>
                 <button type="button"
                         class="btn btn-sm btn-outline-danger delete-quard-payment"
                         data-url="{{ route('quard-payment.destroy', $p->id) }}">

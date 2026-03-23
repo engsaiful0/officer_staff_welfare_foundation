@@ -4,168 +4,122 @@
 
 @section('content')
 <div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Show Quard</h5>
-        <a href="{{ route('quards.view-quards') }}" class="btn btn-outline-secondary">
-          <i class="bx bx-arrow-back me-1"></i> Back to List
-        </a>
-      </div>
-
-      <div class="card-body">
-       
-
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label for="member_id" class="form-label">Member</label>
-              <input type="text" class="form-control" id="member_id" name="member_id" value="{{ $quard->member->name }} ({{ $quard->member->unique_id }})" readonly>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Show Quard</h5>
+                <a href="{{ route('quards.view-quards') }}" class="btn btn-outline-secondary">
+                    <i class="bx bx-arrow-back me-1"></i> Back to List
+                </a>
             </div>
 
-            <div class="col-md-4 mb-3">
-              <label for="total_deposit_amount" class="form-label">Total Deposit Amount</label>
-              <input type="text" class="form-control" id="total_deposit_amount" name="total_deposit_amount" value="{{ number_format((float) $quard->total_deposit_amount, 2) }}" readonly>
-            </div>
+            <div class="card-body">
 
-            <div class="col-md-4 mb-3">
-              <label for="percentage_of_deposit" class="form-label">Percentage of Deposit (%) <span class="text-danger">*</span></label>
-              <input type="number" class="form-control @error('percentage_of_deposit') is-invalid @enderror" id="percentage_of_deposit" name="percentage_of_deposit" value="{{ old('percentage_of_deposit', 0) }}" step="0.01" min="0" max="100" required>
-              @error('percentage_of_deposit')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
 
-            <div class="col-md-4 mb-3">
-              <label for="quard_amount" class="form-label">Quard Amount</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('quard_amount') is-invalid @enderror" id="quard_amount" name="quard_amount" value="{{ old('quard_amount', 0) }}" step="0.01" min="0" readonly required>
-              </div>
-              @error('quard_amount')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+                <div class="row">
+                    <table class="table table-bordered table-striped table-hover">
 
-            <div class="col-md-4 mb-3">
-              <label for="charge_percentage" class="form-label">Charge Percentage (%)</label>
-              <input type="number" class="form-control @error('charge_percentage') is-invalid @enderror" id="charge_percentage" name="charge_percentage" value="{{ old('charge_percentage', 0) }}" step="0.01" min="0" max="100">
-              @error('charge_percentage')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+                        <tr>
+                            <td style="font-weight: bold;">Member</td>
+                            <td>{{ $quard->member->name }} ({{ $quard->member->unique_id }})</td>
+                            <td style="font-weight: bold;">Total Deposit Amount</td>
+                            <td>{{ number_format((float) $quard->total_deposit_amount, 2) }}</td>
+                        </tr>
+                        <tr></tr>
+                        <td style="font-weight: bold;">Percentage of Deposit (%) <span class="text-danger">*</span></td>
+                        <td>{{ $quard->percentage_of_deposit }}</td>
+                        <td style="font-weight: bold;">Quard Amount</td>
+                        <td>{{ $quard->quard_amount }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Period (Years)</td>
+                            <td>{{ $quard->period_in_years }}</td>
+                            <td style="font-weight: bold;">Installment Number</td>
+                            <td>{{ $quard->installment_number }}</td>
+                        </tr>
 
-            <div class="col-md-4 mb-3">
-              <label for="charge_amount" class="form-label">Charge Amount</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('charge_amount') is-invalid @enderror" id="charge_amount" name="charge_amount" value="{{ old('charge_amount', 0) }}" step="0.01" min="0" readonly>
-              </div>
-              @error('charge_amount')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="total_payable_amount" class="form-label">Total Payable Amount</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('total_payable_amount') is-invalid @enderror" id="total_payable_amount" name="total_payable_amount" value="{{ old('total_payable_amount', 0) }}" step="0.01" min="0" readonly>
-              </div>
-              @error('total_payable_amount')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="period_in_years" class="form-label">Period (Years) <span class="text-danger">*</span></label>
-              <select class="form-select @error('period_in_years') is-invalid @enderror" id="period_in_years" name="period_in_years" required>
-                @for($y = 1; $y <= 10; $y++)
-                  <option value="{{ $y }}" {{ old('period_in_years', 1) == $y ? 'selected' : '' }}>{{ $y }}</option>
-                @endfor
-              </select>
-              @error('period_in_years')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+                        <tr>
+                            <td style="font-weight: bold;">Charge Percentage (%) <span class="text-danger">*</span></td>
+                            <td>{{ $quard->charge_percentage }}</td>
+                            <td style="font-weight: bold;">Charge Amount</td>
+                            <td>{{ $quard->charge_amount }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Total Payable Amount</td>
+                            <td>{{ $quard->total_payable_amount }}</td>
 
-            <div class="col-md-4 mb-3">
-              <label for="installment_number" class="form-label">Installment Number <span class="text-danger">*</span></label>
-              <input type="number" class="form-control @error('installment_number') is-invalid @enderror" id="installment_number" name="installment_number" value="{{ old('installment_number', 1) }}" min="1" required>
-              @error('installment_number')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-              <div class="form-text">Example: \(period \times 12\) for monthly installments.</div>
-            </div>
+                            <td style="font-weight: bold;">Installment Amount</td>
+                            <td>{{ $quard->installment_amount }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Start Date</td>
+                            <td>{{ $quard->maturity_date ? $quard->maturity_date->format('Y-m-d') : '' }}</td>
+                            <td style="font-weight: bold;">Maturity Date</td>
+                            <td>{{ $quard->maturity_date ? $quard->maturity_date->format('Y-m-d') : '' }}</td>
+                        </tr>
+                        <tr>
 
-            <div class="col-md-4 mb-3">
-              <label for="installment_amount" class="form-label">Installment Amount</label>
-              <div class="input-group">
-                <span class="input-group-text">৳</span>
-                <input type="number" class="form-control @error('installment_amount') is-invalid @enderror" id="installment_amount" name="installment_amount" value="{{ old('installment_amount', 0) }}" step="0.01" min="0" readonly required>
-              </div>
-              @error('installment_amount')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+                            <td style="font-weight: bold;">Status</td>
+                            <td>{{ ucfirst($quard->status) }}</td>
+                       
+                            <td style="font-weight: bold;">Notes</td>
+                            <td>{{ $quard->notes ?: '-' }}</td>
 
-           
-        
+                        </tr>
 
-            <div class="col-md-4 mb-3">
-              <label for="start_date" class="form-label">Start Date</label>
-              <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}">
-              @error('start_date')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
 
-            <div class="col-md-4 mb-3">
-              <label for="maturity_date" class="form-label">Maturity Date</label>
-              <input type="date" class="form-control @error('maturity_date') is-invalid @enderror" id="maturity_date" name="maturity_date" value="{{ old('maturity_date') }}">
-              @error('maturity_date')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+                    </table>
 
-            <div class="col-md-4 mb-3">
-              <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-              <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
-                <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active</option>
-                <option value="matured" {{ old('status') === 'matured' ? 'selected' : '' }}>Matured</option>
-                <option value="closed" {{ old('status') === 'closed' ? 'selected' : '' }}>Closed</option>
-              </select>
-              @error('status')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+                </div>
 
-            <div class="col-4 mb-3">
-              <label for="notes" class="form-label">Notes</label>
-              <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="3" placeholder="Notes">{{ old('notes') }}</textarea>
-              @error('notes')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
-          </div>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Quard Payments</h6>
+                            <a href="{{ route('quard-payment.add-quard-payment') }}" class="btn btn-primary btn-sm">
+                                <i class="bx bx-plus me-1"></i> Add Payment
+                            </a>
+                        </div>
 
-          <div class="row">
-            <div class="col-12">
-              <div class="d-flex gap-2">
-                <button type="button" class="btn btn-primary" id="submitBtn">
-                  <span class="spinner-border spinner-border-sm me-2 d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
-                  <i class="bx bx-save me-1" id="submitIcon"></i>
-                  <span id="submitText">Create Quard</span>
-                </button>
-                <a href="{{ route('quards.view-quards') }}" class="btn btn-outline-secondary">Cancel</a>
-              </div>
+                        @if($quard->quardPayments && $quard->quardPayments->count())
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Payment Date</th>
+                                        <th>Payment Amount</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($quard->quardPayments as $payment)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ optional($payment->payment_date)->format('Y-m-d') }}</td>
+                                        <td>{{ number_format((float) $payment->payment_amount, 2) }}</td>
+                                        <td>{{ $payment->notes ?: '-' }}</td>
+                                    </tr>
+                                    @endforeach
+                                    <tr>
+                                        <td colspan="2" class="text-end">Total Payment Amount</td>
+                                        <td>{{ number_format((float) $quard->quardPayments->sum('payment_amount'), 2) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        @else
+                        <div class="alert alert-secondary mb-0">No quard payments found.</div>
+                        @endif
+                    </div>
+                </div>
             </div>
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 @endsection
 
-@section('page-script')
+{{-- @section('page-script')
 <script>
 window.memberTotalDepositsUrl = @json(route('quards.member-total-deposits', ['memberId' => '__ID__']));
 </script>
@@ -307,54 +261,56 @@ jQuery(document).ready(function($) {
           else alert(response.message || 'Quard created successfully');
           setTimeout(function() {
             window.location.href = '{{ route("quards.view-quards") }}';
-          }, 800);
-        } else {
-          if (typeof toastr !== 'undefined') toastr.error(response.message || 'Failed to create quard');
-          else alert(response.message || 'Failed to create quard');
-          resetSubmitButton();
-        }
-      },
-      error: function(xhr) {
-        resetSubmitButton();
-        const responseJSON = xhr.responseJSON || null;
-        if (xhr.status === 422 && responseJSON && responseJSON.errors) {
-          const errors = responseJSON.errors;
-          let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
-          errorHtml += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-          errorHtml += '<strong>Please fix the following errors:</strong><ul class="mb-0 mt-2">';
-          $.each(errors, function(field, messages) {
-            const fieldElement = $('[name="' + field + '"]');
-            fieldElement.addClass('is-invalid');
-            const msg = Array.isArray(messages) ? messages.join(' ') : messages;
-            fieldElement.siblings('.invalid-feedback').remove();
-            fieldElement.after('<div class="invalid-feedback">' + msg.trim() + '</div>');
-            errorHtml += '<li>' + msg.trim() + '</li>';
-          });
-          errorHtml += '</ul></div>';
-          form.prepend(errorHtml);
-          $('html, body').animate({ scrollTop: 0 }, 500);
-        } else {
-          const errorMessage = (responseJSON && responseJSON.message) ? responseJSON.message : 'An error occurred while creating the quard.';
-          if (typeof toastr !== 'undefined') toastr.error(errorMessage);
-          else alert(errorMessage);
-        }
-      }
-    });
-  }
+}, 800);
+} else {
+if (typeof toastr !== 'undefined') toastr.error(response.message || 'Failed to create quard');
+else alert(response.message || 'Failed to create quard');
+resetSubmitButton();
+}
+},
+error: function(xhr) {
+resetSubmitButton();
+const responseJSON = xhr.responseJSON || null;
+if (xhr.status === 422 && responseJSON && responseJSON.errors) {
+const errors = responseJSON.errors;
+let errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+    errorHtml += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+    errorHtml += '<strong>Please fix the following errors:</strong>
+    <ul class="mb-0 mt-2">';
+        $.each(errors, function(field, messages) {
+        const fieldElement = $('[name="' + field + '"]');
+        fieldElement.addClass('is-invalid');
+        const msg = Array.isArray(messages) ? messages.join(' ') : messages;
+        fieldElement.siblings('.invalid-feedback').remove();
+        fieldElement.after('<div class="invalid-feedback">' + msg.trim() + '</div>');
+        errorHtml += '<li>' + msg.trim() + '</li>';
+        });
+        errorHtml += '</ul>
+</div>';
+form.prepend(errorHtml);
+$('html, body').animate({ scrollTop: 0 }, 500);
+} else {
+const errorMessage = (responseJSON && responseJSON.message) ? responseJSON.message : 'An error occurred while creating the quard.';
+if (typeof toastr !== 'undefined') toastr.error(errorMessage);
+else alert(errorMessage);
+}
+}
+});
+}
 
-  $('#submitBtn').on('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    submitFormViaAjax();
-    return false;
-  });
+$('#submitBtn').on('click', function(e) {
+e.preventDefault();
+e.stopPropagation();
+submitFormViaAjax();
+return false;
+});
 
-  $('#quardForm').on('submit', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    submitFormViaAjax();
-    return false;
-  });
+$('#quardForm').on('submit', function(e) {
+e.preventDefault();
+e.stopPropagation();
+submitFormViaAjax();
+return false;
+});
 });
 </script>
-@endsection
+@endsection --}}

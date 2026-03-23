@@ -43,4 +43,9 @@ class Quard extends Model
     {
         return $this->belongsTo(Member::class);
     }
+
+    public function quardPayments()
+    {
+        return $this->hasMany(QuardPayment::class, 'quard_id');
+    }
 }

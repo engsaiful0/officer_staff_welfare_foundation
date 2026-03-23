@@ -152,7 +152,7 @@ class QuardController extends Controller
      */
     public function show(Quard $quard)
     {
-        $quard->load(['member']);
+        $quard->load(['member', 'quardPayments']);
 
         if (request()->expectsJson()) {
             return response()->json([

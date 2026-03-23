@@ -12,13 +12,10 @@ return new class extends Migration {
 
             $table->foreignId('member_id')->constrained('members')->onDelete('cascade');
             $table->foreignId('quard_id')->constrained('quards')->onDelete('cascade');
-
             $table->decimal('payment_amount', 15, 2)->default(0);
             $table->date('payment_date');
             $table->text('notes')->nullable();
-
             $table->timestamps();
-
             $table->index(['member_id', 'payment_date']);
         });
     }

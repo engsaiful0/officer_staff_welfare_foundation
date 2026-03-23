@@ -18,7 +18,7 @@
           @csrf
 
           <div class="row">
-            <div class="col-md-4 mb-3">
+            <div class="col-md-12 mb-3">
               <label for="member_id" class="form-label">Member <span class="text-danger">*</span></label>
               <select class="select2 form-select @error('member_id') is-invalid @enderror" id="member_id" name="member_id" required>
                 <option value="">Select Member</option>
@@ -35,7 +35,7 @@
 
             <input type="hidden" id="quard_id" name="quard_id" required>
 
-            <div class="col-md-4 mb-3">
+            <div class="col-md-12 mb-3">
               <label for="payment_amount" class="form-label">Quard Payment Amount <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text">৳</span>
@@ -59,7 +59,7 @@
            
         
 
-            <div class="col-md-4 mb-3">
+            <div class="col-md-12 mb-3">
               <label for="start_date" class="form-label">Payment Date</label>
               <input type="date" class="form-control @error('payment_date') is-invalid @enderror" id="payment_date" name="payment_date" value="{{ old('payment_date', date('Y-m-d')) }}" required>
               @error('payment_date')
@@ -68,7 +68,7 @@
             </div>
 
 
-            <div class="col-4 mb-3">
+            <div class="col-md-12 mb-3">
               <label for="notes" class="form-label">Notes</label>
               <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="3" placeholder="Notes">{{ old('notes') }}</textarea>
               @error('notes')

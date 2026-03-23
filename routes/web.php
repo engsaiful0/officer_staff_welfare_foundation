@@ -508,5 +508,9 @@ Route::get('/app/quard-payment/quard-amount/{memberId}', [QuardPaymentController
     ->name('quard-payment.get-quard-amount');
 Route::post('/app/quard-payment', [QuardPaymentController::class, 'store'])
     ->name('quard-payment.store');
+Route::get('/app/quard-payment/{quardPayment}/edit', [QuardPaymentController::class, 'edit'])
+    ->name('quard-payment.edit');
+Route::put('/app/quard-payment/{quardPayment}', [QuardPaymentController::class, 'update'])
+    ->name('quard-payment.update');
 Route::delete('/app/quard-payment/{quardPayment}', [QuardPaymentController::class, 'destroy'])
     ->name('quard-payment.destroy');
