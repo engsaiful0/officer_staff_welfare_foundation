@@ -154,7 +154,7 @@ return '';
             <ul class="menu-sub">
                 <li class="menu-item {{ $currentRouteName === 'app-expenses' ? 'active' : '' }}">
                     <a href="{{ url('app/expenses') }}" class="menu-link">
-                        <div>Expense Management</div>
+                        <div>Manage</div>
                     </a>
                 </li>
             </ul>
@@ -170,7 +170,6 @@ return '';
         $user->hasPermissionTo('payment-investment') ||
         $user->hasPermissionTo('investment-collection-add') ||
         $user->hasPermissionTo('investment-collection-view') ||
-        $user->hasPermissionTo('investment-import') ||
         $user->hasPermissionTo('investment-reports');
         }
         @endphp
@@ -216,13 +215,7 @@ return '';
                     </a>
                 </li>
                 @endpermission
-                @permission('investment-import')
-                <li class="menu-item {{ $currentRouteName === 'investments.import' ? 'active' : '' }}">
-                    <a href="{{ url('/app/investments/import') }}" class="menu-link">
-                        <div>Import Data</div>
-                    </a>
-                </li>
-                @endpermission
+              
                 @permission('investment-reports')
                 <li class="menu-item {{ $currentRouteName === 'investments.reports' ? 'active' : '' }}">
                     <a href="{{ url('/app/investments/reports') }}" class="menu-link">
@@ -241,7 +234,6 @@ return '';
         $user = Auth::user();
         $hasDepositPermission = $user->hasPermissionTo('deposit-add') ||
         $user->hasPermissionTo('deposit-view') ||
-        $user->hasPermissionTo('deposit-import') ||
         $user->hasPermissionTo('deposit-reports');
         }
         @endphp
@@ -280,7 +272,6 @@ return '';
         $user->hasPermissionTo('quard-view') ||
         $user->hasPermissionTo('quard-edit') ||
         $user->hasPermissionTo('quard-delete') ||
-        $user->hasPermissionTo('quard-import') ||
         $user->hasPermissionTo('quard-reports');
         }
         @endphp

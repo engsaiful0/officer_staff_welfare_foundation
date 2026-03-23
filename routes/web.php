@@ -341,6 +341,7 @@ Route::resource('permissions', PermissionController::class)->names([
 Route::resource('members', MemberController::class)->except(['create', 'edit', 'destroy']);
 Route::get('/app/members/view-member', [MemberController::class, 'index'])->name('members.view-member');
 Route::get('/app/members/add-member', [MemberController::class, 'create'])->name('members.add-member')->middleware('permission:member-add');
+Route::get('/app/members/member-form', [MemberController::class, 'memberFormPrint'])->name('members.member-form')->middleware('permission:member-add');
 Route::post('/members', [MemberController::class, 'store'])->name('members.store')->middleware('permission:member-add');
 Route::get('/app/members/{member}/edit', [MemberController::class, 'edit'])->name('members.edit')->middleware('permission:member-edit');
 Route::put('/members/{member}', [MemberController::class, 'update'])->name('members.update')->middleware('permission:member-edit');

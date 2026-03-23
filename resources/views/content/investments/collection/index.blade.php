@@ -33,10 +33,10 @@
                                     @foreach($accounts as $account)
                                         <option value="{{ $account->id }}" 
                                                 data-account-number="{{ $account->account_number ?? 'N/A' }}"
-                                                data-member-name="{{ $account->investment->member->name }}"
+                                                data-member-name="{{ $account->investment->member->name?? 'N/A' }}"
                                                 data-member-id="{{ $account->investment->member->unique_id ?? 'N/A' }}">
                                             {{ $account->account_number ?? 'Account #' . $account->id }} - 
-                                            {{ $account->investment->member->name }} 
+                                            {{ $account->investment->member->name?? 'N/A' }} 
                                             ({{ $account->investment->member->unique_id ?? 'N/A' }})
                                         </option>
                                     @endforeach

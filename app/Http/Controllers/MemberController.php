@@ -88,6 +88,16 @@ class MemberController extends Controller
     }
 
     /**
+     * Printable blank manual member form (for applicants / office use).
+     */
+    public function memberFormPrint()
+    {
+        $pageConfigs = ['myLayout' => 'blank'];
+
+        return view('content.members.member-form-print', compact('pageConfigs'));
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)

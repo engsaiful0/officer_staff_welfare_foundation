@@ -3,6 +3,22 @@
 @section('title', 'Add Member')
 
 @section('page-script')
+<style>
+  /* Print only the manual member form block on this page */
+  @media print {
+    body * { visibility: hidden !important; }
+    #member-manual-print-area, #member-manual-print-area * { visibility: visible !important; }
+    #member-manual-print-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      padding: 12px !important;
+      background: #fff !important;
+    }
+    .no-print { display: none !important; }
+  }
+</style>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script>
     window.checkEmailUrl = '{{ route("members.check-email-unique") }}';
@@ -14,12 +30,51 @@
 </script>
 <script src="{{asset('assets/js/member-utils.js')}}?v={{ time() }}"></script>
 <script src="{{asset('assets/js/member-add.js')}}?v={{ time() }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('beforeprint', function () {
+      var collapseEl = document.getElementById('collapseManualForm');
+      if (collapseEl && !collapseEl.classList.contains('show') && typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+        bootstrap.Collapse.getOrCreateInstance(collapseEl).show();
+      }
+    });
+  });
+</script>
 @endsection
 
 @section('content')
+<div class="card mb-3">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="card-title mb-0">Add New Member</h5>
+        <div class="d-flex flex-wrap gap-2 no-print">
+           
+            <a href="{{ route('members.member-form') }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+                <i class="bx bx-file-blank"></i> Print manual form
+            </a>
+        </div>
+    </div>
+    <div class="card-body py-2">
+        <p class="text-muted small mb-2 no-print">Use this paper form to collect applicant details by hand, then enter them in the digital form below.</p>
+        <div class="accordion" id="accordionManualMemberForm">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingManualForm">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManualForm" aria-expanded="false" aria-controls="collapseManualForm">
+                        Show printable manual member form
+                    </button>
+                </h2>
+                <div id="collapseManualForm" class="accordion-collapse collapse" aria-labelledby="headingManualForm" data-bs-parent="#accordionManualMemberForm">
+                    <div class="accordion-body pt-3">
+                        @include('content.members.partials.manual-member-form-print')
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">
-        <h5 class="card-title">Add New Member</h5>
+        <h5 class="card-title mb-0">Member details (online entry)</h5>
     </div>
     <div class="card-body">
         <form id="memberForm" action="{{ route('members.store') }}" method="POST" enctype="multipart/form-data">
