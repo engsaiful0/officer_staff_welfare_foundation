@@ -38,10 +38,10 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td  class="fw-bold">Name</td>
+                            <td class="fw-bold">Name</td>
                             <td>{{ $member->name ?? '—' }}</td>
                             <td class="fw-bold">Father Name</td>
-                            <td >{{ $member->father_name ?? '—' }}</td>
+                            <td>{{ $member->father_name ?? '—' }}</td>
                             <td class="fw-bold">Mother Name</td>
                             <td>{{ $member->mother_name ?? '—' }}</td>
                             <td class="fw-bold">Spouse Name</td>
@@ -55,19 +55,15 @@
                             <td class="fw-bold">NID Number</td>
                             <td>{{ $member->nid_number ?? '—' }}</td>
                             <td class="fw-bold">Picture</td>
-                            <td></td>{{ $member->picture ?? '—' }}</td>
-
-                        </tr>
-                        <tr>
-                            <td class="fw-bold">Present Address</td>
-                            <td>{{ $member->present_address ?? '—' }}</td>
-                            <td class="fw-bold">Permanent Address</td>
-                            <td>{{ $member->permanent_address ?? '—' }}</td>
-                            <td class="fw-bold">Designation</td>
-                            <td>{{ $member->designation?->designation_name ?? '—' }}</td>
-                            <td class="fw-bold">Date of Birth</td>
-                            <td>{{ $member->date_of_birth ?? '—' }}</td>
-
+                            <td>
+                                @if($member->picture)
+                                <img src="{{ asset('storage/app/public/' . $member->picture) }}" alt="{{ $member->name }}" class="rounded-circle" width="40" height="40">
+                                @else
+                                <div class="avatar-initial rounded-circle bg-label-primary" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    {{ substr($member->name, 0, 1) }}
+                                </div>
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td class="fw-bold">Date of Join</td>
@@ -78,7 +74,7 @@
                             <td>{{ $member->religion?->religion_name ?? '—' }}</td>
                             <td class="fw-bold">Religion</td>
                             <td>{{ $member->religion?->religion_name ?? '—' }}</td>
-                       
+
                         </tr>
                     </tbody>
                 </table>
@@ -98,7 +94,7 @@
                         <td class="fw-bold">Employees ID</td>
                         <td>{{ $member->employees_id ?? '—' }}</td>
                     </tr>
-                    <tr>   
+                    <tr>
                         <td class="fw-bold">Member ID</td>
                         <td>{{ $member->member_unique_id ?? '—' }}</td>
                         <td class="fw-bold">Account Opening Date</td>
@@ -125,20 +121,31 @@
                         <td>{{ $member->nominee_mother_name ?? '—' }}</td>
                         <td class="fw-bold">Nominee Spouse Name</td>
                         <td>{{ $member->nominee_spouse_name ?? '—' }}</td>
-                        <td class="fw-bold">Nominee Relation</td>
-                        <td>{{ $member->nomineeRelation?->relation_name ?? '—' }}</td>
+                   
                     </tr>
                     <tr>
+                        <td class="fw-bold">Nominee Relation</td>
+                        <td>{{ $member->nomineeRelation?->relation_name ?? '—' }}</td>
                         <td class="fw-bold">Nominee Phone</td>
                         <td>{{ $member->nominee_phone ?? '—' }}</td>
                         <td class="fw-bold">Nominee NID Number</td>
                         <td>{{ $member->nominee_nid_number ?? '—' }}</td>
                         <td class="fw-bold">Nominee Present Address</td>
                         <td>{{ $member->nominee_present_address ?? '—' }}</td>
+                    </tr>
+                    <tr>
                         <td class="fw-bold">Nominee Permanent Address</td>
                         <td>{{ $member->nominee_permanent_address ?? '—' }}</td>
                         <td>Picture</td>
-                        <td>{{ $member->nominee_picture ?? '—' }}</td>
+                        <td>
+                            @if($member->nominee_picture)
+                            <img src="{{ asset('storage/app/public/' . $member->nominee_picture) }}" alt="{{ $member->nominee_name }}" class="rounded-circle" width="40" height="40">
+                            @else
+                            <div class="avatar-initial rounded-circle bg-label-primary" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                {{ substr($member->nominee_name, 0, 1) }}
+                            </div>
+                            @endif
+                        </td>
                     </tr>
                     </tbody>
                 </table>

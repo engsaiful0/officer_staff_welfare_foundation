@@ -9,8 +9,13 @@
     window.checkMobileUrl = '{{ route("members.check-mobile-unique") }}';
     window.checkNidUrl = '{{ route("members.check-nid-unique") }}';
     window.getMembersUrl = '{{ route("members.get-members") }}';
-    window.memberId = {{ $member->id }};
+    window.memberId = {
+        {
+            $member - > id
+        }
+    };
     window.membersListUrl = '{{ route("members.view-member") }}';
+
 </script>
 <script src="{{asset('assets/js/member-utils.js')}}?v={{ time() }}"></script>
 <script src="{{asset('assets/js/member-edit.js')}}?v={{ time() }}"></script>
@@ -26,19 +31,19 @@
             @csrf
             @method('PUT')
             <input type="hidden" id="member_id" name="member_id" value="{{ $member->id }}">
-            
+
             <div class="row">
                 <!-- Personal Information -->
                 <div class="col-12">
                     <h6 class="fw-semibold">Personal Information</h6>
                 </div>
-                
+
                 <div class="col-md-4 mb-3">
                     <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ $member->name }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
-                
+
                 <div class="col-md-4 mb-3">
                     <label for="father_name" class="form-label">Father Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="father_name" name="father_name" value="{{ $member->father_name }}" required>
@@ -64,20 +69,19 @@
                     <input type="text" class="form-control" id="mobile" name="mobile" value="{{ $member->mobile }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
-                
+
                 <div class="col-md-4 mb-3">
                     <label for="email" class="form-label">Email </label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ $member->email }}" 
-            >
+                    <input type="email" class="form-control" id="email" name="email" value="{{ $member->email }}">
                     <div class="invalid-feedback"></div>
                 </div>
-                
+
                 <div class="col-md-4 mb-3">
                     <label for="nid_number" class="form-label">NID Number</label>
-                    <input type="text" class="form-control" id="nid_number" name="nid_number" value="{{ $member->nid_number }}" >
+                    <input type="text" class="form-control" id="nid_number" name="nid_number" value="{{ $member->nid_number }}">
                     <div class="invalid-feedback"></div>
                 </div>
-                
+
                 <div class="col-md-4 mb-3">
                     <label for="picture" class="form-label">Picture</label>
                     <input type="file" class="form-control" id="picture" name="picture" accept="image/*">
@@ -89,52 +93,18 @@
                     @endif
                     <div class="invalid-feedback"></div>
                 </div>
-              
-                <div class="col-md-6 mb-3">
+
+                <div class="col-md-4 mb-3">
                     <label for="present_address" class="form-label">Present Address <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="present_address" name="present_address" rows="3" required>{{ $member->present_address }}</textarea>
                     <div class="invalid-feedback"></div>
                 </div>
-                
-                <div class="col-md-6 mb-3">
+
+                <div class="col-md-4 mb-3">
                     <label for="permanent_address" class="form-label">Permanent Address <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" required>{{ $member->permanent_address }}</textarea>
                     <div class="invalid-feedback"></div>
                 </div>
-                
-                <!-- Professional Information -->
-                <div class="col-12 mt-4">
-                    <h6 class="fw-semibold">Professional Information</h6>
-                </div>
-                
-                <div class="col-md-4 mb-3">
-                    <label for="designation_id" class="form-label">Designation <span class="text-danger">*</span></label>
-                    <select class="form-select select2" id="designation_id" name="designation_id" required>
-                        <option value="">Select Designation</option>
-                        @foreach($designations as $designation)
-                        <option value="{{ $designation->id }}" {{ $member->designation_id == $designation->id ? 'selected' : '' }}>{{ $designation->designation_name }}</option>
-                        @endforeach
-                    </select>
-                    <div class="invalid-feedback"></div>
-                </div>
-                
-                <div class="col-md-4 mb-3">
-                    <label for="date_of_join" class="form-label">Date of Join <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_join" name="date_of_join" value="{{ is_object($member->date_of_join) && method_exists($member->date_of_join, 'format') ? $member->date_of_join->format('Y-m-d') : ($member->date_of_join ?? '') }}" required>
-                    <div class="invalid-feedback"></div>
-                </div>
-                
-                <div class="col-md-4 mb-3">
-                    <label for="branch_id" class="form-label">Branch <span class="text-danger">*</span></label>
-                    <select class="form-select select2" id="branch_id" name="branch_id" required>
-                        <option value="">Select Branch</option>
-                        @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}" {{ $member->branch_id == $branch->id ? 'selected' : '' }}>{{ $branch->branch_name }}</option>
-                        @endforeach
-                    </select>
-                    <div class="invalid-feedback"></div>
-                </div>
-                
                 <div class="col-md-4 mb-3">
                     <label for="religion_id" class="form-label">Religion <span class="text-danger">*</span></label>
                     <select class="form-select select2" id="religion_id" name="religion_id" required>
@@ -145,18 +115,51 @@
                     </select>
                     <div class="invalid-feedback"></div>
                 </div>
+                <!-- Professional Information -->
+                <div class="col-12 mt-4">
+                    <h6 class="fw-semibold">Professional Information</h6>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="designation_id" class="form-label">Designation <span class="text-danger">*</span></label>
+                    <select class="form-select select2" id="designation_id" name="designation_id" required>
+                        <option value="">Select Designation</option>
+                        @foreach($designations as $designation)
+                        <option value="{{ $designation->id }}" {{ $member->designation_id == $designation->id ? 'selected' : '' }}>{{ $designation->designation_name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="date_of_join" class="form-label">Date of Join <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="date_of_join" name="date_of_join" value="{{ is_object($member->date_of_join) && method_exists($member->date_of_join, 'format') ? $member->date_of_join->format('Y-m-d') : ($member->date_of_join ?? '') }}" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="branch_id" class="form-label">Branch <span class="text-danger">*</span></label>
+                    <select class="form-select select2" id="branch_id" name="branch_id" required>
+                        <option value="">Select Branch</option>
+                        @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}" {{ $member->branch_id == $branch->id ? 'selected' : '' }}>{{ $branch->branch_name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+
                 <div class="col-md-4 mb-3">
                     <label for="employees_id" class="form-label">Employees ID <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="employees_id" name="employees_id" value="{{ $member->employees_id }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
-               
-                
+
+
                 <div class="col-md-4 mb-3">
                     <label class="form-label" for="member_unique_id">Member ID</label>
-                    <input  type="text" id="member_unique_id" class="form-control" name="member_unique_id"
-                        class="form-control" placeholder="Member ID" value="{{ $member->member_unique_id }}" />
-                  
+                    <input type="text" id="member_unique_id" class="form-control" name="member_unique_id" class="form-control" placeholder="Member ID" value="{{ $member->member_unique_id }}" />
+
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="diposit_account_number" class="form-label">Diposit Account Number </label>
@@ -165,17 +168,16 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label" for="account_opening_date">Account Opening Date <span class="text-danger">*</span></label>
-                    <input  type="date" id="account_opening_date" class="form-control" placeholder="Account Opening Date" name="account_opening_date" value="{{ is_object($member->account_opening_date) && method_exists($member->account_opening_date, 'format') ? $member->account_opening_date->format('Y-m-d') : ($member->account_opening_date ?? '') }}" required
-                        class="form-control" placeholder="Account Opening Date"  />
+                    <input type="date" id="account_opening_date" class="form-control" placeholder="Account Opening Date" name="account_opening_date" value="{{ is_object($member->account_opening_date) && method_exists($member->account_opening_date, 'format') ? $member->account_opening_date->format('Y-m-d') : ($member->account_opening_date ?? '') }}" required class="form-control" placeholder="Account Opening Date" />
                 </div>
-                
-          
-                
+
+
+
                 <!-- Nominee Information -->
                 <div class="col-12 mt-4">
                     <h6 class="fw-semibold">Nominee Information</h6>
                 </div>
-                
+
                 <div class="col-md-4 mb-3">
                     <label for="nominee_name" class="form-label">Nominee Name</label>
                     <input type="text" class="form-control" id="nominee_name" name="nominee_name" value="{{ $member->nominee_name }}">
@@ -212,6 +214,11 @@
                     <div class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-4 mb-3">
+                    <label for="nominee_phone" class="form-label">Nominee Phone</label>
+                    <input type="text" class="form-control" id="nominee_phone" name="nominee_phone" value="{{ $member->nominee_phone }}">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
                     <label for="nominee_date_of_birth" class="form-label">Nominee Date of Birth</label>
                     <input type="date" class="form-control" id="nominee_date_of_birth" name="nominee_date_of_birth" value="{{ is_object($member->nominee_date_of_birth) && method_exists($member->nominee_date_of_birth, 'format') ? $member->nominee_date_of_birth->format('Y-m-d') : ($member->nominee_date_of_birth ?? '') }}">
                     <div class="invalid-feedback"></div>
@@ -227,28 +234,29 @@
                 </div>
                 @endif
                 <div class="invalid-feedback"></div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="nominee_present_address" class="form-label">Nominee Present Address</label>
-                    <textarea class="form-control" id="nominee_present_address" name="nominee_present_address" rows="3">{{ $member->nominee_present_address }}</textarea>
-                    <div class="invalid-feedback"></div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="nominee_phone" class="form-label">Nominee Phone</label>
-                    <input type="text" class="form-control" id="nominee_phone" name="nominee_phone" value="{{ $member->nominee_phone }}">
-                    <div class="invalid-feedback"></div>
-                </div>
-                
-               
             </div>
-            
-            <div class="row">
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Update Member</button>
-                    <a href="{{ route('members.index') }}" class="btn btn-secondary">Cancel</a>
-                </div>
+            <div class="col-md-4 mb-3">
+                <label for="nominee_present_address" class="form-label">Nominee Present Address</label>
+                <textarea class="form-control" id="nominee_present_address" name="nominee_present_address" rows="3">{{ $member->nominee_present_address }}</textarea>
+                <div class="invalid-feedback"></div>
             </div>
-        </form>
+            <div class="col-md-4 mb-3">
+                <label for="nominee_permanent_address" class="form-label">Permanent Address</label>
+                <textarea class="form-control" id="nominee_permanent_address" placeholder="Permanent Address" name="nominee_permanent_address" rows="3">{{ $member->nominee_permanent_address }}</textarea>
+                <div class="invalid-feedback"></div>
+            </div>
+
+
+
     </div>
+
+    <div class="row">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Update Member</button>
+            <a href="{{ route('members.index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </div>
+    </form>
+</div>
 </div>
 @endsection
