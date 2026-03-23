@@ -89,9 +89,16 @@
                     @endif
                     <div class="invalid-feedback"></div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label for="diposit_account_number" class="form-label">Diposit Account Number </label>
-                    <input type="text" class="form-control" id="diposit_account_number" name="diposit_account_number" value="{{ $member->diposit_account_number }}">
+              
+                <div class="col-md-6 mb-3">
+                    <label for="present_address" class="form-label">Present Address <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="present_address" name="present_address" rows="3" required>{{ $member->present_address }}</textarea>
+                    <div class="invalid-feedback"></div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="permanent_address" class="form-label">Permanent Address <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" required>{{ $member->permanent_address }}</textarea>
                     <div class="invalid-feedback"></div>
                 </div>
                 
@@ -102,7 +109,7 @@
                 
                 <div class="col-md-4 mb-3">
                     <label for="designation_id" class="form-label">Designation <span class="text-danger">*</span></label>
-                    <select class="form-select" id="designation_id" name="designation_id" required>
+                    <select class="form-select select2" id="designation_id" name="designation_id" required>
                         <option value="">Select Designation</option>
                         @foreach($designations as $designation)
                         <option value="{{ $designation->id }}" {{ $member->designation_id == $designation->id ? 'selected' : '' }}>{{ $designation->designation_name }}</option>
@@ -152,27 +159,17 @@
                   
                 </div>
                 <div class="col-md-4 mb-3">
+                    <label for="diposit_account_number" class="form-label">Diposit Account Number </label>
+                    <input placeholder="Diposit Account Number" type="text" class="form-control" id="diposit_account_number" name="diposit_account_number" value="{{ $member->diposit_account_number }}">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
                     <label class="form-label" for="account_opening_date">Account Opening Date <span class="text-danger">*</span></label>
                     <input  type="date" id="account_opening_date" class="form-control" placeholder="Account Opening Date" name="account_opening_date" value="{{ is_object($member->account_opening_date) && method_exists($member->account_opening_date, 'format') ? $member->account_opening_date->format('Y-m-d') : ($member->account_opening_date ?? '') }}" required
                         class="form-control" placeholder="Account Opening Date"  />
                 </div>
                 
-                <!-- Address Information -->
-                <div class="col-12 mt-4">
-                    <h6 class="fw-semibold">Address Information</h6>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <label for="present_address" class="form-label">Present Address <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="present_address" name="present_address" rows="3" required>{{ $member->present_address }}</textarea>
-                    <div class="invalid-feedback"></div>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <label for="permanent_address" class="form-label">Permanent Address <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" required>{{ $member->permanent_address }}</textarea>
-                    <div class="invalid-feedback"></div>
-                </div>
+          
                 
                 <!-- Nominee Information -->
                 <div class="col-12 mt-4">

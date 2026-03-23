@@ -47,6 +47,11 @@
                     <div class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-4 mb-3">
+                    <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="date_of_birth" placeholder="Date of Birth" name="date_of_birth" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
                     <label for="spouse_name" class="form-label">Spouse Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="spouse_name" placeholder="Spouse Name" name="spouse_name" required>
                     <div class="invalid-feedback"></div>
@@ -77,11 +82,18 @@
 
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label for="diposit_account_number" class="form-label">Diposit Account Number </label>
-                    <input type="text" class="form-control" id="diposit_account_number" placeholder="Diposit Account Number" name="diposit_account_number">
+                <div class="col-md-6 mb-3">
+                    <label for="present_address" class="form-label">Present Address <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="present_address" name="present_address" rows="3" placeholder="Present Address" required></textarea>
                     <div class="invalid-feedback"></div>
                 </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="permanent_address" class="form-label">Permanent Address <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" placeholder="Permanent Address" required></textarea>
+                    <div class="invalid-feedback"></div>
+                </div>
+              
 
                 <!-- Professional Information -->
                 <div class="col-12 mt-4">
@@ -98,11 +110,7 @@
                     </select>
                     <div class="invalid-feedback"></div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_birth" placeholder="Date of Birth" name="date_of_birth" required>
-                    <div class="invalid-feedback"></div>
-                </div>
+              
                 <div class="col-md-4 mb-3">
                     <label for="date_of_join_in_ibbl" class="form-label">Date of Join in IBBL <span class="text-danger">*</span></label>
                     <input type="date" class="form-control" id="date_of_join_in_ibbl" placeholder="Date of Join in IBBL" name="date_of_join_in_ibbl" required>
@@ -145,27 +153,19 @@
                         value="{{ $nextSerial }}" />
                 </div>
                 <div class="col-md-4 mb-3">
+                    <label for="diposit_account_number" class="form-label">Diposit Account Number </label>
+                    <input type="text" class="form-control" id="diposit_account_number" placeholder="Diposit Account Number" name="diposit_account_number">
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
                     <label class="form-label" for="account_opening_date">Account Opening Date <span class="text-danger">*</span></label>
                     <input  type="date" id="account_opening_date" class="form-control" placeholder="Account Opening Date" name="account_opening_date" required
                         class="form-control" placeholder="Account Opening Date"  />
                 </div>
 
-                <!-- Address Information -->
-                <div class="col-12 mt-4">
-                    <h6 class="fw-semibold">Address Information</h6>
-                </div>
+              
 
-                <div class="col-md-6 mb-3">
-                    <label for="present_address" class="form-label">Present Address <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="present_address" name="present_address" rows="3" placeholder="Present Address" required></textarea>
-                    <div class="invalid-feedback"></div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="permanent_address" class="form-label">Permanent Address <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" placeholder="Permanent Address" required></textarea>
-                    <div class="invalid-feedback"></div>
-                </div>
+              
 
                 <!-- Nominee Information -->
                 <div class="col-12 mt-4">
