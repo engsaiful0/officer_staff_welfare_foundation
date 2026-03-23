@@ -7,6 +7,7 @@
     function printMember() {
         window.print();
     }
+
 </script>
 @endsection
 
@@ -28,149 +29,151 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <!-- Personal Information -->
             <div class="col-12">
-                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">Personal Information</h6>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Name</label>
-                <p class="mb-0 fw-medium">{{ $member->name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Father Name</label>
-                <p class="mb-0">{{ $member->father_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Mother Name</label>
-                <p class="mb-0">{{ $member->mother_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Spouse Name</label>
-                <p class="mb-0">{{ $member->spouse_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Mobile</label>
-                <p class="mb-0">{{ $member->mobile ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Email</label>
-                <p class="mb-0">{{ $member->email ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">NID Number</label>
-                <p class="mb-0">{{ $member->nid_number ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Picture</label>
-                <div class="mb-0">
-                    @if($member->picture)
-                        <img src="{{ asset('storage/' . $member->picture) }}" alt="{{ $member->name }}" class="img-thumbnail" style="max-width: 100px;">
-                    @else
-                        <span class="text-muted">—</span>
-                    @endif
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Deposit Account Number</label>
-                <p class="mb-0">{{ $member->diposit_account_number ?? '—' }}</p>
-            </div>
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center" colspan="8">Personal Information</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td  class="fw-bold">Name</td>
+                            <td>{{ $member->name ?? '—' }}</td>
+                            <td class="fw-bold">Father Name</td>
+                            <td >{{ $member->father_name ?? '—' }}</td>
+                            <td class="fw-bold">Mother Name</td>
+                            <td>{{ $member->mother_name ?? '—' }}</td>
+                            <td class="fw-bold">Spouse Name</td>
+                            <td>{{ $member->spouse_name ?? '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Mobile</td>
+                            <td>{{ $member->mobile ?? '—' }}</td>
+                            <td class="fw-bold">Email</td>
+                            <td>{{ $member->email ?? '—' }}</td>
+                            <td class="fw-bold">NID Number</td>
+                            <td>{{ $member->nid_number ?? '—' }}</td>
+                            <td class="fw-bold">Picture</td>
+                            <td></td>{{ $member->picture ?? '—' }}</td>
 
-            <!-- Professional Information -->
-            <div class="col-12 mt-4">
-                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">Professional Information</h6>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Designation</label>
-                <p class="mb-0">{{ $member->designation?->designation_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Date of Birth</label>
-                <p class="mb-0">{{ is_object($member->date_of_birth) && method_exists($member->date_of_birth, 'format') ? $member->date_of_birth->format('Y-m-d') : ($member->date_of_birth ?? '—') }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Date of Join</label>
-                <p class="mb-0">{{ is_object($member->date_of_join) && method_exists($member->date_of_join, 'format') ? $member->date_of_join->format('Y-m-d') : ($member->date_of_join ?? '—') }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Branch</label>
-                <p class="mb-0">{{ $member->branch?->branch_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Religion</label>
-                <p class="mb-0">{{ $member->religion?->religion_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Employees ID</label>
-                <p class="mb-0">{{ $member->employees_id ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Member ID</label>
-                <p class="mb-0">{{ $member->member_unique_id ?? '—' }}</p>
-            </div>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Present Address</td>
+                            <td>{{ $member->present_address ?? '—' }}</td>
+                            <td class="fw-bold">Permanent Address</td>
+                            <td>{{ $member->permanent_address ?? '—' }}</td>
+                            <td class="fw-bold">Designation</td>
+                            <td>{{ $member->designation?->designation_name ?? '—' }}</td>
+                            <td class="fw-bold">Date of Birth</td>
+                            <td>{{ $member->date_of_birth ?? '—' }}</td>
 
-            <!-- Address Information -->
-            <div class="col-12 mt-4">
-                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">Address Information</h6>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label text-muted small">Present Address</label>
-                <p class="mb-0">{{ $member->present_address ?? '—' }}</p>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label text-muted small">Permanent Address</label>
-                <p class="mb-0">{{ $member->permanent_address ?? '—' }}</p>
-            </div>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Date of Join</td>
+                            <td>{{ $member->date_of_join ?? '—' }}</td>
+                            <td class="fw-bold">Branch</td>
+                            <td>{{ $member->branch?->branch_name ?? '—' }}</td>
+                            <td class="fw-bold">Religion</td>
+                            <td>{{ $member->religion?->religion_name ?? '—' }}</td>
+                            <td class="fw-bold">Religion</td>
+                            <td>{{ $member->religion?->religion_name ?? '—' }}</td>
+                       
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table table-bordered table-hover mt-3">
+                    <thead>
+                        <tr>
+                            <th class="text-center" colspan="8">Professional Information</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td class="fw-bold">Designation</td>
+                        <td>{{ $member->designation?->designation_name ?? '—' }}</td>
+                        <td class="fw-bold">Date of Join in IBBL</td>
+                        <td>{{ $member->date_of_join ?? '—' }}</td>
+                        <td class="fw-bold">Branch</td>
+                        <td>{{ $member->branch?->branch_name ?? '—' }}</td>
+                        <td class="fw-bold">Employees ID</td>
+                        <td>{{ $member->employees_id ?? '—' }}</td>
+                    </tr>
+                    <tr>   
+                        <td class="fw-bold">Member ID</td>
+                        <td>{{ $member->member_unique_id ?? '—' }}</td>
+                        <td class="fw-bold">Account Opening Date</td>
+                        <td>{{ $member->account_opening_date ?? '—' }}</td>
+                        <td class="fw-bold">Account Opening Date</td>
+                        <td>{{ $member->account_opening_date ?? '—' }}</td>
+                        <td class="fw-bold">Deposit Account Number</td>
+                        <td>{{ $member->diposit_account_number ?? '—' }}</td>
 
-            <!-- Nominee Information -->
-            <div class="col-12 mt-4">
-                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">Nominee Information</h6>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee Name</label>
-                <p class="mb-0">{{ $member->nominee_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee Father Name</label>
-                <p class="mb-0">{{ $member->nominee_father_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee Mother Name</label>
-                <p class="mb-0">{{ $member->nominee_mother_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee Spouse Name</label>
-                <p class="mb-0">{{ $member->nominee_spouse_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee Relation</label>
-                <p class="mb-0">{{ $member->nomineeRelation?->relation_name ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee Phone</label>
-                <p class="mb-0">{{ $member->nominee_phone ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee NID Number</label>
-                <p class="mb-0">{{ $member->nominee_nid_number ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee Present Address</label>
-                <p class="mb-0">{{ $member->nominee_present_address ?? '—' }}</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label text-muted small">Nominee Permanent Address</label>
-                <p class="mb-0">{{ $member->nominee_permanent_address ?? '—' }}</p>
+                    </tr>
+                </table>
+                <table class="table table-bordered table-hover mt-3">
+                    <thead>
+                        <tr>
+                            <th class="text-center" colspan="8">Nominee Information</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td class="fw-bold">Nominee Name</td>
+                        <td>{{ $member->nominee_name ?? '—' }}</td>
+                        <td class="fw-bold">Nominee Father Name</td>
+                        <td>{{ $member->nominee_father_name ?? '—' }}</td>
+                        <td class="fw-bold">Nominee Mother Name</td>
+                        <td>{{ $member->nominee_mother_name ?? '—' }}</td>
+                        <td class="fw-bold">Nominee Spouse Name</td>
+                        <td>{{ $member->nominee_spouse_name ?? '—' }}</td>
+                        <td class="fw-bold">Nominee Relation</td>
+                        <td>{{ $member->nomineeRelation?->relation_name ?? '—' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Nominee Phone</td>
+                        <td>{{ $member->nominee_phone ?? '—' }}</td>
+                        <td class="fw-bold">Nominee NID Number</td>
+                        <td>{{ $member->nominee_nid_number ?? '—' }}</td>
+                        <td class="fw-bold">Nominee Present Address</td>
+                        <td>{{ $member->nominee_present_address ?? '—' }}</td>
+                        <td class="fw-bold">Nominee Permanent Address</td>
+                        <td>{{ $member->nominee_permanent_address ?? '—' }}</td>
+                        <td>Picture</td>
+                        <td>{{ $member->nominee_picture ?? '—' }}</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</div>
 
-<style media="print">
-    @media print {
-        .no-print, nav, aside, .navbar, .footer, .layout-menu, .layout-overlay, .btn, a[href]:not(.print-link) { display: none !important; }
-        body { padding: 0 !important; }
-        .card { box-shadow: none !important; border: 1px solid #ddd !important; }
-        .card-header { border-bottom: 1px solid #ddd !important; }
-    }
-</style>
-@endsection
+    <style media="print">
+        @media print {
+
+            .no-print,
+            nav,
+            aside,
+            .navbar,
+            .footer,
+            .layout-menu,
+            .layout-overlay,
+            .btn,
+            a[href]:not(.print-link) {
+                display: none !important;
+            }
+
+            body {
+                padding: 0 !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+
+            .card-header {
+                border-bottom: 1px solid #ddd !important;
+            }
+        }
+
+    </style>
+    @endsection

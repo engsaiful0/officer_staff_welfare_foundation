@@ -82,18 +82,27 @@
 
                     </div>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="present_address" class="form-label">Present Address <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="present_address" name="present_address" rows="3" placeholder="Present Address" required></textarea>
                     <div class="invalid-feedback"></div>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="permanent_address" class="form-label">Permanent Address <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" placeholder="Permanent Address" required></textarea>
                     <div class="invalid-feedback"></div>
                 </div>
-              
+                <div class="col-md-4 mb-3">
+                    <label for="religion_id" class="form-label">Religion <span class="text-danger">*</span></label>
+                    <select class="form-select select2" id="religion_id" placeholder="Select Religion" name="religion_id" required>
+                        <option value="">Select Religion</option>
+                        @foreach($religions as $religion)
+                        <option value="{{ $religion->id }}">{{ $religion->religion_name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="invalid-feedback"></div>
+                </div>
 
                 <!-- Professional Information -->
                 <div class="col-12 mt-4">
@@ -128,16 +137,7 @@
                     <div class="invalid-feedback"></div>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label for="religion_id" class="form-label">Religion <span class="text-danger">*</span></label>
-                    <select class="form-select select2" id="religion_id" placeholder="Select Religion" name="religion_id" required>
-                        <option value="">Select Religion</option>
-                        @foreach($religions as $religion)
-                        <option value="{{ $religion->id }}">{{ $religion->religion_name }}</option>
-                        @endforeach
-                    </select>
-                    <div class="invalid-feedback"></div>
-                </div>
+             
 
                 
                 <div class="col-md-4 mb-3">

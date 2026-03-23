@@ -113,7 +113,7 @@
 
             <!-- Members Table -->
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-bordered table-hover">
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
@@ -126,7 +126,9 @@
                             <th>Email</th>
                             <th>Mobile</th>
                             <th>Join Date</th>
-                            <th>Actions</th>
+                            <th>View</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -163,26 +165,20 @@
                             <td>{{ $member->mobile }}</td>
                             <td>{{ $member->date_of_join ? $member->date_of_join->format('M d, Y') : 'N/A' }}</td>
                             <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle" data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ route('members.show', $member) }}">
-                                            <i class="bx bx-show me-1"></i>View
-                                        </a>
-                                        
-                                        <a class="dropdown-item" href="{{ route('members.edit', $member) }}">
-                                            <i class="bx bx-edit me-1"></i>Edit
-                                        </a>
-                                      
-                                        <a class="dropdown-item text-danger" href="#" 
-                                           onclick="deleteMember({{ $member->id }}, '{{ $member->name }}')">
-                                            <i class="bx bx-trash me-1"></i>Delete
-                                        </a>
-                                        
-                                    </div>
-                                </div>
+                                <a class="btn btn-sm btn-text-secondary rounded-pill btn-icon member-edit" href="{{ route('members.show', $member) }}">
+                                    <i class="ti ti-eye ti-md"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-text-secondary rounded-pill btn-icon member-edit" href="{{ route('members.edit', $member) }}">
+                                    <i class="ti ti-pencil ti-md"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-text-secondary rounded-pill btn-icon delete-member" href="#" 
+                                   onclick="deleteMember({{ $member->id }}, '{{ $member->name }}')">
+                                    <i class="ti ti-trash ti-md"></i>
+                                </a>
                             </td>
                         </tr>
                         @empty
