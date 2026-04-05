@@ -192,9 +192,8 @@
                     <div class="invalid-feedback"></div>
                 </div>
 
-             
+                @include('content.members.partials.status-field', ['selected' => 'ACTIVE'])
 
-                
                 <div class="col-md-4 mb-3">
                     <label class="form-label" for="employees_id">Employees ID <span class="text-danger">*</span></label>
                     <input  type="text" id="employees_id" class="form-control" placeholder="Employees ID" name="employees_id" required

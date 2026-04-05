@@ -122,8 +122,8 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-column">
-                                                    <span class="fw-semibold">{{ $investment->member->name }}</span>
-                                                    <small class="text-muted">{{ $investment->member->unique_id }}</small>
+                                                    <span class="fw-semibold">{{ $investment->member?->name ?? 'N/A' }}</span>
+                                                    <small class="text-muted">{{ $investment->member?->unique_id ?? 'N/A' }}</small>
                                                 </div>
                                             </td>
                                             <td>{{ $investment->product_name ?: 'N/A' }}</td>
@@ -165,7 +165,7 @@
                                                     </a>
                                                     <button type="button" class="btn btn-sm btn-outline-danger delete-investment" 
                                                         data-id="{{ $investment->id }}" 
-                                                        data-account="{{ $investment->account->account_number ?? 'N/A' }}"
+                                                        data-account="{{ $investment->account?->account_number ?? 'N/A' }}"
                                                         data-url="{{ route('investments.destroy', $investment) }}"
                                                         title="Delete">
                                                         <i class="bx bx-trash"></i>Delete

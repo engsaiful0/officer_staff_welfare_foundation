@@ -33,6 +33,8 @@ return new class extends Migration
             $table->string('temp_username')->unique();
             $table->string('temp_password');
             $table->unsignedBigInteger('user_id');
+            $table->string('status')->default('active');
+
             $table->timestamps();
             
             // Foreign key constraints

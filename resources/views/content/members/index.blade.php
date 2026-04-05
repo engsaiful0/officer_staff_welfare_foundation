@@ -66,6 +66,17 @@
                         </select>
                     </div>
                     <div class="col-md-2">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">All statuses</option>
+                            @foreach(\App\Enums\MemberStatus::cases() as $case)
+                                <option value="{{ $case->value }}" {{ request('status') === $case->value ? 'selected' : '' }}>
+                                    {{ $case->label() }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <label for="sort_by" class="form-label">Sort By</label>
                         <select class="form-select" id="sort_by" name="sort_by">
                             <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Created Date</option>
@@ -126,6 +137,7 @@
                             <th>Email</th>
                             <th>Mobile</th>
                             <th>Join Date</th>
+                            <th>Status</th>
                             <th>View</th>
                             <th>Edit</th>
                             <th>Delete</th>
@@ -165,6 +177,20 @@
                             <td>{{ $member->mobile }}</td>
                             <td>{{ $member->date_of_join ? $member->date_of_join->format('M d, Y') : 'N/A' }}</td>
                             <td>
+                                @php
+                                    $ms = $member->status instanceof \App\Enums\MemberStatus ? $member->status : \App\Enums\MemberStatus::tryFrom((string) ($member->status ?? ''));
+                                @endphp
+                                @if($ms)
+                                    @php
+                                        $badge = $ms === \App\Enums\MemberStatus::ACTIVE ? 'success'
+                                            : (in_array($ms, [\App\Enums\MemberStatus::SUSPENDED, \App\Enums\MemberStatus::CLOSED, \App\Enums\MemberStatus::FROZEN], true) ? 'danger' : 'warning');
+                                    @endphp
+                                    <span class="badge bg-{{ $badge }}">{{ $ms->label() }}</span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td>
                                 <a class="btn btn-sm btn-text-secondary rounded-pill btn-icon member-edit" href="{{ route('members.show', $member) }}">
                                     <i class="ti ti-eye ti-md"></i>
                                 </a>
@@ -183,7 +209,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="text-center py-4">
+                            <td colspan="14" class="text-center py-4">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="bx bx-user-x display-4 text-muted mb-2"></i>
                                     <h6 class="text-muted">No members found</h6>
@@ -255,7 +281,7 @@ function deleteMember(memberId, memberName) {
 
 // Auto-submit form on filter change
 document.addEventListener('DOMContentLoaded', function() {
-    const filterInputs = document.querySelectorAll('#search, #mobile, #designation_id, #branch_id');
+    const filterInputs = document.querySelectorAll('#search, #mobile, #designation_id, #branch_id, #status');
     filterInputs.forEach(input => {
         input.addEventListener('change', function() {
             this.form.submit();

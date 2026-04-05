@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\MemberStatus;
 use App\Models\Member;
 use App\Models\Designation;
 use App\Models\Branch;
@@ -50,6 +51,13 @@ class MemberController extends Controller
 
         if ($request->filled('branch_id')) {
             $query->where('branch_id', $request->branch_id);
+        }
+
+        if ($request->filled('status')) {
+            $allowedStatuses = array_map(fn (MemberStatus $c) => $c->value, MemberStatus::cases());
+            if (in_array($request->status, $allowedStatuses, true)) {
+                $query->where('status', $request->status);
+            }
         }
 
         // Apply sorting
@@ -148,6 +156,7 @@ class MemberController extends Controller
             'nominee_permanent_address' => 'nullable|string',
             'nominee_date_of_birth' => 'nullable|date',
             'nominee_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'status' => ['required', Rule::enum(MemberStatus::class)],
         ], $messages);
 
         $data = $validatedData;
@@ -282,6 +291,7 @@ class MemberController extends Controller
                 'nominee_date_of_birth' => 'nullable|date',
                 'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'nominee_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'status' => ['required', Rule::enum(MemberStatus::class)],
             ], $messages);
 
             // Handle image upload
@@ -503,6 +513,13 @@ class MemberController extends Controller
             $query->where('branch_id', $request->branch_id);
         }
 
+        if ($request->filled('status')) {
+            $allowedStatuses = array_map(fn (MemberStatus $c) => $c->value, MemberStatus::cases());
+            if (in_array($request->status, $allowedStatuses, true)) {
+                $query->where('status', $request->status);
+            }
+        }
+
         // Apply same sorting as index
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
@@ -542,6 +559,13 @@ class MemberController extends Controller
 
         if ($request->filled('branch_id')) {
             $query->where('branch_id', $request->branch_id);
+        }
+
+        if ($request->filled('status')) {
+            $allowedStatuses = array_map(fn (MemberStatus $c) => $c->value, MemberStatus::cases());
+            if (in_array($request->status, $allowedStatuses, true)) {
+                $query->where('status', $request->status);
+            }
         }
 
         // Apply same sorting as index

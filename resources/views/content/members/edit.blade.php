@@ -9,11 +9,7 @@
     window.checkMobileUrl = '{{ route("members.check-mobile-unique") }}';
     window.checkNidUrl = '{{ route("members.check-nid-unique") }}';
     window.getMembersUrl = '{{ route("members.get-members") }}';
-    window.memberId = {
-        {
-            $member - > id
-        }
-    };
+    window.memberId = {{ $member->id }};
     window.membersListUrl = '{{ route("members.view-member") }}';
 
 </script>
@@ -148,6 +144,7 @@
                     <div class="invalid-feedback"></div>
                 </div>
 
+                @include('content.members.partials.status-field', ['selected' => $member->status instanceof \App\Enums\MemberStatus ? $member->status->value : ($member->status ?? 'ACTIVE')])
 
                 <div class="col-md-4 mb-3">
                     <label for="employees_id" class="form-label">Employees ID <span class="text-danger">*</span></label>

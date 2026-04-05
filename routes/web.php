@@ -515,3 +515,33 @@ Route::put('/app/quard-payment/{quardPayment}', [QuardPaymentController::class, 
     ->name('quard-payment.update');
 Route::delete('/app/quard-payment/{quardPayment}', [QuardPaymentController::class, 'destroy'])
     ->name('quard-payment.destroy');
+
+// Member deductions
+use App\Http\Controllers\MemberDeductionController;
+Route::get('/app/deductions/add-deduction', [MemberDeductionController::class, 'create'])
+    ->name('deductions.add-deduction')
+    ->middleware('permission:add-deduction');
+Route::get('/app/deductions/calculate-amounts', [MemberDeductionController::class, 'calculateAmounts'])
+    ->name('deductions.calculate-amounts')
+    ->middleware('permission:add-deduction');
+Route::post('/app/deductions', [MemberDeductionController::class, 'store'])
+    ->name('deductions.store')
+    ->middleware('permission:add-deduction');
+Route::post('/app/deductions/generate-monthly', [MemberDeductionController::class, 'generateMonthly'])
+    ->name('deductions.generate-monthly')
+    ->middleware('permission:add-deduction');
+Route::get('/app/deductions/{member_deduction}/edit', [MemberDeductionController::class, 'edit'])
+    ->name('deductions.edit')
+    ->middleware('permission:add-deduction');
+Route::put('/app/deductions/{member_deduction}', [MemberDeductionController::class, 'update'])
+    ->name('deductions.update')
+    ->middleware('permission:add-deduction');
+Route::delete('/app/deductions/{member_deduction}', [MemberDeductionController::class, 'destroy'])
+    ->name('deductions.destroy')
+    ->middleware('permission:add-deduction');
+Route::get('/app/deductions/monthly-deduction-list', [MemberDeductionController::class, 'index'])
+    ->name('deductions.monthly-deduction-list')
+    ->middleware('permission:add-deduction');
+Route::get('/app/deductions/view-deduction', [MemberDeductionController::class, 'index'])
+    ->name('deductions.view-deduction')
+    ->middleware('permission:view-deduction');

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\MemberStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -27,6 +29,7 @@ class Member extends Model
         'present_address',
         'permanent_address',
         'unique_id',
+        'status',
         'introducer_id',
         'religion_id',
         'employees_id',
@@ -46,6 +49,7 @@ class Member extends Model
 
     protected $casts = [
         'date_of_join' => 'date',
+        'status' => MemberStatus::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -96,6 +100,36 @@ class Member extends Model
         return $this->hasMany(DepositInstallmentAmount::class);
     }
 
+    public function memberDeductions()
+    {
+        return $this->hasMany(MemberDeduction::class);
+    }
+
+    public function quards()
+    {
+        return $this->hasMany(Quard::class);
+    }
+
+    /**
+     * Members with at least one active deposit, investment, or qard (for bulk deduction generation).
+     * Only members in {@see MemberStatus::ACTIVE} are included.
+     */
+    public function scopeActiveForDeductions(Builder $query): Builder
+    {
+        return $query->where('status', MemberStatus::ACTIVE)
+            ->where(function (Builder $q) {
+                $q->whereHas('deposits', function (Builder $d) {
+                    $d->where('status', 'active');
+                })
+                    ->orWhereHas('investments', function (Builder $i) {
+                        $i->where('status', 'active');
+                    })
+                    ->orWhereHas('quards', function (Builder $qd) {
+                        $qd->where('status', 'active');
+                    });
+            });
+    }
+
     public function memberUniqueId()
     {
         return $this->hasOne(MemberUniqueId::class);
@@ -116,6 +150,9 @@ class Member extends Model
         parent::boot();
         
         static::creating(function ($member) {
+            if (empty($member->status)) {
+                $member->status = MemberStatus::ACTIVE;
+            }
             if (empty($member->unique_id)) {
                 $member->unique_id = static::generateUniqueId();
             }

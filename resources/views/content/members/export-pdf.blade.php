@@ -80,6 +80,7 @@
                 <th>Email</th>
                 <th>Mobile</th>
                 <th>Unique ID</th>
+                <th>Status</th>
                 <th>Designation</th>
                 <th>Branch</th>
                 <th>Join Date</th>
@@ -93,6 +94,13 @@
                 <td>{{ $member->email }}</td>
                 <td>{{ $member->mobile }}</td>
                 <td>{{ $member->unique_id }}</td>
+                <td>
+                    @if($member->status instanceof \App\Enums\MemberStatus)
+                        {{ $member->status->label() }}
+                    @else
+                        {{ $member->status ?? 'N/A' }}
+                    @endif
+                </td>
                 <td>{{ $member->designation ? $member->designation->designation_name : 'N/A' }}</td>
                 <td>{{ $member->branch ? $member->branch->branch_name : 'N/A' }}</td>
                 <td>{{ $member->date_of_join ? $member->date_of_join->format('M d, Y') : 'N/A' }}</td>

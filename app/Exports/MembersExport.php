@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Enums\MemberStatus;
 use App\Models\Member;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -34,6 +35,7 @@ class MembersExport implements FromCollection, WithHeadings, WithMapping, WithSt
             'NID Number',
             'Unique ID',
             'Member Unique ID',
+            'Status',
             'Designation',
             'Branch',
             'Religion',
@@ -59,6 +61,7 @@ class MembersExport implements FromCollection, WithHeadings, WithMapping, WithSt
             $member->nid_number,
             $member->unique_id,
             $member->member_unique_id,
+            $member->status instanceof MemberStatus ? $member->status->label() : ($member->status ?? 'N/A'),
             $member->designation ? $member->designation->designation_name : 'N/A',
             $member->branch ? $member->branch->branch_name : 'N/A',
             $member->religion ? $member->religion->religion_name : 'N/A',

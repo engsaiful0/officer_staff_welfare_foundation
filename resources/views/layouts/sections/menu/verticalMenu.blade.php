@@ -144,12 +144,11 @@ return '';
         </li>
         @endpermission
         @endpermission
-
         <!-- Expense -->
         <li class="menu-item {{ (str_contains($currentRouteName, 'app-expense') || str_contains($currentRouteName, 'expenses')) ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-file-dollar"></i>
-                <div>Expense</div>
+                <div>Dedeuction</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ $currentRouteName === 'app-expenses' ? 'active' : '' }}">
@@ -160,6 +159,46 @@ return '';
             </ul>
         </li>
 
+        <!-- Expense -->
+        @php
+        $hasDeductionPermission = false;
+        if (Auth::check()) {
+        $user = Auth::user();
+        $hasDeductionPermission = $user->hasPermissionTo('deduction-add') ||
+        $user->hasPermissionTo('view-deduction');
+        }
+        @endphp
+        @if($hasDeductionPermission)
+        <li class="menu-item {{ (str_contains($currentRouteName, 'deductions') || str_contains($currentRouteName, 'deductions')) ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+                <div>Deduction</div>
+            </a>
+            <ul class="menu-sub">
+                @permission('add-deduction')
+                <li class="menu-item {{ $currentRouteName === 'deductions.add-deduction' ? 'active' : '' }}">
+                    <a href="{{ url('app/deductions/add-deduction') }}" class="menu-link">
+                        <div>Add Deduction</div>
+                    </a>
+                </li>
+                @endpermission
+                @permission('add-deduction')
+                <li class="menu-item {{ $currentRouteName === 'deductions.monthly-deduction-list' ? 'active' : '' }}">
+                    <a href="{{ url('app/deductions/monthly-deduction-list') }}" class="menu-link">
+                        <div>Monthly Deduction List</div>
+                    </a>
+                </li>
+                @endpermission
+                @permission('view-deduction')
+                <li class="menu-item {{ $currentRouteName === 'deductions.view-deduction' ? 'active' : '' }}">
+                    <a href="{{ url('app/deductions/view-deduction') }}" class="menu-link">
+                        <div>View Deduction</div>
+                    </a>
+                </li>
+                @endpermission
+            </ul>
+        </li>
+        @endif
         <!-- Investment -->
         @php
         $hasInvestmentPermission = false;
@@ -215,7 +254,7 @@ return '';
                     </a>
                 </li>
                 @endpermission
-              
+
                 @permission('investment-reports')
                 <li class="menu-item {{ $currentRouteName === 'investments.reports' ? 'active' : '' }}">
                     <a href="{{ url('/app/investments/reports') }}" class="menu-link">
@@ -301,7 +340,7 @@ return '';
         </li>
         @endif
 
-          <!-- Deposit -->
+        <!-- Deposit -->
         @php
         $hasDepositPermission = false;
         if (Auth::check()) {
@@ -344,7 +383,7 @@ return '';
                 <div>Report</div>
             </a>
             <ul class="menu-sub">
-              
+
                 <li class="menu-item {{ $currentRouteName === 'expense-report' ? 'active' : '' }}">
                     <a href="{{ url('app/expense-report') }}" class="menu-link">
                         <div>Expense Report</div>
@@ -355,9 +394,9 @@ return '';
                         <div>Employee List Report</div>
                     </a>
                 </li>
-             
-          
-              
+
+
+
             </ul>
         </li>
 
@@ -410,9 +449,9 @@ return '';
                     </a>
                 </li>
                 <li class="menu-item {{ ($currentRouteName === 'app-settings-permission' || $currentRouteName === 'permissions') ? 'active' : '' }}">
-                  <a href="{{ url('app/settings/permission') }}" class="menu-link">
-                      <div>Permissions</div>
-                  </a>
+                    <a href="{{ url('app/settings/permission') }}" class="menu-link">
+                        <div>Permissions</div>
+                    </a>
                 </li>
                 <li class="menu-item {{ ($currentRouteName === 'app-settings-users' || $currentRouteName === 'users') ? 'active' : '' }}">
                     <a href="{{ url('app/settings/users') }}" class="menu-link">

@@ -70,8 +70,14 @@
                             <td>{{ $member->date_of_join ?? '—' }}</td>
                             <td class="fw-bold">Branch</td>
                             <td>{{ $member->branch?->branch_name ?? '—' }}</td>
-                            <td class="fw-bold">Religion</td>
-                            <td>{{ $member->religion?->religion_name ?? '—' }}</td>
+                            <td class="fw-bold">Account status</td>
+                            <td>
+                                @if($member->status instanceof \App\Enums\MemberStatus)
+                                    {{ $member->status->label() }} ({{ $member->status->value }})
+                                @else
+                                    {{ $member->status ?? '—' }}
+                                @endif
+                            </td>
                             <td class="fw-bold">Religion</td>
                             <td>{{ $member->religion?->religion_name ?? '—' }}</td>
 
