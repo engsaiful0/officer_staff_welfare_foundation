@@ -239,18 +239,8 @@
             }
 
             // Calculate number of installments based on payment type
-            let noOfInstallments = 0;
-            if (paymentType === 'monthly') {
-                noOfInstallments = investmentYears * 12;
-            } else if (paymentType === 'quarterly') {
-                noOfInstallments = investmentYears * 4;
-            } else if (paymentType === 'yearly') {
-                noOfInstallments = investmentYears;
-            } else if (paymentType === 'daily') {
-                noOfInstallments = investmentYears * 365;
-            } else {
-                noOfInstallments = investmentYears * 12; // Default to monthly
-            }
+            let noOfInstallments = investmentYears * 12; // Default to monthly
+            let totalNumberOfMonths=investmentYears * 12;
 
             // Calculate principal amount per installment
             // Example: 100000 / 60 = 1667
@@ -259,25 +249,13 @@
             // Calculate rent (interest) per installment
             // Formula: rent = Principal * (Annual Rate / Payment Frequency) * adjustment factor
             // The adjustment factor (0.509) accounts for reducing balance over time
+            // Net Profit calculation: ((((Principal/month)+Principal)*15%)*5)/2 = Net Profit
             let rentPerInstallment = 0;
-            if (paymentType === 'monthly') {
-                const monthlyRate = interestRate / 12;
-                // Using formula: Principal * Monthly Rate * 0.509
-                // This produces 509 for Principal=100000, Rate=12%, Years=5
-                rentPerInstallment = Math.round(principalAmount * monthlyRate * 0.509);
-            } else if (paymentType === 'quarterly') {
-                const quarterlyRate = interestRate / 4;
-                rentPerInstallment = Math.round(principalAmount * quarterlyRate * 0.509);
-            } else if (paymentType === 'yearly') {
-                rentPerInstallment = Math.round(principalAmount * interestRate * 0.509);
-            } else if (paymentType === 'daily') {
-                const dailyRate = interestRate / 365;
-                rentPerInstallment = Math.round(principalAmount * dailyRate * 0.509);
-            } else {
-                // Default to monthly calculation
-                const monthlyRate = interestRate / 12;
-                rentPerInstallment = Math.round(principalAmount * monthlyRate * 0.509);
-            }
+            let netProfit=(((((principalAmount/totalNumberOfMonths)+principalAmount)*interestRate)*investmentYears))/2;
+            rentPerInstallment=netProfit/totalNumberOfMonths;
+
+            console.log("Net Profit: "+netProfit);
+            console.log("Rent Per Installment: "+rentPerInstallment);
 
             // Calculate total amount per installment
             const totalAmountPerInstallment = principalAmountPerInstallment + rentPerInstallment;
