@@ -15,8 +15,8 @@ class MemberUniqueId extends Model
         'member_id'
     ];
 
-    public function employee()
+    public function member()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Member::class);
     }
 }

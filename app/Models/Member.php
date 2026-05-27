@@ -30,7 +30,6 @@ class Member extends Model
         'branch_id',
         'status',
         'employees_id',
-        'unique_id',
         'member_unique_id',
         'serial',
         'diposit_account_number',
@@ -143,9 +142,13 @@ class Member extends Model
             });
     }
 
-    public function memberUniqueId()
+    /**
+     * Office-assigned Member ID (member_unique_ids table).
+     * Named distinctly from the member_unique_id attribute to avoid accessor collisions.
+     */
+    public function memberUniqueIdRecord()
     {
-        return $this->hasOne(MemberUniqueId::class);
+        return $this->hasOne(MemberUniqueId::class, 'member_id');
     }
 
     /**
@@ -153,11 +156,13 @@ class Member extends Model
      */
     public function getMemberUniqueIdAttribute($value): ?string
     {
-        if ($this->relationLoaded('memberUniqueId')) {
-            $record = $this->memberUniqueId;
-        } else {
-            $record = $this->memberUniqueId()->first();
+        if (! $this->exists) {
+            return $value;
         }
+
+        $record = $this->relationLoaded('memberUniqueIdRecord')
+            ? $this->getRelation('memberUniqueIdRecord')
+            : $this->memberUniqueIdRecord()->first();
 
         if ($record && ! empty($record->member_unique_id)) {
             return $record->member_unique_id;
@@ -175,8 +180,8 @@ class Member extends Model
             if (empty($member->status)) {
                 $member->status = MemberStatus::ACTIVE;
             }
-            if (empty($member->unique_id)) {
-                $member->unique_id = static::generateUniqueId();
+            if (empty($member->member_unique_id)) {
+                $member->member_unique_id = static::generateUniqueId();
             }
             if (empty($member->temp_username)) {
                 $member->temp_username = static::generateTempUsername($member->name);
@@ -190,8 +195,8 @@ class Member extends Model
     public static function generateUniqueId()
     {
         do {
-            $uniqueId = 'MEM' . str_pad(rand(1, 999999), 6, '0', STR_PAD_LEFT);
-        } while (static::where('unique_id', $uniqueId)->exists());
+            $uniqueId =  str_pad(rand(1, 999999), 6, '0', STR_PAD_LEFT);
+        } while (static::where('member_unique_id', $uniqueId)->exists());
         
         return $uniqueId;
     }

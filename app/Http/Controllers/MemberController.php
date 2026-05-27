@@ -27,7 +27,7 @@ class MemberController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
+        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueIdRecord']);
 
         // Apply filters
         if ($request->filled('search')) {
@@ -209,7 +209,7 @@ class MemberController extends Controller
      */
     public function show(Member $member)
     {
-        $member->load(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
+        $member->load(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueIdRecord']);
         return view('content.members.show', compact('member'));
     }
     /**
@@ -323,7 +323,7 @@ class MemberController extends Controller
 
             // Handle MemberUniqueId: only update when value changed and is unique
             if ($request->filled('member_unique_id')) {
-                $memberUniqueId = $member->memberUniqueId()->first();
+                $memberUniqueId = $member->memberUniqueIdRecord()->first();
                 $newValue = trim($request->member_unique_id);
                 if ($memberUniqueId && is_object($memberUniqueId)) {
                     $currentValue = $memberUniqueId->member_unique_id ?? '';
@@ -372,7 +372,7 @@ class MemberController extends Controller
                 'success' => true,
                 'message' => 'Member updated successfully.',
                 'redirect_url' => route('members.view-member'),
-                'member' => $member->load(['designation', 'branch', 'religion', 'introducer', 'memberUniqueId']),
+                'member' => $member->load(['designation', 'branch', 'religion', 'introducer', 'memberUniqueIdRecord']),
             ];
 
             if ($request->ajax() || $request->expectsJson()) {
@@ -488,7 +488,7 @@ class MemberController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
+        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueIdRecord']);
 
         // Apply same filters as index
         if ($request->filled('search')) {
@@ -536,7 +536,7 @@ class MemberController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueId']);
+        $query = Member::with(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueIdRecord']);
 
         // Apply same filters as index
         if ($request->filled('search')) {
