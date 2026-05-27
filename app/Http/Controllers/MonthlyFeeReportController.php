@@ -79,6 +79,7 @@ class MonthlyFeeReportController extends Controller
         if ($request->search) {
             $query->whereHas('student', function ($q) use ($request) {
                 $q->where('full_name_in_english_block_letter', 'like', '%' . $request->search . '%')
+                  ->orWhere('student_unique_id', 'like', '%' . $request->search . '%')
                   ->orWhere('student_unique_id', 'like', '%' . $request->search . '%');
             });
         }

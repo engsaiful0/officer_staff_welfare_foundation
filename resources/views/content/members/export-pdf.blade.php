@@ -103,7 +103,7 @@
                 </td>
                 <td>{{ $member->designation ? $member->designation->designation_name : 'N/A' }}</td>
                 <td>{{ $member->branch ? $member->branch->branch_name : 'N/A' }}</td>
-                <td>{{ $member->date_of_join ? $member->date_of_join->format('M d, Y') : 'N/A' }}</td>
+                <td>{{ $member->date_of_join_in_ibbl ? $member->date_of_join_in_ibbl->format('M d, Y') : 'N/A' }}</td>
             </tr>
             @endforeach
         </tbody>

@@ -67,7 +67,7 @@
                         </tr>
                         <tr>
                             <td class="fw-bold">Date of Join</td>
-                            <td>{{ $member->date_of_join ?? '—' }}</td>
+                            <td>{{ $member->date_of_join_in_ibbl ?? '—' }}</td>
                             <td class="fw-bold">Branch</td>
                             <td>{{ $member->branch?->branch_name ?? '—' }}</td>
                             <td class="fw-bold">Account status</td>
@@ -94,7 +94,7 @@
                         <td class="fw-bold">Designation</td>
                         <td>{{ $member->designation?->designation_name ?? '—' }}</td>
                         <td class="fw-bold">Date of Join in IBBL</td>
-                        <td>{{ $member->date_of_join ?? '—' }}</td>
+                        <td>{{ $member->date_of_join_in_ibbl ?? '—' }}</td>
                         <td class="fw-bold">Branch</td>
                         <td>{{ $member->branch?->branch_name ?? '—' }}</td>
                         <td class="fw-bold">Employees ID</td>

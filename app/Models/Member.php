@@ -17,38 +17,46 @@ class Member extends Model
         'father_name',
         'mother_name',
         'spouse_name',
+        'date_of_birth',
         'mobile',
         'email',
         'nid_number',
         'picture',
-        'diposit_account_number',
-        'designation_id',
-        'date_of_join',
-        'account_opening_date',
-        'branch_id',
         'present_address',
         'permanent_address',
-        'unique_id',
-        'status',
-        'introducer_id',
         'religion_id',
+        'designation_id',
+        'date_of_join_in_ibbl',
+        'branch_id',
+        'status',
         'employees_id',
+        'unique_id',
+        'member_unique_id',
+        'serial',
+        'diposit_account_number',
+        'account_opening_date',
         'nominee_name',
         'nominee_father_name',
         'nominee_mother_name',
         'nominee_spouse_name',
         'nominee_relation_id',
         'nominee_phone',
-        'nominee_present_address',
-        'nominee_permanent_address',
+        'nominee_nid_number',
         'nominee_date_of_birth',
         'nominee_picture',
-       
-        'user_id'
+        'nominee_present_address',
+        'nominee_permanent_address',
+        'introducer_id',
+        'user_id',
+        'temp_username',
+        'temp_password',
     ];
 
     protected $casts = [
-        'date_of_join' => 'date',
+        'date_of_birth' => 'date',
+        'date_of_join_in_ibbl' => 'date',
+        'account_opening_date' => 'date',
+        'nominee_date_of_birth' => 'date',
         'status' => MemberStatus::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -110,6 +118,11 @@ class Member extends Model
         return $this->hasMany(Quard::class);
     }
 
+    public function hpsmOpeningAccounts()
+    {
+        return $this->hasMany(HpsmOpeningAccount::class, 'member_id');
+    }
+
     /**
      * Members with at least one active deposit, investment, or qard (for bulk deduction generation).
      * Only members in {@see MemberStatus::ACTIVE} are included.
@@ -136,12 +149,21 @@ class Member extends Model
     }
 
     /**
-     * Get the member_unique_id from the related member_unique_ids record (for display in forms).
+     * Prefer office Member ID from member_unique_ids; fall back to column on members.
      */
-    public function getMemberUniqueIdAttribute()
+    public function getMemberUniqueIdAttribute($value): ?string
     {
-        $record = $this->memberUniqueId()->first();
-        return (is_object($record) && isset($record->member_unique_id)) ? $record->member_unique_id : null;
+        if ($this->relationLoaded('memberUniqueId')) {
+            $record = $this->memberUniqueId;
+        } else {
+            $record = $this->memberUniqueId()->first();
+        }
+
+        if ($record && ! empty($record->member_unique_id)) {
+            return $record->member_unique_id;
+        }
+
+        return $value;
     }
 
     // Auto-generate unique ID

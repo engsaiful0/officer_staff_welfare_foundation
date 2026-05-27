@@ -19,20 +19,20 @@ class QuardPaymentController extends Controller
         }
 
         $payments = $query->orderBy('created_at', 'desc')->paginate(15);
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
 
         return view('content.quard-payment.index', compact('payments', 'members'));
     }
 
     public function create(Request $request)
     {
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
         return view('content.quard-payment.create', compact('members'));
     }
 
     public function edit(QuardPayment $quardPayment)
     {
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
 
         // Eager load relations used in the view.
         $quardPayment->load(['member', 'quard']);

@@ -81,7 +81,7 @@
                         <select class="form-select" id="sort_by" name="sort_by">
                             <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Created Date</option>
                             <option value="name" {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
-                            <option value="date_of_join" {{ request('sort_by') == 'date_of_join' ? 'selected' : '' }}>Join Date</option>
+                            <option value="date_of_join_in_ibbl" {{ request('sort_by') == 'date_of_join_in_ibbl' ? 'selected' : '' }}>Join Date</option>
                             <option value="mobile" {{ request('sort_by') == 'mobile' ? 'selected' : '' }}>Mobile</option>
                         </select>
                     </div>
@@ -175,7 +175,7 @@
                             <td>{{ $member->branch ? $member->branch->branch_name : 'N/A' }}</td>
                             <td>{{ $member->email }}</td>
                             <td>{{ $member->mobile }}</td>
-                            <td>{{ $member->date_of_join ? $member->date_of_join->format('M d, Y') : 'N/A' }}</td>
+                            <td>{{ $member->date_of_join_in_ibbl ? $member->date_of_join_in_ibbl->format('M d, Y') : 'N/A' }}</td>
                             <td>
                                 @php
                                     $ms = $member->status instanceof \App\Enums\MemberStatus ? $member->status : \App\Enums\MemberStatus::tryFrom((string) ($member->status ?? ''));

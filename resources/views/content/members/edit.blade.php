@@ -128,8 +128,8 @@
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <label for="date_of_join" class="form-label">Date of Join <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date_of_join" name="date_of_join" value="{{ is_object($member->date_of_join) && method_exists($member->date_of_join, 'format') ? $member->date_of_join->format('Y-m-d') : ($member->date_of_join ?? '') }}" required>
+                    <label for="date_of_join_in_ibbl" class="form-label">Date of Join <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="date_of_join_in_ibbl" name="date_of_join_in_ibbl" value="{{ is_object($member->date_of_join) && method_exists($member->date_of_join_in_ibbl, 'format') ? $member->date_of_join_in_ibbl->format('Y-m-d') : ($member->date_of_join ?? '') }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
 

@@ -20,7 +20,7 @@ class MemberDeductionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = MemberDeduction::with(['member:id,name,unique_id', 'user:id,name'])
+        $query = MemberDeduction::with(['member:id,name,member_unique_id', 'user:id,name'])
             ->orderByDesc('year')
             ->orderByDesc('month')
             ->orderByDesc('id');
@@ -37,7 +37,7 @@ class MemberDeductionController extends Controller
 
         $deductions = $query->paginate(20)->withQueryString();
 
-        $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
+        $members = Member::orderBy('name')->get(['id', 'name', 'member_unique_id']);
 
         return view('content.deductions.index', compact('deductions', 'members'));
     }
@@ -47,7 +47,7 @@ class MemberDeductionController extends Controller
      */
     public function create()
     {
-        $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
+        $members = Member::orderBy('name')->get(['id', 'name', 'member_unique_id']);
 
         return view('content.deductions.create', compact('members'));
     }
@@ -57,7 +57,7 @@ class MemberDeductionController extends Controller
      */
     public function edit(MemberDeduction $member_deduction)
     {
-        $member_deduction->load('member:id,name,unique_id');
+        $member_deduction->load('member:id,name,member_unique_id');
 
         return view('content.deductions.edit', ['deduction' => $member_deduction]);
     }

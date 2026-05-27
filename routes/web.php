@@ -84,6 +84,10 @@ use App\Http\Controllers\ReportController;
 
 use App\Http\Controllers\StudentFinalReportController;
 
+use App\Http\Controllers\HpsmOpeningAccountController;
+use App\Http\Controllers\HpsmCollectionController;
+use App\Http\Controllers\HpsmReportController;
+
 
 Route::get('/app/expense-report', [ReportController::class, 'expenseReport'])->name('expense-report');
 Route::get('/app/expense-report/pdf', [ReportController::class, 'expenseReportPdf'])->name('expense-report.pdf');
@@ -515,6 +519,26 @@ Route::put('/app/quard-payment/{quardPayment}', [QuardPaymentController::class, 
     ->name('quard-payment.update');
 Route::delete('/app/quard-payment/{quardPayment}', [QuardPaymentController::class, 'destroy'])
     ->name('quard-payment.destroy');
+
+// HPSM — Anuity to Reducing / opening HPSM reducing accounts
+// Backward-compatible routes for existing UI menu ("Anuity To HPSM")
+Route::get('/app/anuity-to-hpsm/add-anuity-to-hpsm', [HpsmOpeningAccountController::class, 'create'])
+    ->name('anuity-to-hpsm.add-anuity-to-hpsm');
+Route::get('/app/anuity-to-hpsm/view-anuity-to-hpsm', [HpsmOpeningAccountController::class, 'index'])
+    ->name('anuity-to-hpsm.view-anuity-to-hpsm');
+
+Route::get('hpsm-reports/due', [HpsmReportController::class, 'dueReport'])->name('hpsm-reports.due');
+Route::get('hpsm-reports/collection', [HpsmReportController::class, 'collectionReport'])->name('hpsm-reports.collection');
+Route::get('hpsm-reports/member-statement', [HpsmReportController::class, 'memberStatement'])->name('hpsm-reports.member-statement');
+
+Route::get('hpsm-opening-accounts/{hpsm_opening_account}/schedule', [HpsmOpeningAccountController::class, 'schedule'])->name('hpsm-opening-accounts.schedule');
+Route::get('hpsm-opening-accounts/{hpsm_opening_account}/ledger', [HpsmOpeningAccountController::class, 'ledger'])->name('hpsm-opening-accounts.ledger');
+Route::get('hpsm-opening-accounts/{hpsm_opening_account}/print-schedule', [HpsmOpeningAccountController::class, 'printSchedule'])->name('hpsm-opening-accounts.print-schedule');
+
+Route::get('hpsm-collections/{hpsm_collection}/receipt', [HpsmCollectionController::class, 'receipt'])->name('hpsm-collections.receipt');
+
+Route::resource('hpsm-opening-accounts', HpsmOpeningAccountController::class);
+Route::resource('hpsm-collections', HpsmCollectionController::class)->except(['edit', 'update', 'destroy']);
 
 // Member deductions
 use App\Http\Controllers\MemberDeductionController;

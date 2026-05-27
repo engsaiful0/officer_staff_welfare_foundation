@@ -12,37 +12,123 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('members', function (Blueprint $table) {
+
             $table->id();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Personal Information
+            |--------------------------------------------------------------------------
+            */
+
             $table->string('name');
             $table->string('father_name');
-            $table->string('mobile');
-            $table->string('email')->unique();
-            $table->string('nid_number')->unique();
+            $table->string('mother_name');
+
+            $table->date('date_of_birth');
+
+            $table->string('spouse_name');
+
+            $table->string('mobile')->unique();
+
+            $table->string('email')->nullable()->unique();
+
+            $table->string('nid_number')->nullable()->unique();
+
             $table->string('picture')->nullable();
-            $table->unsignedBigInteger('designation_id');
-            $table->date('date_of_join');
-            $table->unsignedBigInteger('branch_id');
+
             $table->text('present_address');
+
             $table->text('permanent_address');
-            $table->string('unique_id')->unique();
-            $table->unsignedBigInteger('introducer_id')->nullable();
-            $table->unsignedBigInteger('religion_id');
+
+            $table->foreignId('religion_id')
+                ->constrained('religions')
+                ->restrictOnDelete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Professional Information
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('designation_id')
+                ->constrained('designations')
+                ->restrictOnDelete();
+
+            $table->date('date_of_join_in_ibbl');
+
+            $table->foreignId('branch_id')
+                ->constrained('branches')
+                ->restrictOnDelete();
+
+            $table->string('status')->default('ACTIVE');
+
+            $table->string('employees_id')->unique();
+
+            /** Auto-generated system ID (e.g. MEM000123) — used across deposits, HPSM, etc. */
+            $table->string('unique_id')->nullable()->unique();
+
+            /** Manual / office Member ID (also tracked in member_unique_ids when assigned) */
+            $table->string('member_unique_id')->nullable()->unique();
+
+            $table->unsignedInteger('serial')->nullable();
+
+            $table->string('diposit_account_number')->nullable();
+
+            $table->date('account_opening_date');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Nominee Information
+            |--------------------------------------------------------------------------
+            */
+
             $table->string('nominee_name')->nullable();
-            $table->string('nominee_relation')->nullable();
+
+            $table->string('nominee_father_name')->nullable();
+
+            $table->string('nominee_mother_name')->nullable();
+
+            $table->string('nominee_spouse_name')->nullable();
+
+            $table->foreignId('nominee_relation_id')
+                ->nullable()
+                ->constrained('relations')
+                ->nullOnDelete();
+
             $table->string('nominee_phone')->nullable();
-            $table->string('temp_username')->unique();
-            $table->string('temp_password');
-            $table->unsignedBigInteger('user_id');
-            $table->string('status')->default('active');
+
+            $table->string('nominee_nid_number')->nullable();
+
+            $table->date('nominee_date_of_birth')->nullable();
+
+            $table->string('nominee_picture')->nullable();
+
+            $table->text('nominee_present_address')->nullable();
+
+            $table->text('nominee_permanent_address')->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Optional System Fields
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('introducer_id')
+                ->nullable()
+                ->constrained('members')
+                ->nullOnDelete();
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->string('temp_username')->nullable()->unique();
+
+            $table->string('temp_password')->nullable();
 
             $table->timestamps();
-            
-            // Foreign key constraints
-            $table->foreign('designation_id')->references('id')->on('designations')->onDelete('cascade');
-            $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
-            $table->foreign('introducer_id')->references('id')->on('members')->onDelete('set null');
-            $table->foreign('religion_id')->references('id')->on('religions')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

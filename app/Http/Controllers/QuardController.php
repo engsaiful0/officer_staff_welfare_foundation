@@ -37,7 +37,7 @@ class QuardController extends Controller
             ]);
         }
 
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
 
         return view('content.quard.index', compact('quards', 'members'));
     }
@@ -49,7 +49,7 @@ class QuardController extends Controller
     {
         $memberId = $request->get('member_id');
         $member = $memberId ? Member::find($memberId) : null;
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
 
         return view('content.quard.create', compact('member', 'members'));
     }
@@ -171,7 +171,7 @@ class QuardController extends Controller
      */
     public function edit(Quard $quard)
     {
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
         return view('content.quard.edit', compact('quard', 'members'));
     }
 

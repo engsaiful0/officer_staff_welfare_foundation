@@ -32,7 +32,7 @@ class MonthlyDepositCollectionController extends Controller
             ->orderBy('deposit_account_number')
             ->get();
         
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
 
         return view('content.deposits.monthly-collections.index', compact('deposits', 'members'));
     }
@@ -108,7 +108,7 @@ class MonthlyDepositCollectionController extends Controller
                   })
                   ->orWhereHas('member', function($mq) use ($search) {
                       $mq->where('name', 'like', "%$search%")
-                        ->orWhere('unique_id', 'like', "%$search%");
+                        ->orWhere('member_unique_id', 'like', "%$search%");
                   });
             });
         }
@@ -135,7 +135,7 @@ class MonthlyDepositCollectionController extends Controller
                             'id' => $deposit->id,
                             'deposit_account_number' => $deposit->deposit_account_number,
                             'member_name' => $deposit->member->name,
-                            'member_id' => $deposit->member->unique_id,
+                            'member_id' => $deposit->member->member_unique_id,
                             'monthly_deposit_amount' => (float)$deposit->monthly_deposit_amount,
                             'current_balance' => (float)$deposit->current_balance
                         ];
@@ -299,7 +299,7 @@ class MonthlyDepositCollectionController extends Controller
                             'id' => $deposit->id,
                             'deposit_account_number' => $deposit->deposit_account_number,
                             'member_name' => $deposit->member->name,
-                            'member_id' => $deposit->member->unique_id,
+                            'member_id' => $deposit->member->member_unique_id,
                             'monthly_deposit_amount' => (float)$deposit->monthly_deposit_amount
                         ];
                     })
@@ -549,7 +549,7 @@ class MonthlyDepositCollectionController extends Controller
                             $item->collection_number,
                             $item->deposit->deposit_account_number ?? 'N/A',
                             $item->member->name ?? 'N/A',
-                            $item->member->unique_id ?? 'N/A',
+                            $item->member->member_unique_id ?? 'N/A',
                             $item->amount,
                             $item->month ?? 'N/A',
                             $item->description ?? 'N/A',
