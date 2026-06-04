@@ -15,7 +15,7 @@ $(function () {
     $memberSelect.find('option').remove();
     $memberSelect.append(first);
     config.members.forEach(function (m) {
-      $memberSelect.append($('<option></option>').attr('value', m.id).text(m.name + (m.unique_id ? ' (' + m.unique_id + ')' : '')));
+      $memberSelect.append($('<option></option>').attr('value', m.id).text(m.name + (m.member_unique_id ? ' (' + m.member_unique_id + ')' : '')));
     });
   }
 

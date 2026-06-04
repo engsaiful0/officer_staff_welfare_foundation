@@ -29,7 +29,7 @@ class HpsmReportController extends Controller
         }
 
         $rows = $query->paginate(60)->withQueryString();
-        $members = Member::orderBy('name')->select('id', 'name', 'unique_id')->get();
+        $members = Member::orderBy('name')->select('id', 'name', 'member_unique_id')->get();
 
         return view('hpsm_reports.due_report', compact('rows', 'members'));
     }
@@ -58,7 +58,7 @@ class HpsmReportController extends Controller
 
     public function memberStatement(Request $request)
     {
-        $members = Member::orderBy('name')->select('id', 'name', 'unique_id')->get();
+        $members = Member::orderBy('name')->select('id', 'name', 'member_unique_id')->get();
         $member = null;
         $accounts = collect();
         $timeline = collect();

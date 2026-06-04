@@ -43,7 +43,7 @@ class DepositController extends Controller
             ]);
         }
 
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
       
         
         return view('content.deposits.index', compact('deposits', 'members'));
@@ -56,7 +56,7 @@ class DepositController extends Controller
     {
        $memberId = $request->get('member_id');
         $member = $memberId ? Member::find($memberId) : null;
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
         
         
         return view('content.deposits.create', compact('member', 'members'));
@@ -152,7 +152,7 @@ class DepositController extends Controller
      */
     public function edit(Deposit $deposit)
     {
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
         return view('content.deposits.edit', compact('deposit', 'members'));
     }
 

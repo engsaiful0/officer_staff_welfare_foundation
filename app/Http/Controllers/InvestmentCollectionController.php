@@ -58,7 +58,7 @@ class InvestmentCollectionController extends Controller
                       ->orWhere('transaction_reference', 'like', "%$search%")
                       ->orWhereHas('investment.member', function($mq) use ($search) {
                           $mq->where('name', 'like', "%$search%")
-                            ->orWhere('unique_id', 'like', "%$search%");
+                            ->orWhere('member_unique_id', 'like', "%$search%");
                       });
                 });
             }
@@ -72,7 +72,7 @@ class InvestmentCollectionController extends Controller
             ]);
         }
 
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
         $paymentMethods = PaymentMethod::all();
 
         return view('content.investments.collection.view-collection', compact('members', 'paymentMethods'));

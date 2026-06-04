@@ -15,7 +15,7 @@ class DepositInstallmentAmountController extends Controller
      */
     public function index(Request $request)
     {
-        $query = DepositInstallmentAmount::with(['member:id,name,unique_id', 'user:id,name'])
+        $query = DepositInstallmentAmount::with(['member:id,name,member_unique_id', 'user:id,name'])
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc');
 
@@ -24,9 +24,9 @@ class DepositInstallmentAmountController extends Controller
         }
 
         $installments = $query->paginate(15)->withQueryString();
-        $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
+        $members = Member::orderBy('name')->get(['id', 'name', 'member_unique_id']);
         $membersJson = $members->map(function ($m) {
-            return ['id' => $m->id, 'name' => $m->name, 'unique_id' => $m->unique_id ?? ''];
+            return ['id' => $m->id, 'name' => $m->name, 'member_unique_id' => $m->member_unique_id ?? ''];
         })->values();
 
         return view('content.monthly-deposit-installment-settings.index', compact('installments', 'members', 'membersJson'));
@@ -37,9 +37,9 @@ class DepositInstallmentAmountController extends Controller
      */
     public function create()
     {
-        $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
+        $members = Member::orderBy('name')->get(['id', 'name', 'member_unique_id']);
         $membersJson = $members->map(function ($m) {
-            return ['id' => $m->id, 'name' => $m->name, 'unique_id' => $m->unique_id ?? ''];
+            return ['id' => $m->id, 'name' => $m->name, 'member_unique_id' => $m->member_unique_id ?? ''];
         })->values();
         return view('content.monthly-deposit-installment-settings.create', compact('members', 'membersJson'));
     }
@@ -49,7 +49,7 @@ class DepositInstallmentAmountController extends Controller
      */
     public function getMembers()
     {
-        $members = Member::orderBy('name')->get(['id', 'name', 'unique_id']);
+        $members = Member::orderBy('name')->get(['id', 'name', 'member_unique_id']);
         return response()->json(['members' => $members]);
     }
 
@@ -58,7 +58,7 @@ class DepositInstallmentAmountController extends Controller
      */
     public function getData(Request $request)
     {
-        $query = DepositInstallmentAmount::with(['member:id,name,unique_id', 'user:id,name'])
+        $query = DepositInstallmentAmount::with(['member:id,name,member_unique_id', 'user:id,name'])
             ->orderBy('date', 'desc')
             ->orderBy('id', 'desc');
 
@@ -114,7 +114,7 @@ class DepositInstallmentAmountController extends Controller
             'user_id' => $userId,
         ]);
 
-        $record->load(['member:id,name,unique_id', 'user:id,name']);
+        $record->load(['member:id,name,member_unique_id', 'user:id,name']);
 
         return response()->json([
             'message' => 'Deposit installment created successfully.',
@@ -127,7 +127,7 @@ class DepositInstallmentAmountController extends Controller
      */
     public function show($id)
     {
-        $record = DepositInstallmentAmount::with(['member:id,name,unique_id', 'user:id,name'])
+        $record = DepositInstallmentAmount::with(['member:id,name,member_unique_id', 'user:id,name'])
             ->findOrFail($id);
         return response()->json(['data' => $this->formatRecord($record)]);
     }
@@ -153,7 +153,7 @@ class DepositInstallmentAmountController extends Controller
             'year' => $request->filled('year') ? (int) $request->year : null,
         ]);
 
-        $record->load(['member:id,name,unique_id', 'user:id,name']);
+        $record->load(['member:id,name,member_unique_id', 'user:id,name']);
 
         return response()->json([
             'message' => 'Deposit installment updated successfully.',
@@ -170,7 +170,7 @@ class DepositInstallmentAmountController extends Controller
             'id' => $row->id,
             'member_id' => $row->member_id,
             'member_name' => $row->member ? $row->member->name : '—',
-            'member_unique_id' => $row->member ? $row->member->unique_id : '—',
+            'member_unique_id' => $row->member ? $row->member->member_unique_id : '—',
             'installment_amount' => number_format((float) $row->installment_amount, 2),
             'installment_amount_raw' => (float) $row->installment_amount,
             'date' => $dateObj ? $dateObj->format('Y-m-d') : '',

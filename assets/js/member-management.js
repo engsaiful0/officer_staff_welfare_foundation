@@ -50,8 +50,8 @@ $(document).ready(function() {
                 }
             },
             { 
-                data: 'unique_id', 
-                name: 'unique_id',
+                data: 'member_unique_id', 
+                name: 'member_unique_id',
                 render: function(data, type, row) {
                     return '<span class="badge bg-primary">' + data + '</span>';
                 }
@@ -153,7 +153,7 @@ $(document).ready(function() {
                 
                 // Professional Information
                 content += '<div class="col-12 mt-4"><h6 class="fw-semibold mb-3">Professional Information</h6></div>';
-                content += '<div class="col-md-6 mb-3"><strong>Unique ID:</strong> <span class="badge bg-primary">' + member.unique_id + '</span></div>';
+                content += '<div class="col-md-6 mb-3"><strong>Member ID:</strong> <span class="badge bg-primary">' + (member.member_unique_id || '') + '</span></div>';
                 content += '<div class="col-md-6 mb-3"><strong>Designation:</strong> ' + (member.designation ? member.designation.name : '-') + '</div>';
                 content += '<div class="col-md-6 mb-3"><strong>Branch:</strong> ' + (member.branch ? member.branch.name : '-') + '</div>';
                 content += '<div class="col-md-6 mb-3"><strong>Date of Join:</strong> ' + (member.date_of_join ? new Date(member.date_of_join).toLocaleDateString() : '-') + '</div>';
@@ -166,7 +166,7 @@ $(document).ready(function() {
                 // Introducer Information
                 if (member.introducer) {
                     content += '<div class="col-12 mt-4"><h6 class="fw-semibold mb-3">Introducer Information</h6></div>';
-                    content += '<div class="col-12 mb-3"><strong>Introducer:</strong> ' + member.introducer.name + ' (' + member.introducer.unique_id + ')</div>';
+                    content += '<div class="col-12 mb-3"><strong>Introducer:</strong> ' + member.introducer.name + ' (' + (member.introducer.member_unique_id || '') + ')</div>';
                 }
                 
                 // Nominee Information

@@ -54,7 +54,7 @@ class InvestmentPaymentController extends Controller
             ]);
         }
 
-        $members = \App\Models\Member::select('id', 'name', 'unique_id')->get();
+        $members = \App\Models\Member::select('id', 'name', 'member_unique_id')->get();
 
         return view('content.investments.payments.payment-investment', compact('investments', 'members'));
     }

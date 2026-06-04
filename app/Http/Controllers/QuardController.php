@@ -17,7 +17,7 @@ class QuardController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Quard::with(['member:id,name,unique_id,employees_id']);
+        $query = Quard::with(['member:id,name,member_unique_id,employees_id']);
 
         // Apply filters
         if ($request->filled('member_id')) {

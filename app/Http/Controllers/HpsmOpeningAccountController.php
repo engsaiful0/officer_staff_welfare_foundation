@@ -13,7 +13,7 @@ class HpsmOpeningAccountController extends Controller
 {
     public function index(Request $request)
     {
-        $query = HpsmOpeningAccount::with(['member:id,name,unique_id']);
+        $query = HpsmOpeningAccount::with(['member:id,name,member_unique_id']);
 
         if ($request->filled('member_id')) {
             $query->where('member_id', $request->integer('member_id'));
@@ -24,17 +24,17 @@ class HpsmOpeningAccountController extends Controller
         }
 
         $accounts = $query->orderByDesc('created_at')->paginate(30)->withQueryString();
-        $members = Member::orderBy('name')->select('id', 'name', 'unique_id')->get();
+        $members = Member::orderBy('name')->select('id', 'name', 'member_unique_id')->get();
 
         return view('hpsm_opening_accounts.index', compact('accounts', 'members'));
     }
 
     public function create(Request $request)
     {
-        $members = Member::orderBy('name')->select('id', 'name', 'unique_id')->get();
+        $members = Member::orderBy('name')->select('id', 'name', 'member_unique_id')->get();
         $member = null;
         if ($request->filled('member_id')) {
-            $member = Member::select('id', 'name', 'unique_id')->find($request->integer('member_id'));
+            $member = Member::select('id', 'name', 'member_unique_id')->find($request->integer('member_id'));
         }
 
         return view('hpsm_opening_accounts.create', compact('members', 'member'));
@@ -112,7 +112,7 @@ class HpsmOpeningAccountController extends Controller
 
     public function edit(HpsmOpeningAccount $hpsm_opening_account)
     {
-        $members = Member::orderBy('name')->select('id', 'name', 'unique_id')->get();
+        $members = Member::orderBy('name')->select('id', 'name', 'member_unique_id')->get();
         $mayReschedule = $hpsm_opening_account->collections()->doesntExist();
 
         return view('hpsm_opening_accounts.edit', [

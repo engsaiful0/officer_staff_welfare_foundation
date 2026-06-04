@@ -152,6 +152,14 @@ class Member extends Model
     }
 
     /**
+     * Legacy alias — maps to member_unique_id (no separate unique_id column in DB).
+     */
+    public function getUniqueIdAttribute(): ?string
+    {
+        return $this->member_unique_id;
+    }
+
+    /**
      * Prefer office Member ID from member_unique_ids; fall back to column on members.
      */
     public function getMemberUniqueIdAttribute($value): ?string

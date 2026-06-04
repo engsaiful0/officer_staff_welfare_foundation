@@ -105,7 +105,7 @@ class DepositLedgerController extends Controller
      */
     public function memberLedger(Request $request)
     {
-        $members = Member::select('id', 'name', 'unique_id')
+        $members = Member::select('id', 'name', 'member_unique_id')
             ->orderBy('name')
             ->get();
 

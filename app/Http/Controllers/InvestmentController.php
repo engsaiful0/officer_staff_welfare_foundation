@@ -55,7 +55,7 @@ class InvestmentController extends Controller
             ]);
         }
 
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
         
         return view('content.investments.index', compact('investments', 'members'));
     }
@@ -65,7 +65,7 @@ class InvestmentController extends Controller
      */
     public function create()
     {
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
         $latest = InvestmentAccountNumber::latest('serial')->first();
         $nextAccountNumber = 'INV' . Carbon::now()->year . '-' . str_pad($latest ? $latest->serial + 1 : 1, 6, '0', STR_PAD_LEFT);
         $investmentTypes=InvestmentType::all();
@@ -211,7 +211,7 @@ class InvestmentController extends Controller
     public function edit(Investment $investment)
     {
         $investment->load(['account', 'installments']);
-        $members = Member::select('id', 'name', 'unique_id')->get();
+        $members = Member::select('id', 'name', 'member_unique_id')->get();
         $investmentTypes = InvestmentType::all();
         
         // Calculate values for form
