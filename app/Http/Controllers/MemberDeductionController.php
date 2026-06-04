@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\MemberDeductionsExport;
 use App\Models\DepositInstallmentAmount;
 use App\Models\InvestmentInstallment;
 use App\Models\Member;
@@ -11,7 +12,10 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\Response;
 
 class MemberDeductionController extends Controller
 {
@@ -20,26 +24,56 @@ class MemberDeductionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = MemberDeduction::with(['member:id,name,member_unique_id', 'user:id,name'])
-            ->orderByDesc('year')
-            ->orderByDesc('month')
-            ->orderByDesc('id');
-
-        if ($request->filled('member_id')) {
-            $query->where('member_id', $request->integer('member_id'));
-        }
-        if ($request->filled('month')) {
-            $query->where('month', $request->integer('month'));
-        }
-        if ($request->filled('year')) {
-            $query->where('year', $request->integer('year'));
-        }
-
-        $deductions = $query->paginate(20)->withQueryString();
+        $deductions = $this->buildDeductionListQuery($request)
+            ->paginate(20)
+            ->withQueryString();
 
         $members = Member::orderBy('name')->get(['id', 'name', 'member_unique_id']);
 
-        return view('content.deductions.index', compact('deductions', 'members'));
+        return view('content.deductions.index', [
+            'deductions' => $deductions,
+            'members' => $members,
+            'resolveAccountNumber' => $this->accountNumberResolver(),
+        ]);
+    }
+
+    /**
+     * Export filtered deductions to Excel.
+     */
+    public function exportExcel(Request $request)
+    {
+        $this->ensureDeductionListAccess();
+
+        $deductions = $this->buildDeductionListQuery($request)->get();
+        $filename = 'monthly-deductions-'.date('Y-m-d_His').'.xlsx';
+
+        return Excel::download(
+            new MemberDeductionsExport($deductions, $this->accountNumberResolver()),
+            $filename
+        );
+    }
+
+    /**
+     * Printable view of filtered deductions.
+     */
+    public function exportPrint(Request $request)
+    {
+        $this->ensureDeductionListAccess();
+
+        $deductions = $this->buildDeductionListQuery($request)->get();
+        $resolveAccountNumber = $this->accountNumberResolver();
+        $filterSummary = $this->buildFilterSummary($request);
+        $summary = [
+            'count' => $deductions->count(),
+            'total_amount' => (float) $deductions->sum('total_amount'),
+        ];
+
+        return view('content.deductions.export-print', compact(
+            'deductions',
+            'summary',
+            'filterSummary',
+            'resolveAccountNumber'
+        ));
     }
 
     /**
@@ -230,6 +264,84 @@ class MemberDeductionController extends Controller
             'success' => true,
             'message' => 'Deduction deleted.',
         ]);
+    }
+
+    private function buildDeductionListQuery(Request $request)
+    {
+        $query = MemberDeduction::with([
+            'member:'.$this->memberColumnsForList(),
+            'member.designation:id,designation_name',
+            'user:id,name',
+        ])
+            ->orderByDesc('year')
+            ->orderByDesc('month')
+            ->orderBy('member_id');
+
+        if ($request->filled('member_id')) {
+            $query->where('member_id', $request->integer('member_id'));
+        }
+        if ($request->filled('month')) {
+            $query->where('month', $request->integer('month'));
+        }
+        if ($request->filled('year')) {
+            $query->where('year', $request->integer('year'));
+        }
+
+        return $query;
+    }
+
+    private function memberColumnsForList(): string
+    {
+        $columns = ['id', 'name', 'member_unique_id', 'mobile', 'designation_id'];
+        if (Schema::hasColumn('members', 'deposit_account_number')) {
+            $columns[] = 'deposit_account_number';
+        }
+        if (Schema::hasColumn('members', 'diposit_account_number')) {
+            $columns[] = 'diposit_account_number';
+        }
+
+        return implode(',', $columns);
+    }
+
+    private function ensureDeductionListAccess(): void
+    {
+        $user = Auth::user();
+        if (! $user || (! $user->hasPermissionTo('add-deduction') && ! $user->hasPermissionTo('view-deduction'))) {
+            abort(Response::HTTP_FORBIDDEN);
+        }
+    }
+
+    /**
+     * @return \Closure(?Member): string
+     */
+    private function accountNumberResolver(): \Closure
+    {
+        return function (?Member $member): string {
+            if (! $member) {
+                return '—';
+            }
+
+            $accountNumber = $member->deposit_account_number ?? $member->diposit_account_number;
+
+            return $accountNumber !== null && $accountNumber !== '' ? $accountNumber : '—';
+        };
+    }
+
+    private function buildFilterSummary(Request $request): string
+    {
+        $parts = [];
+        if ($request->filled('member_id')) {
+            $member = Member::find($request->integer('member_id'));
+            $parts[] = 'Member: '.($member?->name ?? $request->member_id);
+        }
+        if ($request->filled('month')) {
+            $parts[] = 'Month: '.date('F', mktime(0, 0, 0, $request->integer('month'), 1));
+        }
+        if ($request->filled('year')) {
+            $parts[] = 'Year: '.$request->year;
+        }
+
+        return $parts ? implode(' | ', $parts) : 'All records';
     }
 
     /**

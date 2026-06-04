@@ -9,7 +9,7 @@
       <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Edit deduction</h5>
         <a href="{{ route('deductions.monthly-deduction-list') }}" class="btn btn-outline-secondary">
-          <i class="bx bx-arrow-back me-1"></i> Back to List
+          <i class="ti ti-arrow-left me-1"></i> Back to List
         </a>
       </div>
 
@@ -109,7 +109,7 @@
           <div class="d-flex gap-2">
             <button type="button" class="btn btn-primary" id="submitBtn">
               <span class="spinner-border spinner-border-sm me-2 d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
-              <i class="bx bx-save me-1" id="submitIcon"></i>
+              <i class="ti ti-device-floppy me-1" id="submitIcon"></i>
               <span id="submitText">Update deduction</span>
             </button>
             <a href="{{ route('deductions.monthly-deduction-list') }}" class="btn btn-outline-secondary">Cancel</a>

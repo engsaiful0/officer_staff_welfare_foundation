@@ -32,6 +32,7 @@ class Member extends Model
         'employees_id',
         'member_unique_id',
         'serial',
+        'deposit_account_number',
         'diposit_account_number',
         'account_opening_date',
         'nominee_name',

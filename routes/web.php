@@ -554,6 +554,10 @@ Route::post('/app/deductions', [MemberDeductionController::class, 'store'])
 Route::post('/app/deductions/generate-monthly', [MemberDeductionController::class, 'generateMonthly'])
     ->name('deductions.generate-monthly')
     ->middleware('permission:add-deduction');
+Route::get('/app/deductions/export-excel', [MemberDeductionController::class, 'exportExcel'])
+    ->name('deductions.export-excel');
+Route::get('/app/deductions/export-print', [MemberDeductionController::class, 'exportPrint'])
+    ->name('deductions.export-print');
 Route::get('/app/deductions/{member_deduction}/edit', [MemberDeductionController::class, 'edit'])
     ->name('deductions.edit')
     ->middleware('permission:add-deduction');

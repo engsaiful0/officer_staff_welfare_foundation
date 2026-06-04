@@ -5,6 +5,8 @@
 @section('content')
 @php
   $canManageDeductions = auth()->check() && auth()->user()->hasPermissionTo('add-deduction');
+  $exportQuery = request()->only(['member_id', 'month', 'year']);
+  $colspanRemarks = $canManageDeductions ? 14 : 13;
 @endphp
 <div class="container-xxl flex-grow-1 container-p-y">
   @permission('add-deduction')
@@ -50,7 +52,7 @@
             <div class="col-12">
               <button type="submit" class="btn btn-primary" id="generateBtn">
                 <span class="spinner-border spinner-border-sm me-2 d-none" id="generateSpinner" role="status"></span>
-                <i class="bx bx-list-plus me-1" id="generateIcon"></i>
+                <i class="ti ti-list-details me-1" id="generateIcon"></i>
                 <span id="generateText">Generate list</span>
               </button>
             </div>
@@ -66,11 +68,21 @@
       <div class="card">
         <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
           <h5 class="card-title mb-0">Member deductions</h5>
-          @permission('add-deduction')
-          <a href="{{ route('deductions.add-deduction') }}" class="btn btn-primary btn-sm">
-            <i class="bx bx-plus me-1"></i> Add deduction
-          </a>
-          @endpermission
+          <div class="d-flex flex-wrap gap-2">
+            @if($deductions->count() > 0)
+              <a href="{{ route('deductions.export-print', $exportQuery) }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+                <i class="ti ti-printer me-1"></i> Print
+              </a>
+              <a href="{{ route('deductions.export-excel', $exportQuery) }}" class="btn btn-outline-success btn-sm">
+                <i class="ti ti-file-spreadsheet me-1"></i> Excel
+              </a>
+            @endif
+            @permission('add-deduction')
+            <a href="{{ route('deductions.add-deduction') }}" class="btn btn-primary btn-sm">
+              <i class="ti ti-plus me-1"></i> Add deduction
+            </a>
+            @endpermission
+          </div>
         </div>
         <div class="card-body">
           <form method="GET" class="row g-3 mb-4">
@@ -80,7 +92,7 @@
                 <option value="">All</option>
                 @foreach($members as $m)
                   <option value="{{ $m->id }}" {{ (string) request('member_id') === (string) $m->id ? 'selected' : '' }}>
-                    {{ $m->name }} ({{ $m->unique_id }})
+                    {{ $m->name }} ({{ $m->member_unique_id }})
                   </option>
                 @endforeach
               </select>
@@ -114,12 +126,15 @@
                   <tr>
                     <th>Member</th>
                     <th>Period</th>
+                    <th>Account Number</th>
+                    <th>Mobile</th>
+                    <th>Designation</th>
                     <th class="text-end">Deposit</th>
                     <th class="text-end">Investment</th>
                     <th class="text-end">Qard</th>
                     <th class="text-end">Profit</th>
                     <th class="text-end">Compensation</th>
-                    <th class="text-end">Total</th>
+                    <th class="text-end">Total Amount</th>
                     <th>Date</th>
                     <th>Recorded by</th>
                     @permission('add-deduction')
@@ -133,12 +148,15 @@
                       <td>
                         @if($d->member)
                           <span class="fw-semibold">{{ $d->member->name }}</span>
-                          <span class="text-muted small">({{ $d->member->unique_id }})</span>
+                          <span class="text-muted small">({{ $d->member->member_unique_id }})</span>
                         @else
                           —
                         @endif
                       </td>
                       <td>{{ date('F', mktime(0, 0, 0, $d->month, 1)) }} {{ $d->year }}</td>
+                      <td>{{ $resolveAccountNumber($d->member) }}</td>
+                      <td>{{ $d->member?->mobile ?? '—' }}</td>
+                      <td>{{ $d->member?->designation?->designation_name ?? '—' }}</td>
                       <td class="text-end">{{ number_format($d->monthly_deposit_amount, 2) }}</td>
                       <td class="text-end">{{ number_format($d->monthly_investment_amount, 2) }}</td>
                       <td class="text-end">{{ number_format($d->monthly_qard_amount, 2) }}</td>
@@ -149,26 +167,35 @@
                       <td>{{ $d->user?->name ?? '—' }}</td>
                       @permission('add-deduction')
                       <td class="text-end text-nowrap">
-                        <a href="{{ route('deductions.edit', $d) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                          <i class="bx bx-edit-alt"></i>
+                        <a href="{{ route('deductions.edit', $d) }}" class="btn btn-sm btn-icon" title="Edit">
+                          <i class="ti ti-pencil"></i>
                         </a>
-                        <button type="button" class="btn btn-sm btn-outline-danger btn-delete-deduction" title="Delete"
+                        <button type="button" class="btn btn-sm btn-icon text-danger btn-delete-deduction" title="Delete"
                                 data-url="{{ route('deductions.destroy', $d) }}">
                           <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-                          <i class="bx bx-trash delete-icon"></i>
+                          <i class="ti ti-trash delete-icon"></i>
                         </button>
                       </td>
                       @endpermission
                     </tr>
                     @if($d->remarks)
                       <tr class="table-light">
-                        <td colspan="{{ $canManageDeductions ? 11 : 10 }}" class="small text-muted">
+                        <td colspan="{{ $colspanRemarks }}" class="small text-muted">
                           <strong>Remarks:</strong> {{ $d->remarks }}
                         </td>
                       </tr>
                     @endif
                   @endforeach
                 </tbody>
+                @if($deductions->count() > 0)
+                <tfoot>
+                  <tr class="table-light fw-semibold">
+                    <td colspan="10" class="text-end">Page total ({{ $deductions->count() }} rows):</td>
+                    <td class="text-end">{{ number_format($deductions->sum('total_amount'), 2) }}</td>
+                    <td colspan="{{ $canManageDeductions ? 3 : 2 }}"></td>
+                  </tr>
+                </tfoot>
+                @endif
               </table>
             </div>
             <div class="mt-3">
