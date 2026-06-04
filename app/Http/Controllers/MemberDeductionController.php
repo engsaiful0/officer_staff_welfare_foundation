@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
-use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MemberDeductionController extends Controller
 {
@@ -38,19 +38,28 @@ class MemberDeductionController extends Controller
     }
 
     /**
-     * Export filtered deductions to Excel.
+     * Export filtered deductions to CSV (opens in Excel).
      */
-    public function exportExcel(Request $request)
+    public function exportExcel(Request $request): StreamedResponse
     {
         $this->ensureDeductionListAccess();
 
         $deductions = $this->buildDeductionListQuery($request)->get();
-        $filename = 'monthly-deductions-'.date('Y-m-d_His').'.xlsx';
+        $export = new MemberDeductionsExport($deductions, $this->accountNumberResolver());
+        $filename = 'monthly-deductions-'.date('Y-m-d_His').'.csv';
 
-        return Excel::download(
-            new MemberDeductionsExport($deductions, $this->accountNumberResolver()),
-            $filename
-        );
+        return response()->streamDownload(function () use ($export) {
+            $handle = fopen('php://output', 'w');
+            // UTF-8 BOM so Excel displays special characters correctly
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, $export->headings());
+            foreach ($export->rows() as $row) {
+                fputcsv($handle, $row);
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     /**

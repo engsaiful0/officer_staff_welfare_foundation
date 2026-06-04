@@ -2,23 +2,15 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use App\Models\Member;
+use App\Models\MemberDeduction;
 
-class MemberDeductionsExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class MemberDeductionsExport
 {
     public function __construct(
         protected $deductions,
-        protected $resolveAccountNumber
+        protected \Closure $resolveAccountNumber
     ) {}
-
-    public function collection()
-    {
-        return $this->deductions;
-    }
 
     public function headings(): array
     {
@@ -41,8 +33,25 @@ class MemberDeductionsExport implements FromCollection, WithHeadings, WithMappin
         ];
     }
 
-    public function map($deduction): array
+    /**
+     * @return array<int, array<int, mixed>>
+     */
+    public function rows(): array
     {
+        $rows = [];
+        foreach ($this->deductions as $deduction) {
+            $rows[] = $this->mapRow($deduction);
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    protected function mapRow(MemberDeduction $deduction): array
+    {
+        /** @var Member|null $member */
         $member = $deduction->member;
         $accountNumber = ($this->resolveAccountNumber)($member);
 
@@ -62,13 +71,6 @@ class MemberDeductionsExport implements FromCollection, WithHeadings, WithMappin
             $deduction->deduction_date?->format('Y-m-d') ?? '—',
             $deduction->user?->name ?? '—',
             $deduction->remarks ?? '',
-        ];
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        return [
-            1 => ['font' => ['bold' => true]],
         ];
     }
 }
