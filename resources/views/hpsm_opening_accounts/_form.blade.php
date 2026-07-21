@@ -10,7 +10,7 @@
     </div>
   @endif
 
-  <div class="col-md-6 mb-3">
+  <div class="col-md-3 mb-3">
     <label for="member_id" class="form-label">Member <span class="text-danger">*</span></label>
     <select class="select2 form-select @error('member_id') is-invalid @enderror" id="member_id" name="member_id" required @disabled(!$mayReschedule)>
       <option value="">Select member</option>
@@ -38,7 +38,7 @@
     @error('remaining_duration_months')<div class="invalid-feedback">{{ $message }}</div>@enderror
   </div>
 
-  <div class="col-md-4 mb-3">
+  <div class="col-md-3 mb-3">
     <label for="balance_principal" class="form-label">Balance principal <span class="text-danger">*</span></label>
     <div class="input-group">
       <span class="input-group-text">৳</span>
@@ -48,7 +48,7 @@
     @error('balance_principal')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
   </div>
 
-  <div class="col-md-4 mb-3">
+  <div class="col-md-3 mb-3">
     <label for="balance_pre_rent" class="form-label">Balance pre rent / outstanding rent <span class="text-danger">*</span></label>
     <div class="input-group">
       <span class="input-group-text">৳</span>
@@ -58,7 +58,7 @@
     @error('balance_pre_rent')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
   </div>
 
-  <div class="col-md-4 mb-3">
+  <div class="col-md-3 mb-3">
     <label for="current_rent" class="form-label">Current rent <span class="text-danger">*</span></label>
     <div class="input-group">
       <span class="input-group-text">৳</span>
@@ -68,7 +68,7 @@
     @error('current_rent')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
   </div>
 
-  <div class="col-md-4 mb-3">
+  <div class="col-md-3 mb-3">
     <label for="annual_profit_rate" class="form-label">Annual profit rate (%) <span class="text-danger">*</span></label>
     <input type="number" step="0.01" min="0" class="form-control @error('annual_profit_rate') is-invalid @enderror" id="annual_profit_rate"
       name="annual_profit_rate" value="{{ old('annual_profit_rate', $a?->annual_profit_rate ?? '') }}" required @readonly(!$mayReschedule) />
