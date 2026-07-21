@@ -54,6 +54,17 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                            <div class="col-md-3 hpsm-only">
+                                <label for="calculation_method" class="form-label">
+                                    Calculation Method <span class="text-danger">*</span>
+                                </label>
+
+                                <select class="form-select" id="calculation_method" name="calculation_method">
+                                    <option value="">Select Calculation Method</option>
+                                    <option value="annuity">Annuity</option>
+                                    <option value="reducing">Reducing Balance</option>
+                                </select>
+                            </div>
 
 
 
@@ -88,7 +99,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            
+
                             <div class="col-md-3">
                                 <label for="gestation_maturity_date" class="form-label">Gestation Maturity Date</label>
                                 <input type="date" class="form-control @error('gestation_maturity_date') is-invalid @enderror"
@@ -204,7 +215,7 @@
                             </div>
                         </div>
                     </form>
-                    
+
                     <!-- Success/Error Messages -->
                     <div id="form-messages" class="mt-3"></div>
                 </div>
@@ -240,7 +251,7 @@
 
             // Calculate number of installments based on payment type
             let noOfInstallments = investmentYears * 12; // Default to monthly
-            let totalNumberOfMonths=investmentYears * 12;
+            let totalNumberOfMonths = investmentYears * 12;
 
             // Calculate principal amount per installment
             // Example: 100000 / 60 = 1667
@@ -251,11 +262,11 @@
             // The adjustment factor (0.509) accounts for reducing balance over time
             // Net Profit calculation: ((((Principal/month)+Principal)*15%)*5)/2 = Net Profit
             let rentPerInstallment = 0;
-            let netProfit=(((((principalAmount/totalNumberOfMonths)+principalAmount)*interestRate)*investmentYears))/2;
-            rentPerInstallment=netProfit/totalNumberOfMonths;
+            let netProfit = (((((principalAmount / totalNumberOfMonths) + principalAmount) * interestRate) * investmentYears)) / 2;
+            rentPerInstallment = netProfit / totalNumberOfMonths;
 
-            console.log("Net Profit: "+netProfit);
-            console.log("Rent Per Installment: "+rentPerInstallment);
+            console.log("Net Profit: " + netProfit);
+            console.log("Rent Per Installment: " + rentPerInstallment);
 
             // Calculate total amount per installment
             const totalAmountPerInstallment = principalAmountPerInstallment + rentPerInstallment;
@@ -291,24 +302,24 @@
 
         // Initial calculation if values are already present
         calculateInstallments();
-        
+
         // AJAX Form Submission
         $('#investment-form').on('submit', function(e) {
             e.preventDefault();
-            
+
             const form = $(this);
             const formData = form.serialize();
             const submitBtn = $('#submit-btn');
             const submitText = $('#submit-text');
             const submitSpinner = $('#submit-spinner');
             const messages = $('#form-messages');
-            
+
             // Disable submit button and show spinner inside button
             submitBtn.prop('disabled', true);
             submitText.addClass('d-none');
             submitSpinner.removeClass('d-none');
             messages.html('');
-            
+
             $.ajax({
                 url: form.attr('action'),
                 type: 'POST',
@@ -320,13 +331,13 @@
                 success: function(response) {
                     submitText.removeClass('d-none');
                     submitSpinner.addClass('d-none');
-                    
+
                     if (response.success) {
                         messages.html('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
                             '<strong>Success!</strong> ' + (response.message || 'Investment created successfully.') +
                             '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
                             '</div>');
-                        
+
                         // Redirect after 2 seconds
                         setTimeout(function() {
                             if (response.redirect) {
@@ -347,9 +358,9 @@
                     submitText.removeClass('d-none');
                     submitSpinner.addClass('d-none');
                     submitBtn.prop('disabled', false);
-                    
+
                     let errorMessage = 'An error occurred while creating the investment.';
-                    
+
                     if (xhr.responseJSON) {
                         if (xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
@@ -362,7 +373,7 @@
                             errorMessage = errorList;
                         }
                     }
-                    
+
                     messages.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
                         '<strong>Error!</strong> ' + errorMessage +
                         '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +

@@ -36,7 +36,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label for="account_number" class="form-label">Account Number</label>
-                                <input type="text" class="form-control" id="account_number" name="account_number" 
+                                <input type="text" class="form-control" id="account_number" name="account_number"
                                     value="{{ $investment->account->account_number ?? 'N/A' }}" readonly>
                             </div>
                             <div class="col-md-3">
@@ -52,6 +52,17 @@
                                 @error('investment_type_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                            <div class="col-md-3 hpsm-only">
+                                <label for="calculation_method" class="form-label">
+                                    Calculation Method <span class="text-danger">*</span>
+                                </label>
+
+                                <select class="form-select" id="calculation_method" name="calculation_method">
+                                    <option value="">Select Calculation Method</option>
+                                    <option {{ old('calculation_method', $investment->calculation_method) == 'annuity' ? 'selected' : '' }} value="annuity">Annuity</option>
+                                    <option {{ old('calculation_method', $investment->calculation_method) == 'reducing' ? 'selected' : '' }}      value="reducing">Reducing Balance</option>
+                                </select>
                             </div>
 
                             <!-- Principal Amount -->
@@ -72,7 +83,7 @@
                             <div class="col-md-3">
                                 <label for="account_opening_date" class="form-label">Account Opening Date <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control @error('account_opening_date') is-invalid @enderror"
-                                    id="account_opening_date" name="account_opening_date" 
+                                    id="account_opening_date" name="account_opening_date"
                                     value="{{ old('account_opening_date', $investment->account->account_opening_date ?? $investment->start_date) }}" required>
                                 @error('account_opening_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -86,11 +97,11 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            
+
                             <div class="col-md-3">
                                 <label for="gestation_maturity_date" class="form-label">Gestation Maturity Date</label>
                                 <input type="date" class="form-control @error('gestation_maturity_date') is-invalid @enderror"
-                                    id="gestation_maturity_date" name="gestation_maturity_date" 
+                                    id="gestation_maturity_date" name="gestation_maturity_date"
                                     value="{{ old('gestation_maturity_date', $investment->account->account_closing_date ?? '') }}">
                                 @error('gestation_maturity_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -113,9 +124,9 @@
 
                             <div class="col-md-3">
                                 <label for="investment_years" class="form-label">Investment Years <span class="text-danger">*</span></label>
-                                <input type="number" placeholder="Enter Investment Years" min="2" max="20" 
-                                    class="form-control @error('investment_years') is-invalid @enderror" 
-                                    id="investment_years" name="investment_years" 
+                                <input type="number" placeholder="Enter Investment Years" min="2" max="20"
+                                    class="form-control @error('investment_years') is-invalid @enderror"
+                                    id="investment_years" name="investment_years"
                                     value="{{ old('investment_years', $investmentYears) }}" required>
                                 @error('investment_years')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -148,33 +159,33 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
                         <div class="row g-3">
                             <h6 class="mt-4 mb-3">Probable Installment Breakup</h6>
                             <div class="col-md-3">
                                 <label for="no_of_installments" class="form-label">No of Installments</label>
-                                <input type="number" min="2" class="form-control" id="no_of_installments" name="no_of_installments" 
+                                <input type="number" min="2" class="form-control" id="no_of_installments" name="no_of_installments"
                                     value="{{ old('no_of_installments', $noOfInstallments) }}" readonly>
                             </div>
                             <div class="col-md-3">
                                 <label for="principal_amount_per_installment" class="form-label">Principal Amount (Per Installment)</label>
-                                <input type="number" class="form-control" id="principal_amount_per_installment" 
-                                    name="principal_amount_per_installment" 
+                                <input type="number" class="form-control" id="principal_amount_per_installment"
+                                    name="principal_amount_per_installment"
                                     value="{{ old('principal_amount_per_installment', $principalPerInstallment) }}" readonly>
                             </div>
                             <div class="col-md-3">
                                 <label for="rent" class="form-label">Rent (Per Installment)</label>
-                                <input type="number" class="form-control" id="rent" name="rent" 
+                                <input type="number" class="form-control" id="rent" name="rent"
                                     value="{{ old('rent', $rentPerInstallment) }}" readonly>
                             </div>
                             <div class="col-md-3">
                                 <label for="total_amount" class="form-label">Total Amount (Per Installment)</label>
-                                <input type="number" class="form-control" id="total_amount" name="total_amount" 
+                                <input type="number" class="form-control" id="total_amount" name="total_amount"
                                     value="{{ old('total_amount', $totalAmountPerInstallment) }}" readonly>
                             </div>
                             <div class="col-md-3">
                                 <label for="total_rent" class="form-label">Total Rent</label>
-                                <input type="number" class="form-control" id="total_rent" name="total_rent" 
+                                <input type="number" class="form-control" id="total_rent" name="total_rent"
                                     value="{{ old('total_rent', $totalRent) }}" readonly>
                             </div>
                             <div class="col-md-3">
@@ -206,7 +217,7 @@
                             </div>
                         </div>
                     </form>
-                    
+
                     <!-- Success/Error Messages -->
                     <div id="form-messages" class="mt-3"></div>
                 </div>
@@ -248,7 +259,7 @@
 
             const principalAmountPerInstallment = Math.round(principalAmount / noOfInstallments);
             let rentPerInstallment = 0;
-            
+
             if (paymentType === 'monthly') {
                 const monthlyRate = interestRate / 12;
                 rentPerInstallment = Math.round(principalAmount * monthlyRate * 0.509);
@@ -283,19 +294,19 @@
         // AJAX Form Submission
         $('#investment-form').on('submit', function(e) {
             e.preventDefault();
-            
+
             const form = $(this);
             const formData = form.serialize();
             const submitBtn = $('#submit-btn');
             const submitText = $('#submit-text');
             const submitSpinner = $('#submit-spinner');
             const messages = $('#form-messages');
-            
+
             submitBtn.prop('disabled', true);
             submitText.addClass('d-none');
             submitSpinner.removeClass('d-none');
             messages.html('');
-            
+
             $.ajax({
                 url: form.attr('action'),
                 type: 'POST',
@@ -307,13 +318,13 @@
                 success: function(response) {
                     submitText.removeClass('d-none');
                     submitSpinner.addClass('d-none');
-                    
+
                     if (response.success) {
                         messages.html('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
                             '<strong>Success!</strong> ' + (response.message || 'Investment updated successfully.') +
                             '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
                             '</div>');
-                        
+
                         setTimeout(function() {
                             if (response.redirect) {
                                 window.location.href = response.redirect;
@@ -333,9 +344,9 @@
                     submitText.removeClass('d-none');
                     submitSpinner.addClass('d-none');
                     submitBtn.prop('disabled', false);
-                    
+
                     let errorMessage = 'An error occurred while updating the investment.';
-                    
+
                     if (xhr.responseJSON) {
                         if (xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
@@ -348,7 +359,7 @@
                             errorMessage = errorList;
                         }
                     }
-                    
+
                     messages.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
                         '<strong>Error!</strong> ' + errorMessage +
                         '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
@@ -359,4 +370,3 @@
     });
 </script>
 @endsection
-
