@@ -199,6 +199,41 @@ return '';
             </ul>
         </li>
         @endif
+
+        <!-- Anuity to HPSM -->
+        @php
+        $hasAnuityToHpsmPermission = false;
+        if (Auth::check()) {
+        $user = Auth::user();
+        $hasAnuityToHpsmPermission = $user->hasPermissionTo('anuity-to-hpsm-add') ||
+        $user->hasPermissionTo('anuity-to-hpsm-view');
+        }
+        @endphp
+        @if($hasAnuityToHpsmPermission)
+        <li class="menu-item {{ (str_contains($currentRouteName, 'anuity-to-hpsm') || str_contains($currentRouteName, 'hpsm-opening-accounts') || str_contains($currentRouteName, 'hpsm-collections') || str_contains($currentRouteName, 'hpsm-reports')) ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+                <div>Anuity to HPSM</div>
+            </a>
+            <ul class="menu-sub">
+                @permission('anuity-to-hpsm-add')
+                <li class="menu-item {{ $currentRouteName === 'anuity-to-hpsm.add-anuity-to-hpsm' || $currentRouteName === 'hpsm-opening-accounts.create' ? 'active' : '' }}">
+                    <a href="{{ url('/app/anuity-to-hpsm/add-anuity-to-hpsm') }}" class="menu-link">
+                        <div>Add</div>
+                    </a>
+                </li>
+                @endpermission
+                @permission('anuity-to-hpsm-view')
+                <li class="menu-item {{ $currentRouteName === 'anuity-to-hpsm.view-anuity-to-hpsm' || $currentRouteName === 'hpsm-opening-accounts.index' ? 'active' : '' }}">
+                    <a href="{{ url('/app/anuity-to-hpsm/view-anuity-to-hpsm') }}" class="menu-link">
+                        <div>View</div>
+                    </a>
+                </li>
+                @endpermission
+            </ul>
+        </li>
+        @endif
+
         <!-- Investment -->
         @php
         $hasInvestmentPermission = false;
@@ -266,40 +301,6 @@ return '';
         </li>
         @endif
 
-        <!-- Deposit -->
-        @php
-        $hasDepositPermission = false;
-        if (Auth::check()) {
-        $user = Auth::user();
-        $hasAnuityToHpsmPermission = $user->hasPermissionTo('anuity-to-hpsm-add') ||
-        $user->hasPermissionTo('anuity-to-hpsm-view');
-        }
-        @endphp
-        @if($hasAnuityToHpsmPermission)
-        <li class="menu-item {{ (str_contains($currentRouteName, 'anuity-to-hpsm') || str_contains($currentRouteName, 'anuity-to-hpsms')) ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons ti ti-file-dollar"></i>
-                <div>Anuity To HPSM</div>
-            </a>
-            <ul class="menu-sub">
-                @permission('anuity-to-hpsm-add')
-                <li class="menu-item {{ $currentRouteName === 'anuity-to-hpsm.add-anuity-to-hpsm' ? 'active' : '' }}">
-                    <a href="{{ url('/app/anuity-to-hpsm/add-anuity-to-hpsm') }}" class="menu-link">
-                        <div>Add</div>
-                    </a>
-                </li>
-                @endpermission
-                @permission('anuity-to-hpsm-view')
-                <li class="menu-item {{ $currentRouteName === 'anuity-to-hpsm.view-anuity-to-hpsm' ? 'active' : '' }}">
-                    <a href="{{ url('/app/anuity-to-hpsm/view-anuity-to-hpsm') }}" class="menu-link">
-                        <div>View</div>
-                    </a>
-                </li>
-                @endpermission
-
-            </ul>
-        </li>
-        @endif
         <!-- Deposit -->
         @php
         $hasDepositPermission = false;
