@@ -213,7 +213,7 @@ return '';
         <li class="menu-item {{ (str_contains($currentRouteName, 'anuity-to-hpsm') || str_contains($currentRouteName, 'hpsm-opening-accounts') || str_contains($currentRouteName, 'hpsm-collections') || str_contains($currentRouteName, 'hpsm-reports')) ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-file-dollar"></i>
-                <div>Anuity to HPSM</div>
+                <div>Anuity to Reducing</div>
             </a>
             <ul class="menu-sub">
                 @permission('anuity-to-hpsm-add')
