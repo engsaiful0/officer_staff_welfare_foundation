@@ -10,16 +10,13 @@
   "require": {
     "php": "^8.2",
     "barryvdh/laravel-dompdf": "^2.2",
-    "inertiajs/inertia-laravel": "^2.0",
     "kwn/number-to-words": "^2.12",
     "laravel/framework": "^11.0",
-    "laravel/jetstream": "^5.3",
     "laravel/tinker": "^2.9",
-    "maatwebsite/excel": "^1.1"
+    "maatwebsite/excel": "^3.1"
   },
   "require-dev": {
     "fakerphp/faker": "^1.23",
-    "laravel/pint": "^1.13",
     "laravel/sail": "^1.26",
     "mockery/mockery": "^1.6",
     "nunomaduro/collision": "^8.0",

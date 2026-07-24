@@ -106,15 +106,11 @@
                     @foreach($deposits as $deposit)
                     <tr>
                         <td>{{ $deposits->firstItem() + $loop->index }}</td>
-                        <td>
-                            {{ $deposit->member->name }}
-                        </td>
-                        <td>
-                            {{ $deposit->member->employees_id }}
-                        </td>
-                        <td>{{ $deposit->member->unique_id }}</td>
+                        <td>{{ $deposit->member->name ?? '—' }}</td>
+                        <td>{{ $deposit->member->unique_id ?? ($deposit->member->member_unique_id ?? '—') }}</td>
+                        <td>{{ $deposit->member->employees_id ?? '—' }}</td>
                         <td>{{ number_format($deposit->deposit_amount, 2) }}</td>
-                        <td>{{ $deposit->deposit_date->format('M d, Y') }}</td>
+                        <td>{{ $deposit->deposit_date?->format('M d, Y') ?? '—' }}</td>
                         <td>
                           <div class="d-inline-block">
                             <a href="{{ route('deposits.edit', $deposit) }}" class="btn btn-sm btn-outline-primary" title="Edit">
