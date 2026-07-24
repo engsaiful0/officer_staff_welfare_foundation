@@ -12,31 +12,51 @@ class Investment extends Model
 
     protected $fillable = [
         'member_id',
+        'investment_type_id',
         'principal_amount',
+        'selling_price',
+        'profit_amount',
+        'emi_amount',
+        'remaining_principal',
+        'ownership_ratio',
         'product_name',
+        'calculation_method',
         'start_date',
+        'account_opening_date',
+        'gestation_date',
         'term_months',
         'expiry_date',
         'rate',
         'rate_period',
         'frequency',
         'status',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
         'start_date' => 'date',
+        'account_opening_date' => 'date',
+        'gestation_date' => 'date',
         'expiry_date' => 'date',
         'principal_amount' => 'decimal:2',
+        'selling_price' => 'decimal:2',
+        'profit_amount' => 'decimal:2',
+        'emi_amount' => 'decimal:2',
+        'remaining_principal' => 'decimal:2',
+        'ownership_ratio' => 'decimal:4',
         'rate' => 'decimal:4',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // Relationships
     public function member()
     {
         return $this->belongsTo(Member::class);
+    }
+
+    public function investmentType()
+    {
+        return $this->belongsTo(InvestmentType::class, 'investment_type_id');
     }
 
     public function ledgerEntries()
@@ -59,7 +79,6 @@ class Investment extends Model
         return $this->hasOne(InvestmentAccount::class);
     }
 
-    // Accessors & Mutators
     public function getRatePercentageAttribute()
     {
         return $this->rate * 100;
@@ -71,7 +90,7 @@ class Investment extends Model
             ->orderBy('entry_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->first();
-        
+
         return $lastEntry ? $lastEntry->balance_after : $this->principal_amount;
     }
 
@@ -89,6 +108,23 @@ class Investment extends Model
             ->sum('amount');
     }
 
+    public function isHpsm(): bool
+    {
+        $code = strtolower((string) ($this->investmentType?->code ?? ''));
+        if ($code === 'hpsm') {
+            return true;
+        }
+
+        return str_contains(strtolower((string) $this->product_name), 'hpsm');
+    }
+
+    public function isBaiMuajjal(): bool
+    {
+        $code = strtolower((string) ($this->investmentType?->code ?? ''));
+
+        return $code === 'bai_muajjal' || str_contains(strtolower((string) $this->product_name), 'muajjal');
+    }
+
     public function isMatured()
     {
         return $this->expiry_date <= Carbon::now()->toDateString();
@@ -96,10 +132,9 @@ class Investment extends Model
 
     public function isActive()
     {
-        return $this->status === 'active' && !$this->isMatured();
+        return $this->status === 'active' && ! $this->isMatured();
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('status', 'active');

@@ -379,6 +379,8 @@ use App\Http\Controllers\InvestmentReportController;
 
 // Investment Routes
 Route::resource('investments', InvestmentController::class);
+Route::post('/app/investments/calculate', [InvestmentController::class, 'calculate'])->name('investments.calculate');
+Route::post('/api/investments/calculate', [InvestmentController::class, 'calculate']);
 
 // Investment Payment Routes (must be before parameterized routes)
 use App\Http\Controllers\InvestmentPaymentController;

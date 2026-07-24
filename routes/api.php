@@ -28,6 +28,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Investment Module API Routes
 Route::prefix('investments')->group(function () {
+    Route::post('/calculate', [InvestmentController::class, 'calculate']);
+
     // Investment CRUD API
     Route::get('/', [InvestmentController::class, 'index']);
     Route::post('/', [InvestmentController::class, 'store']);

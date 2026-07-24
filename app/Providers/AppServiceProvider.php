@@ -20,6 +20,14 @@ class AppServiceProvider extends ServiceProvider
     $this->app->singleton('Helper', function ($app) {
       return new Helpers();
     });
+
+    $this->app->singleton(
+      \App\Services\Investment\InvestmentCalculatorFactory::class
+    );
+
+    $this->app->singleton(
+      \App\Services\Investment\InvestmentService::class
+    );
   }
 
   /**
@@ -44,5 +52,10 @@ class AppServiceProvider extends ServiceProvider
     // Configure pagination to use Bootstrap 5
     Paginator::defaultView('vendor.pagination.custom-bootstrap-5');
     Paginator::defaultSimpleView('vendor.pagination.simple-bootstrap-5');
+
+    \Illuminate\Database\Eloquent\Relations\Relation::morphMap([
+      'investment' => \App\Models\Investment::class,
+      'deposit' => \App\Models\Deposit::class,
+    ]);
   }
 }
