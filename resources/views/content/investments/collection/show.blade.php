@@ -286,13 +286,25 @@
                                 <tr>
                                     <td>Member ID</td>
                                     <td>
-                                        {{ $installment->investment->member->unique_id ?? 'N/A' }}
+                                        {{ $installment->investment->member->member_unique_id ?? $installment->investment->member->unique_id ?? 'N/A' }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>Account</td>
                                     <td>
                                         {{ $installment->investment->account->account_number ?? 'N/A' }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Product</td>
+                                    <td>
+                                        {{ $installment->investment->product_name ?? $installment->investment->investmentType?->investment_type_name ?? 'N/A' }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Calc. Method</td>
+                                    <td>
+                                        {{ $installment->investment->calculation_method ? ucfirst($installment->investment->calculation_method) : 'N/A' }}
                                     </td>
                                 </tr>
                             </table>
@@ -318,7 +330,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Interest</td>
+                                    <td>Profit / Rent</td>
                                     <td>
                                     ৳{{ number_format($installment->rent, 2) }}
                                     </td>

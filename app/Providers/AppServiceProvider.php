@@ -28,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
     $this->app->singleton(
       \App\Services\Investment\InvestmentService::class
     );
+
+    $this->app->singleton(
+      \App\Services\Investment\InvestmentCollectionService::class
+    );
   }
 
   /**

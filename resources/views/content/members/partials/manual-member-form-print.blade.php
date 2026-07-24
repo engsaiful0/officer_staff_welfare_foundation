@@ -49,6 +49,7 @@
       <tr><td class="label-col">Date of join in IBBL</td><td><div class="field-line">&nbsp;</div></td></tr>
       <tr><td class="label-col">Branch</td><td><div class="field-line">&nbsp;</div></td></tr>
       <tr><td class="label-col">Employee ID</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">OSWF ID</td><td><div class="field-line">&nbsp;</div></td></tr>
       <tr><td class="label-col">Member ID</td><td><div class="field-line">&nbsp;</div></td></tr>
       <tr><td class="label-col">Deposit account number</td><td><div class="field-line">&nbsp;</div></td></tr>
       <tr><td class="label-col">Account opening date</td><td><div class="field-line">&nbsp;</div></td></tr>
@@ -69,6 +70,32 @@
       <tr><td class="label-col">Photo</td><td><div class="field-line" style="min-height: 3rem;">&nbsp;</div></td></tr>
       <tr><td class="label-col">Present address</td><td><div class="field-line" style="min-height: 3rem;">&nbsp;</div></td></tr>
       <tr><td class="label-col">Permanent address</td><td><div class="field-line" style="min-height: 3rem;">&nbsp;</div></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">First Guarantor</div>
+  <table class="table table-sm table-bordered mb-0">
+    <tbody>
+      <tr><td class="label-col">Name of Guarantor</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Employee ID</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Designation</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Branch Name</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Birth Date</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Date of Joining the Bank</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Mobile</td><td><div class="field-line">&nbsp;</div></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Second Guarantor</div>
+  <table class="table table-sm table-bordered mb-0">
+    <tbody>
+      <tr><td class="label-col">Name of Guarantor</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Employee ID</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Designation</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Branch Name</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Birth Date</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Date of Joining the Bank</td><td><div class="field-line">&nbsp;</div></td></tr>
+      <tr><td class="label-col">Mobile</td><td><div class="field-line">&nbsp;</div></td></tr>
     </tbody>
   </table>
 

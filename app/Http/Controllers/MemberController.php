@@ -36,7 +36,9 @@ class MemberController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('mobile', 'like', "%{$search}%")
-                    ->orWhere('member_unique_id', 'like', "%{$search}%");
+                    ->orWhere('oswf_id', 'like', "%{$search}%")
+                    ->orWhere('member_unique_id', 'like', "%{$search}%")
+                    ->orWhere('employees_id', 'like', "%{$search}%");
             });
         }
 
@@ -80,7 +82,7 @@ class MemberController extends Controller
      */
     public function create()
     {
-        $designations = Designation::all()->where("designation_type", "Member");
+        $designations = Designation::all();
         $branches = Branch::all();
         $religions = Religion::all();
         $relations = Relation::all();
@@ -113,7 +115,8 @@ class MemberController extends Controller
         $messages = [
             
             'mobile.unique' => 'This mobile number is already registered.',
-            
+            'oswf_id.unique' => 'This OSWF ID is already assigned to another member.',
+            'oswf_id.required' => 'OSWF ID is required.',
         ];
 
         // Validation rules
@@ -138,6 +141,12 @@ class MemberController extends Controller
             'branch_id' => 'required|exists:branches,id',
             'religion_id' => 'required|exists:religions,id',
             'employees_id' => 'required|string|max:50',
+            'oswf_id' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('members', 'oswf_id'),
+            ],
             'account_opening_date' => 'required|date',
             'present_address' => 'required|string',
             'permanent_address' => 'required|string',
@@ -155,6 +164,20 @@ class MemberController extends Controller
             'nominee_permanent_address' => 'nullable|string',
             'nominee_date_of_birth' => 'nullable|date',
             'nominee_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'first_guarantor_name' => 'nullable|string|max:255',
+            'first_guarantor_employees_id' => 'nullable|string|max:50',
+            'first_guarantor_designation_id' => 'nullable|exists:designations,id',
+            'first_guarantor_branch_name' => 'nullable|string|max:255',
+            'first_guarantor_date_of_birth' => 'nullable|date',
+            'first_guarantor_date_of_joining' => 'nullable|date',
+            'first_guarantor_mobile' => 'nullable|string|max:15',
+            'second_guarantor_name' => 'nullable|string|max:255',
+            'second_guarantor_employees_id' => 'nullable|string|max:50',
+            'second_guarantor_designation_id' => 'nullable|exists:designations,id',
+            'second_guarantor_branch_name' => 'nullable|string|max:255',
+            'second_guarantor_date_of_birth' => 'nullable|date',
+            'second_guarantor_date_of_joining' => 'nullable|date',
+            'second_guarantor_mobile' => 'nullable|string|max:15',
             'status' => ['required', Rule::enum(MemberStatus::class)],
         ], $messages);
 
@@ -209,7 +232,17 @@ class MemberController extends Controller
      */
     public function show(Member $member)
     {
-        $member->load(['designation', 'branch', 'religion', 'introducer', 'nomineeRelation', 'user', 'memberUniqueIdRecord']);
+        $member->load([
+            'designation',
+            'branch',
+            'religion',
+            'introducer',
+            'nomineeRelation',
+            'user',
+            'memberUniqueIdRecord',
+            'firstGuarantorDesignation',
+            'secondGuarantorDesignation',
+        ]);
         return view('content.members.show', compact('member'));
     }
     /**
@@ -246,6 +279,8 @@ class MemberController extends Controller
                 'email.unique' => 'This email is already taken.',
                 'mobile.unique' => 'This mobile number is already registered.',
                 'nid_number.unique' => 'This NID number is already registered.',
+                'oswf_id.unique' => 'This OSWF ID is already assigned to another member.',
+                'oswf_id.required' => 'OSWF ID is required.',
             ];
 
             // Validation rules
@@ -274,6 +309,12 @@ class MemberController extends Controller
                 'branch_id' => 'required|exists:branches,id',
                 'religion_id' => 'required|exists:religions,id',
                 'employees_id' => 'nullable|string|max:50',
+                'oswf_id' => [
+                    'required',
+                    'string',
+                    'max:50',
+                    Rule::unique('members', 'oswf_id')->ignore($member->id),
+                ],
                 'account_opening_date' => 'required|date',
                 'present_address' => 'required|string',
                 'permanent_address' => 'required|string',
@@ -292,6 +333,20 @@ class MemberController extends Controller
                 'nominee_date_of_birth' => 'nullable|date',
                 'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'nominee_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'first_guarantor_name' => 'nullable|string|max:255',
+                'first_guarantor_employees_id' => 'nullable|string|max:50',
+                'first_guarantor_designation_id' => 'nullable|exists:designations,id',
+                'first_guarantor_branch_name' => 'nullable|string|max:255',
+                'first_guarantor_date_of_birth' => 'nullable|date',
+                'first_guarantor_date_of_joining' => 'nullable|date',
+                'first_guarantor_mobile' => 'nullable|string|max:15',
+                'second_guarantor_name' => 'nullable|string|max:255',
+                'second_guarantor_employees_id' => 'nullable|string|max:50',
+                'second_guarantor_designation_id' => 'nullable|exists:designations,id',
+                'second_guarantor_branch_name' => 'nullable|string|max:255',
+                'second_guarantor_date_of_birth' => 'nullable|date',
+                'second_guarantor_date_of_joining' => 'nullable|date',
+                'second_guarantor_mobile' => 'nullable|string|max:15',
                 'status' => ['required', Rule::enum(MemberStatus::class)],
             ], $messages);
 

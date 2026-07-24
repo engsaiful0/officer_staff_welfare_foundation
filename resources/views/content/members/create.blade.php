@@ -200,6 +200,11 @@
                         class="form-control" placeholder="Employees ID"  />
                 </div>
                 <div class="col-md-4 mb-3">
+                    <label class="form-label" for="oswf_id">OSWF ID <span class="text-danger">*</span></label>
+                    <input type="text" id="oswf_id" class="form-control" placeholder="OSWF ID" name="oswf_id" required />
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-4 mb-3">
                     <label class="form-label" for="member_unique_id">Member ID</label>
                     <input  type="text" id="member_unique_id" class="form-control" placeholder="Member ID" name="member_unique_id"
                         class="form-control" placeholder="ID"  />
@@ -288,6 +293,8 @@
                     <textarea class="form-control" id="nominee_permanent_address" placeholder="Permanent Address" name="nominee_permanent_address" rows="3"></textarea>
                     <div class="invalid-feedback"></div>
                 </div>
+
+                @include('content.members.partials.guarantor-fields')
             </div>
 
             <div class="row">

@@ -30,6 +30,7 @@ class Member extends Model
         'branch_id',
         'status',
         'employees_id',
+        'oswf_id',
         'member_unique_id',
         'serial',
         'deposit_account_number',
@@ -46,6 +47,20 @@ class Member extends Model
         'nominee_picture',
         'nominee_present_address',
         'nominee_permanent_address',
+        'first_guarantor_name',
+        'first_guarantor_employees_id',
+        'first_guarantor_designation_id',
+        'first_guarantor_branch_name',
+        'first_guarantor_date_of_birth',
+        'first_guarantor_date_of_joining',
+        'first_guarantor_mobile',
+        'second_guarantor_name',
+        'second_guarantor_employees_id',
+        'second_guarantor_designation_id',
+        'second_guarantor_branch_name',
+        'second_guarantor_date_of_birth',
+        'second_guarantor_date_of_joining',
+        'second_guarantor_mobile',
         'introducer_id',
         'user_id',
         'temp_username',
@@ -57,6 +72,10 @@ class Member extends Model
         'date_of_join_in_ibbl' => 'date',
         'account_opening_date' => 'date',
         'nominee_date_of_birth' => 'date',
+        'first_guarantor_date_of_birth' => 'date',
+        'first_guarantor_date_of_joining' => 'date',
+        'second_guarantor_date_of_birth' => 'date',
+        'second_guarantor_date_of_joining' => 'date',
         'status' => MemberStatus::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -66,6 +85,16 @@ class Member extends Model
     public function designation()
     {
         return $this->belongsTo(Designation::class);
+    }
+
+    public function firstGuarantorDesignation()
+    {
+        return $this->belongsTo(Designation::class, 'first_guarantor_designation_id');
+    }
+
+    public function secondGuarantorDesignation()
+    {
+        return $this->belongsTo(Designation::class, 'second_guarantor_designation_id');
     }
 
     public function branch()
@@ -153,11 +182,14 @@ class Member extends Model
     }
 
     /**
-     * Legacy alias — maps to member_unique_id (no separate unique_id column in DB).
+     * Display ID used across the app (dropdowns, ledgers, etc.).
+     * Prefers OSWF ID, then office Member ID.
      */
     public function getUniqueIdAttribute(): ?string
     {
-        return $this->member_unique_id;
+        return $this->attributes['oswf_id']
+            ?? $this->member_unique_id
+            ?? null;
     }
 
     /**

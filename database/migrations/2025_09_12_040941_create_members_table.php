@@ -65,6 +65,9 @@ return new class extends Migration
 
             $table->string('employees_id')->unique();
 
+            /** OSWF membership ID (manual / office-assigned) */
+            $table->string('oswf_id', 50)->nullable()->unique();
+
             /** Auto-generated system ID (e.g. MEM000123) — used across deposits, HPSM, etc. */
             $table->string('unique_id')->nullable()->unique();
 
@@ -107,6 +110,34 @@ return new class extends Migration
             $table->text('nominee_present_address')->nullable();
 
             $table->text('nominee_permanent_address')->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Guarantor Information
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('first_guarantor_name')->nullable();
+            $table->string('first_guarantor_employees_id', 50)->nullable();
+            $table->foreignId('first_guarantor_designation_id')
+                ->nullable()
+                ->constrained('designations')
+                ->nullOnDelete();
+            $table->string('first_guarantor_branch_name')->nullable();
+            $table->date('first_guarantor_date_of_birth')->nullable();
+            $table->date('first_guarantor_date_of_joining')->nullable();
+            $table->string('first_guarantor_mobile', 15)->nullable();
+
+            $table->string('second_guarantor_name')->nullable();
+            $table->string('second_guarantor_employees_id', 50)->nullable();
+            $table->foreignId('second_guarantor_designation_id')
+                ->nullable()
+                ->constrained('designations')
+                ->nullOnDelete();
+            $table->string('second_guarantor_branch_name')->nullable();
+            $table->date('second_guarantor_date_of_birth')->nullable();
+            $table->date('second_guarantor_date_of_joining')->nullable();
+            $table->string('second_guarantor_mobile', 15)->nullable();
 
             /*
             |--------------------------------------------------------------------------

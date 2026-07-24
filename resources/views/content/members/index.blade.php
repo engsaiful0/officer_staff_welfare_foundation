@@ -36,7 +36,7 @@
                     <div class="col-md-3">
                         <label for="search" class="form-label">Search</label>
                         <input type="text" class="form-control" id="search" name="search" 
-                               value="{{ request('search') }}" placeholder="Search by name, email, mobile, or ID">
+                               value="{{ request('search') }}" placeholder="Search by name, email, mobile, OSWF ID, or Member ID">
                     </div>
                     <div class="col-md-2">
                         <label for="mobile" class="form-label">Mobile</label>
@@ -131,6 +131,7 @@
                             <th>Photo</th>
                             <th>Name</th>
                             <th>IBBL Employee ID</th>
+                            <th>OSWF ID</th>
                             <th>Member ID</th>
                             <th>Designation</th>
                             <th>Branch</th>
@@ -167,6 +168,9 @@
                             </td>
                             <td>
                             {{ $member->employees_id }}
+                            </td>
+                            <td>
+                               {{ $member->oswf_id ?? '—' }}
                             </td>
                             <td>
                                {{ $member->member_unique_id }}

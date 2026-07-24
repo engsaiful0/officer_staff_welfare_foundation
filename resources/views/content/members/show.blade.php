@@ -101,6 +101,8 @@
                         <td>{{ $member->employees_id ?? '—' }}</td>
                     </tr>
                     <tr>
+                        <td class="fw-bold">OSWF ID</td>
+                        <td>{{ $member->oswf_id ?? '—' }}</td>
                         <td class="fw-bold">Member ID</td>
                         <td>{{ $member->member_unique_id ?? '—' }}</td>
                         <td class="fw-bold">Account Opening Date</td>
@@ -152,6 +154,62 @@
                             </div>
                             @endif
                         </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table class="table table-bordered table-hover mt-3">
+                    <thead>
+                        <tr>
+                            <th class="text-center" colspan="8">First Guarantor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="fw-bold">Name of Guarantor</td>
+                        <td>{{ $member->first_guarantor_name ?? '—' }}</td>
+                        <td class="fw-bold">Employee ID</td>
+                        <td>{{ $member->first_guarantor_employees_id ?? '—' }}</td>
+                        <td class="fw-bold">Designation</td>
+                        <td>{{ $member->firstGuarantorDesignation?->designation_name ?? '—' }}</td>
+                        <td class="fw-bold">Branch Name</td>
+                        <td>{{ $member->first_guarantor_branch_name ?? '—' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Birth Date</td>
+                        <td>{{ $member->first_guarantor_date_of_birth?->format('Y-m-d') ?? '—' }}</td>
+                        <td class="fw-bold">Date of Joining the Bank</td>
+                        <td>{{ $member->first_guarantor_date_of_joining?->format('Y-m-d') ?? '—' }}</td>
+                        <td class="fw-bold">Mobile</td>
+                        <td colspan="3">{{ $member->first_guarantor_mobile ?? '—' }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table class="table table-bordered table-hover mt-3">
+                    <thead>
+                        <tr>
+                            <th class="text-center" colspan="8">Second Guarantor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="fw-bold">Name of Guarantor</td>
+                        <td>{{ $member->second_guarantor_name ?? '—' }}</td>
+                        <td class="fw-bold">Employee ID</td>
+                        <td>{{ $member->second_guarantor_employees_id ?? '—' }}</td>
+                        <td class="fw-bold">Designation</td>
+                        <td>{{ $member->secondGuarantorDesignation?->designation_name ?? '—' }}</td>
+                        <td class="fw-bold">Branch Name</td>
+                        <td>{{ $member->second_guarantor_branch_name ?? '—' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">Birth Date</td>
+                        <td>{{ $member->second_guarantor_date_of_birth?->format('Y-m-d') ?? '—' }}</td>
+                        <td class="fw-bold">Date of Joining the Bank</td>
+                        <td>{{ $member->second_guarantor_date_of_joining?->format('Y-m-d') ?? '—' }}</td>
+                        <td class="fw-bold">Mobile</td>
+                        <td colspan="3">{{ $member->second_guarantor_mobile ?? '—' }}</td>
                     </tr>
                     </tbody>
                 </table>

@@ -31,13 +31,23 @@
                                 <select class="form-select form-select-lg" id="account_id" name="account_id" required>
                                     <option value="">-- Select Investment Account --</option>
                                     @foreach($accounts as $account)
-                                        <option value="{{ $account->id }}" 
+                                        @php
+                                            $member = $account->investment?->member;
+                                            $product = $account->investment?->product_name
+                                                ?? $account->investment?->investmentType?->investment_type_name
+                                                ?? 'Investment';
+                                            $method = $account->investment?->calculation_method;
+                                            $memberCode = $member?->member_unique_id ?? $member?->unique_id ?? 'N/A';
+                                        @endphp
+                                        <option value="{{ $account->id }}"
                                                 data-account-number="{{ $account->account_number ?? 'N/A' }}"
-                                                data-member-name="{{ $account->investment->member->name?? 'N/A' }}"
-                                                data-member-id="{{ $account->investment->member->unique_id ?? 'N/A' }}">
-                                            {{ $account->account_number ?? 'Account #' . $account->id }} - 
-                                            {{ $account->investment->member->name?? 'N/A' }} 
-                                            ({{ $account->investment->member->unique_id ?? 'N/A' }})
+                                                data-member-name="{{ $member?->name ?? 'N/A' }}"
+                                                data-member-id="{{ $memberCode }}"
+                                                data-product="{{ $product }}"
+                                                data-method="{{ $method }}">
+                                            {{ $account->account_number ?? 'Account #'.$account->id }} —
+                                            {{ $member?->name ?? 'N/A' }} ({{ $memberCode }})
+                                            · {{ $product }}@if($method) / {{ ucfirst($method) }}@endif
                                         </option>
                                     @endforeach
                                 </select>
@@ -63,7 +73,15 @@
                                                 <td id="display_member_id">-</td>
                                             </tr>
                                             <tr>
-                                                <td class="text-muted">Current Balance:</td>
+                                                <td class="text-muted">Product:</td>
+                                                <td><strong id="display_product">-</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Calc. Method:</td>
+                                                <td id="display_method">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Outstanding Principal:</td>
                                                 <td><strong class="text-primary" id="display_balance">-</strong></td>
                                             </tr>
                                         </table>
@@ -95,20 +113,28 @@
                                                 <td id="display_due_date">-</td>
                                             </tr>
                                             <tr>
-                                                <td>Principal:</td>
-                                                <td><strong>$<span id="display_principal">0.00</span></strong></td>
+                                                <td>Beginning Balance:</td>
+                                                <td>৳<span id="display_beginning">0.00</span></td>
                                             </tr>
                                             <tr>
-                                                <td>Interest (Rent):</td>
-                                                <td><strong>$<span id="display_rent">0.00</span></strong></td>
+                                                <td>Principal:</td>
+                                                <td><strong>৳<span id="display_principal">0.00</span></strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Profit / Rent:</td>
+                                                <td><strong>৳<span id="display_rent">0.00</span></strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Ending Balance:</td>
+                                                <td>৳<span id="display_ending">0.00</span></td>
                                             </tr>
                                             <tr>
                                                 <td>Fine (Estimated):</td>
-                                                <td><strong class="text-danger">$<span id="display_fine">0.00</span></strong></td>
+                                                <td><strong class="text-danger">৳<span id="display_fine">0.00</span></strong></td>
                                             </tr>
                                             <tr class="border-top">
                                                 <td><strong>Total Due:</strong></td>
-                                                <td><strong class="text-primary fs-5">$<span id="display_total">0.00</span></strong></td>
+                                                <td><strong class="text-primary fs-5">৳<span id="display_total">0.00</span></strong></td>
                                             </tr>
                                         </table>
                                     </div>
@@ -242,7 +268,7 @@
                                         <div class="col-md-6">
                                             <label class="form-label">Base Amount</label>
                                             <div class="input-group">
-                                                <span class="input-group-text">$</span>
+                                                <span class="input-group-text">৳</span>
                                                 <input type="text" 
                                                        class="form-control bg-light" 
                                                        id="base_amount_display" 
@@ -250,14 +276,14 @@
                                                        readonly>
                                             </div>
                                             <small class="text-muted">
-                                                Principal + Rent + Fine
+                                                Principal + Profit/Rent + Fine
                                             </small>
                                         </div>
 
                                         <div class="col-md-6">
                                             <label for="discount_amount" class="form-label">Discount Amount</label>
                                             <div class="input-group">
-                                                <span class="input-group-text">$</span>
+                                                <span class="input-group-text">৳</span>
                                                 <input type="number" 
                                                        class="form-control @error('discount_amount') is-invalid @enderror" 
                                                        id="discount_amount" 
@@ -278,7 +304,7 @@
                                                 Net Payment Amount <span class="text-danger">*</span>
                                             </label>
                                             <div class="input-group input-group-lg">
-                                                <span class="input-group-text bg-primary text-white">$</span>
+                                                <span class="input-group-text bg-primary text-white">৳</span>
                                                 <input type="number" 
                                                        class="form-control @error('paid_amount') is-invalid @enderror" 
                                                        id="paid_amount" 
@@ -378,6 +404,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('display_account_number').textContent = selectedOption.dataset.accountNumber;
             document.getElementById('display_member_name').textContent = selectedOption.dataset.memberName;
             document.getElementById('display_member_id').textContent = selectedOption.dataset.memberId;
+            document.getElementById('display_product').textContent = selectedOption.dataset.product || '-';
+            document.getElementById('display_method').textContent = selectedOption.dataset.method
+                ? selectedOption.dataset.method.charAt(0).toUpperCase() + selectedOption.dataset.method.slice(1)
+                : 'N/A (Bai-Muajjal)';
             document.getElementById('account_info').style.display = 'block';
 
             // Load installments
@@ -411,13 +441,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentInstallments.forEach(function(inst) {
                         const option = document.createElement('option');
                         option.value = inst.id;
-                        option.textContent = `#${inst.installment_number} - ${inst.month_name} (Due: ${inst.schedule_date_formatted})`;
+                        const overdue = inst.is_overdue ? ' [OVERDUE]' : '';
+                        option.textContent = `#${inst.installment_number} - ${inst.month_name} | Due ${inst.schedule_date_formatted} | ৳${parseFloat(inst.total_amount).toFixed(2)}${overdue}`;
                         option.dataset.installment = JSON.stringify(inst);
                         installmentSelect.appendChild(option);
                     });
 
-                    // Update account balance display
-                    document.getElementById('display_balance').textContent = '$' + parseFloat(response.data.account.current_balance).toFixed(2);
+                    // Update outstanding principal
+                    const rem = response.data.account.remaining_principal ?? response.data.account.current_balance;
+                    document.getElementById('display_balance').textContent = '৳' + parseFloat(rem).toFixed(2);
+                    if (response.data.account.product_name) {
+                        document.getElementById('display_product').textContent = response.data.account.product_name;
+                    }
+                    if (response.data.account.calculation_method_label) {
+                        document.getElementById('display_method').textContent = response.data.account.calculation_method_label;
+                    } else if (!response.data.account.calculation_method) {
+                        document.getElementById('display_method').textContent = 'N/A (Bai-Muajjal)';
+                    }
                     
                     document.getElementById('installment_selection').style.display = 'block';
                     installmentSelect.disabled = false;
@@ -454,8 +494,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateInstallmentDetails(installment) {
         document.getElementById('display_installment_number').textContent = '#' + installment.installment_number;
         document.getElementById('display_due_date').textContent = installment.schedule_date_formatted;
+        document.getElementById('display_beginning').textContent = parseFloat(installment.beginning_balance || 0).toFixed(2);
         document.getElementById('display_principal').textContent = parseFloat(installment.principal_amount).toFixed(2);
         document.getElementById('display_rent').textContent = parseFloat(installment.rent).toFixed(2);
+        document.getElementById('display_ending').textContent = parseFloat(installment.ending_balance || 0).toFixed(2);
         document.getElementById('display_fine').textContent = parseFloat(installment.fine_amount).toFixed(2);
         document.getElementById('display_total').textContent = parseFloat(installment.total_amount).toFixed(2);
         document.getElementById('installment_details').style.display = 'block';
@@ -512,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         paidAmountInput.value = netPaid.toFixed(2);
         netAmountCalculation.textContent = 
-            `$${baseAmount.toFixed(2)} - $${discount.toFixed(2)} = $${netPaid.toFixed(2)}`;
+            `৳${baseAmount.toFixed(2)} - ৳${discount.toFixed(2)} = ৳${netPaid.toFixed(2)}`;
     }
 
     // Reset amounts

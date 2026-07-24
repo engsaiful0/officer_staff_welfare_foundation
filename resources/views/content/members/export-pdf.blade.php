@@ -80,6 +80,7 @@
                 <th>Email</th>
                 <th>Mobile</th>
                 <th>Unique ID</th>
+                <th>OSWF ID</th>
                 <th>Status</th>
                 <th>Designation</th>
                 <th>Branch</th>
@@ -94,6 +95,7 @@
                 <td>{{ $member->email }}</td>
                 <td>{{ $member->mobile }}</td>
                 <td>{{ $member->unique_id }}</td>
+                <td>{{ $member->oswf_id ?? '—' }}</td>
                 <td>
                     @if($member->status instanceof \App\Enums\MemberStatus)
                         {{ $member->status->label() }}

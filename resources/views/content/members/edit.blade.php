@@ -151,8 +151,11 @@
                     <input type="text" class="form-control" id="employees_id" name="employees_id" value="{{ $member->employees_id }}" required>
                     <div class="invalid-feedback"></div>
                 </div>
-
-
+                <div class="col-md-4 mb-3">
+                    <label for="oswf_id" class="form-label">OSWF ID <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="oswf_id" name="oswf_id" placeholder="OSWF ID" value="{{ $member->oswf_id }}" required>
+                    <div class="invalid-feedback"></div>
+                </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label" for="member_unique_id">Member ID</label>
                     <input type="text" id="member_unique_id" class="form-control" name="member_unique_id" class="form-control" placeholder="Member ID" value="{{ $member->member_unique_id }}" />
@@ -243,7 +246,7 @@
                 <div class="invalid-feedback"></div>
             </div>
 
-
+            @include('content.members.partials.guarantor-fields', ['member' => $member])
 
     </div>
 
